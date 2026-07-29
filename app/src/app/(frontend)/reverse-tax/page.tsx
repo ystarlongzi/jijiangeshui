@@ -13,5 +13,5 @@ export default function ReverseTaxPage() {
     { title: '适合哪些场景？', description: '谈薪、换工作、核对 offer 或制定年度收入目标时，可以先确定期望到手工资，再估算对应的税前月薪。' },
     { title: '反推会考虑什么？', description: '税前工资不是简单加上固定税率，还会受到缴费城市、社保公积金基数、住房公积金比例、专项附加扣除和累计预扣的影响。' },
     { title: '结果如何使用？', description: '反推结果适合用于谈薪和预算估算，实际工资条还可能受到奖金、补发工资、单位缴费口径等因素影响。' },
-  ]} />
+  ]} active="reverse-tax" />
 }
