@@ -5,12 +5,12 @@ import { ArrowRight, Award, Gift, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
+import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateBonusTax } from '@/lib/bonus-tax'
 import { currentYear } from '@/lib/site'
 
-const money = (value: number, decimals = 0) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
-
 export default function BonusTaxClient() {
+  const { money } = useMoneyFormat()
   const [bonus, setBonus] = useState(60000)
   const [annualSalary, setAnnualSalary] = useState(240000)
   const [annualInsurance, setAnnualInsurance] = useState(54000)
@@ -36,5 +36,6 @@ function BonusInput({ id, label, value, onChange }: { id: string; label: string;
 }
 
 function BonusResultCard({ title, result, active, note }: { title: string; result: ReturnType<typeof calculateBonusTax>['separate']; active: boolean; note: string }) {
+  const { money } = useMoneyFormat()
   return <article className={`bonus-result-card${active ? ' active' : ''}`}><div className="bonus-card-title"><h3>{title}</h3>{active && <span className="bonus-better"><Award size={16} />更优</span>}</div><div className="bonus-card-takehome"><small>奖金到手</small><strong>{money(result.takeHome)}</strong></div><dl><div><dt>应缴个税</dt><dd>{money(result.tax)}</dd></div><div><dt>适用税率</dt><dd>{Math.round(result.bracket.rate * 100)}%</dd></div></dl><p>{note}</p></article>
 }

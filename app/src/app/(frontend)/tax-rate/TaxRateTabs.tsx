@@ -4,24 +4,25 @@ import { useState } from 'react'
 import { ExternalLink, Info } from 'lucide-react'
 import { currentYear } from '@/lib/site'
 import { taxBrackets } from '@/lib/tax-rules'
+import { useMoneyFormat } from '../MoneyFormatProvider'
 
 type Identity = 'resident' | 'non-resident'
 type IncomeGroup = 'comprehensive' | 'classified'
 type IncomeType = 'salary' | 'labor' | 'royalty' | 'license' | 'business' | 'rent' | 'transfer' | 'dividend' | 'accidental'
-type RateRow = { range: string; rate: string; quick: string }
+type RateRow = { range: string; rate: string; quick: string | number }
 type RateTab = { title: string; description: string; rows?: RateRow[]; rate?: string; note: string }
 
 const salaryRows = [
   '不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元',
-].map((range, index) => ({ range, rate: `${Math.round(taxBrackets[index].rate * 100)}%`, quick: taxBrackets[index].quick.toLocaleString('zh-CN') }))
+].map((range, index) => ({ range, rate: `${Math.round(taxBrackets[index].rate * 100)}%`, quick: taxBrackets[index].quick }))
 
-const laborRows: RateRow[] = [
+const laborRows = [
   { range: '不超过 20,000 元', rate: '20%', quick: '0' },
   { range: '超过 20,000 元至 50,000 元', rate: '30%', quick: '2,000' },
   { range: '超过 50,000 元', rate: '40%', quick: '7,000' },
 ]
 
-const nonResidentRows: RateRow[] = [
+const nonResidentRows = [
   { range: '不超过 3,000 元', rate: '3%', quick: '0' },
   { range: '超过 3,000 元至 12,000 元', rate: '10%', quick: '210' },
   { range: '超过 12,000 元至 25,000 元', rate: '20%', quick: '1,410' },
@@ -52,6 +53,7 @@ function getRateTab(identity: Identity, type: IncomeType): RateTab {
 }
 
 export default function TaxRateTabs() {
+  const { money } = useMoneyFormat()
   const [activeGroup, setActiveGroup] = useState<IncomeGroup>('comprehensive')
   const [identity, setIdentity] = useState<Identity>('resident')
   const [activeType, setActiveType] = useState<IncomeType>('salary')
@@ -62,6 +64,12 @@ export default function TaxRateTabs() {
     <div className="rate-category-cards" role="tablist" aria-label="所得类型分类">{([{ id: 'comprehensive', label: '综合所得', description: '工资薪金、劳务报酬、稿酬、特许权使用费' }, { id: 'classified', label: '分类所得', description: '经营、财产、利息股息红利和偶然所得' }] as { id: IncomeGroup; label: string; description: string }[]).map((item) => <button key={item.id} className={activeGroup === item.id ? 'active' : ''} type="button" role="tab" aria-selected={activeGroup === item.id} onClick={() => { setActiveGroup(item.id); setActiveType(item.id === 'comprehensive' ? 'salary' : 'business') }}><strong>{item.label}</strong><span>{item.description}</span></button>)}</div>
     <div className="rate-income-nav" aria-label={currentGroup.label}><div className="rate-income-group"><div className="rate-income-options" role="tablist" aria-label={currentGroup.label}>{currentGroup.items.map((item) => <button key={item.id} className={activeType === item.id ? 'active' : ''} type="button" role="tab" aria-selected={activeType === item.id} onClick={() => setActiveType(item.id)}>{item.label}</button>)}</div></div></div>
     {activeGroup === 'comprehensive' && <div className="rate-identity-nav" role="tablist" aria-label="居民或非居民个人"><div className="rate-identity-options">{([{ id: 'resident', label: '居民个人' }, { id: 'non-resident', label: '非居民个人' }] as { id: Identity; label: string }[]).map((item) => <button key={item.id} className={identity === item.id ? 'active' : ''} type="button" role="tab" aria-selected={identity === item.id} onClick={() => setIdentity(item.id)}>{item.label}</button>)}</div></div>}
-    <div className="rate-tab-panel panel" role="tabpanel"><div className="rate-table-heading"><div><h2>{active.title}</h2><p>{active.description}</p></div><span className="rate-year-label">{currentYear} 年</span></div>{active.rows ? <div className="rate-table-wrap"><table className="rate-table"><thead><tr><th>级数</th><th>应纳税所得额</th><th>税率 / 预扣率</th><th>速算扣除数</th></tr></thead><tbody>{active.rows.map((row, index) => <tr key={`${activeType}-${identity}-${row.range}`}><td>{index + 1}</td><td>{row.range}</td><td>{row.rate}</td><td>{row.quick}</td></tr>)}</tbody></table></div> : <div className="simple-rate-panel"><div className="simple-rate-copy"><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className="rate-tab-note"><Info size={15} /><span>{active.note}</span></div>}<div className="source-line"><span>规则核对日期：{currentYear}-07-27</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看国家税务总局规则 <ExternalLink size={13} /></a></div></div>
+    <div className="rate-tab-panel panel" role="tabpanel"><div className="rate-table-heading"><div><h2>{active.title}</h2><p>{active.description}</p></div><span className="rate-year-label">{currentYear} 年</span></div>{active.rows ? <div className="rate-table-wrap"><table className="rate-table"><thead><tr><th>级数</th><th>应纳税所得额</th><th>税率 / 预扣率</th><th>速算扣除数</th></tr></thead><tbody>{active.rows.map((row, index) => <tr key={`${activeType}-${identity}-${row.range}`}><td>{index + 1}</td><td>{row.range}</td><td>{row.rate}</td><td>{formatQuick(row.quick, money)}</td></tr>)}</tbody></table></div> : <div className="simple-rate-panel"><div className="simple-rate-copy"><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className="rate-tab-note"><Info size={15} /><span>{active.note}</span></div>}<div className="source-line"><span>规则核对日期：{currentYear}-07-27</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看国家税务总局规则 <ExternalLink size={13} /></a></div></div>
   </section>
+}
+
+function formatQuick(value: string | number, money: (value: number, decimals?: number) => string) {
+  if (typeof value === 'number') return money(value, 0).replace('¥', '')
+  const numeric = Number(value.replaceAll(',', ''))
+  return Number.isFinite(numeric) ? money(numeric, 0).replace('¥', '') : value
 }

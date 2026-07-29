@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { siteName, siteUrl } from '@/lib/site'
+import { MoneyFormatProvider } from './MoneyFormatProvider'
 
 import './calculator.css'
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body><MoneyFormatProvider>{children}</MoneyFormatProvider></body>
     </html>
   )
 }

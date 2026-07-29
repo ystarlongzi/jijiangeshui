@@ -7,12 +7,12 @@ import { currentYear } from '@/lib/site'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
+import { useMoneyFormat } from '../MoneyFormatProvider'
 
-const money = (value: number, decimals = 2) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
-const wholeMoney = (value: number) => money(value, 0)
-const range = (min: number, max: number) => `${wholeMoney(min)} - ${wholeMoney(max)}`
+const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
 export default function CalculatorClient() {
+  const { money } = useMoneyFormat()
   const [city, setCity] = useState('beijing')
   const [salary, setSalary] = useState(20000)
   const [month, setMonth] = useState(8)
@@ -51,6 +51,7 @@ export default function CalculatorClient() {
   const housingEmployee = housingItems.reduce((sum, item) => sum + item.employee, 0)
   const housingEmployer = housingItems.reduce((sum, item) => sum + item.employer, 0)
   const takeHomePercent = salary > 0 ? Math.round(result.takeHome / salary * 100) : 0
+  const wholeMoney = (value: number) => money(value, 0)
   const flowTotal = Math.max(1, salary)
   const ladderPosition = Math.max(0, taxBrackets.findIndex((item) => item.rate === result.bracket.rate)) / (taxBrackets.length - 1) * 100
 
@@ -98,15 +99,15 @@ export default function CalculatorClient() {
         </form>
 
         <div className="results-column">
-          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
-            <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: `${result.takeHome / flowTotal * 100}%` }} /><span className="flow-segment flow-social" style={{ width: `${socialEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-housing" style={{ width: `${housingEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-tax" style={{ width: `${result.currentTax / flowTotal * 100}%` }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} /></div></div>
+          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
+            <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: `${result.takeHome / flowTotal * 100}%` }} /><span className="flow-segment flow-social" style={{ width: `${socialEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-housing" style={{ width: `${housingEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-tax" style={{ width: `${result.currentTax / flowTotal * 100}%` }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
             <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
-          <InsuranceTable insurance={insurance} month={month} />
+          <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
       </section>
 
-      <AnnualTable salary={salary} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} />
-      <RateTable />
+      <AnnualTable salary={salary} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} money={money} />
+      <RateTable money={money} />
       <Faq />
       <section className="source-section" aria-label="官方来源和相关工具"><div><h2>每个结果都有出处</h2><p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p></div><div className="source-links"><a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a><a href="#calculator">返回计算器 ↑</a></div></section>
       <SiteFooter />
@@ -115,6 +116,8 @@ export default function CalculatorClient() {
 }
 
 function BaseField({ label, value, min, max, editing, onEdit, onChange }: { label: string; value: number; min: number; max: number; editing: boolean; onEdit: () => void; onChange: (value: number) => void }) {
+  const { money } = useMoneyFormat()
+  const range = (min: number, max: number) => `${money(min, 0)} - ${money(max, 0)}`
   return <div className="field-block"><div className="label-with-action"><label>{label}</label><button className="text-button edit-base-button" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</button></div><MoneyInput className="small-input" value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /><p className="field-meta">允许范围：{range(min, max)}</p></div>
 }
 
@@ -122,25 +125,24 @@ function RateSelect({ label, value, onChange }: { label: string; value: number; 
   return <div className="field-block"><label>{label}</label><div className="select-wrap"><select value={value} onChange={(event) => onChange(Number(event.target.value))}>{housingRateOptions.map((rate) => <option key={rate} value={rate}>{rate}%</option>)}</select></div></div>
 }
 
-function FlowLegend({ className, label, value }: { className: string; label: string; value: number }) {
-  return <div><span className={`flow-dot ${className}`} /><span>{label}</span><strong>{wholeMoney(value)}</strong></div>
+function FlowLegend({ className, label, value, money }: { className: string; label: string; value: number; money: (value: number, decimals?: number) => string }) {
+  return <div><span className={`flow-dot ${className}`} /><span>{label}</span><strong>{money(value, 0)}</strong></div>
 }
 
-function InsuranceTable({ insurance, month }: { insurance: InsuranceItem[]; month: number }) {
+function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[]; month: number; money: (value: number, decimals?: number) => string }) {
   const social = insurance.filter((item) => !item.housing)
   const housing = insurance.filter((item) => item.housing)
   const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
-  const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal)}</td></tr>
-  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'))}</td><td>{money(sum(social, 'employer'))}</td><td>{money(sum(social, 'subtotal'))}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'))}</td><td>{money(sum(insurance, 'employer'))}</td><td>{money(sum(insurance, 'subtotal'))}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+  const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee, 2)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer, 2)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal, 2)}</td></tr>
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
-function AnnualTable({ salary, month, startMonth, deduction, insurance }: { salary: number; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[] }) {
-  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年逐月明细</h2><span className="subtle-label">当前月份会高亮显示</span></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{Array.from({ length: 12 }, (_, index) => index + 1).map((currentMonth) => { const inactive = currentMonth < startMonth; const item = calculateMonth(salary, currentMonth, startMonth, deduction, insurance); return <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : wholeMoney(item.takeHome)}</span>{!inactive && <span className="before-tax-value">税前 {wholeMoney(salary)}</span>}</td><td>{inactive ? '-' : wholeMoney(item.employeeInsurance)}</td><td>{inactive ? '-' : wholeMoney(item.taxable)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : wholeMoney(item.currentTax)}</td></tr> })}</tbody></table></div></section>
+function AnnualTable({ salary, month, startMonth, deduction, insurance, money }: { salary: number; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
+  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年逐月明细</h2><span className="subtle-label">当前月份会高亮显示</span></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{Array.from({ length: 12 }, (_, index) => index + 1).map((currentMonth) => { const inactive = currentMonth < startMonth; const item = calculateMonth(salary, currentMonth, startMonth, deduction, insurance); return <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr> })}</tbody></table></div></section>
 }
 
-function RateTable() {
-  const rows = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
-  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><div className="rate-table-wrap panel"><table className="rate-table"><thead><tr><th>级数</th><th>累计预扣预缴应纳税所得额</th><th>预扣率</th><th>速算扣除数</th></tr></thead><tbody>{taxBrackets.map((item, index) => <tr key={item.rate}><td>{index + 1}</td><td>{rows[index]}</td><td>{Math.round(item.rate * 100)}%</td><td>{item.quick.toLocaleString('zh-CN')}</td></tr>)}</tbody></table><div className="source-line">本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></div></section>
+function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
+  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><div className="rate-table-wrap panel"><table className="rate-table"><thead><tr><th>级数</th><th>累计预扣预缴应纳税所得额</th><th>预扣率</th><th>速算扣除数</th></tr></thead><tbody>{taxBrackets.map((item, index) => <tr key={item.rate}><td>{index + 1}</td><td>{rateRanges[index]}</td><td>{Math.round(item.rate * 100)}%</td><td>{money(item.quick, 0).replace('¥', '')}</td></tr>)}</tbody></table><div className="source-line">本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></div></section>
 }
 
 function Faq() {

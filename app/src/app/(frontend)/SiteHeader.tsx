@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from './ThemeToggle'
+import { useMoneyFormat } from './MoneyFormatProvider'
 import { ArrowUpRight, Calculator, FileText, Gift, Home, Menu, Percent, Sparkles, X } from 'lucide-react'
 
 type ActivePage = 'home' | 'calculator' | 'bonus-tax' | 'reverse-tax' | 'special-deductions' | 'tax-rate' | 'faq'
 
 export default function SiteHeader({ active }: { active: ActivePage }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { grouping, toggleGrouping } = useMoneyFormat()
   const closeMenu = () => setMenuOpen(false)
 
   return <header className={`topbar${menuOpen ? ' menu-open' : ''}`}>
@@ -25,6 +27,7 @@ export default function SiteHeader({ active }: { active: ActivePage }) {
     {menuOpen && <button className="mobile-menu-backdrop" aria-label="关闭导航菜单" onClick={closeMenu} />}
     <div className="topbar-actions">
       <button className="mobile-menu-button" type="button" aria-label={menuOpen ? '关闭导航菜单' : '打开导航菜单'} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+      <button className="format-toggle" type="button" aria-label="切换金额分组方式" title={grouping === 'thousand' ? '当前：千位分组，点击切换为万位分组' : '当前：万位分组，点击切换为千位分组'} onClick={toggleGrouping}>{grouping === 'thousand' ? '千' : '万'}</button>
       <ThemeToggle />
     </div>
   </header>

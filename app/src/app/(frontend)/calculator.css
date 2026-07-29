@@ -62,7 +62,9 @@ a { color: inherit; text-decoration: none; }
 .main-nav a:hover, .main-nav a.active { color: var(--ink); border-bottom-color: var(--accent); }
 .main-nav a.active { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
 .main-nav a svg { color: var(--accent); }
-.icon-button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); }
+.icon-button, .format-toggle { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); }
+.format-toggle { font-size: 12px; font-weight: 800; }
+.format-toggle:hover { border-color: var(--accent); color: var(--accent); }
 .mobile-menu-button, .mobile-menu-backdrop { display: none; }
 
 .page-content { width: min(1280px, calc(100% - 48px)); margin: 0 auto; padding: 54px 0 40px; }
