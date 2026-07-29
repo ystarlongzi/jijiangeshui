@@ -11,11 +11,11 @@ export default function SiteHeader({ active }: { active: ActivePage }) {
     <nav className="main-nav" aria-label="主导航">
       <Link className={active === 'home' ? 'active' : ''} href="/">首页</Link>
       <Link className={active === 'calculator' ? 'active' : ''} href="/calculator">工资薪金</Link>
-      <Link href="/calculator#bonus">年终奖</Link>
-      <Link href="/calculator#reverse">税后反推</Link>
-      <Link href="/calculator#deduction">专项扣除</Link>
+      <Link href="/bonus-tax">年终奖</Link>
+      <Link href="/reverse-tax">税后反推</Link>
+      <Link href="/special-deductions">专项扣除</Link>
       <Link className={active === 'tax-rate' ? 'active' : ''} href="/tax-rate">税率表</Link>
-      <Link href="/calculator#faq">FAQ</Link>
+      <Link href="/faq">FAQ</Link>
     </nav>
     <ThemeToggle />
   </header>

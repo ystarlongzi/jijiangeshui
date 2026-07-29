@@ -15,7 +15,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { city } = await params
   const rule = cityRules[city]
-  return rule ? { title: `${rule.label}个税计算器｜${currentYear}年工资税后与五险一金｜${siteName}`, description: `按${rule.label}${currentYear}年社保公积金规则，测算工资到手、五险一金和全年个税变化。` } : { title: `城市个税计算器｜${siteName}` }
+  return rule ? { title: `${rule.label}个税计算器｜${currentYear}年工资税后与五险一金｜${siteName}`, description: `按${rule.label}${currentYear}年社保公积金规则，测算工资到手、五险一金和全年个税变化。`, alternates: { canonical: `/city/${city}` } } : { title: `城市个税计算器｜${siteName}` }
 }
 
 export default async function CityPage({ params }: CityPageProps) {

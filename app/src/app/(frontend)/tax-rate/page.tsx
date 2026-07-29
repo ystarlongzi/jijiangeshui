@@ -9,6 +9,7 @@ import SiteFooter from '../SiteFooter'
 export const metadata: Metadata = {
   title: `税率表｜${currentYear}年个人所得税预扣规则｜${siteName}`,
   description: `${currentYear}年个人所得税税率表和预扣规则，支持工资薪金、劳务报酬、稿酬、特许权使用费和非居民个人所得。`,
+  alternates: { canonical: '/tax-rate' },
 }
 
 export default function TaxRatePage() {
