@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: jijian-geshui-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jijian_geshui
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - jijian_geshui_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  jijian_geshui_postgres_data:

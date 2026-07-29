@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>极简个税 · 工资薪金计算器</title>
+    <meta name="description" content="极简个税工资薪金计算器原型，支持城市规则、社保公积金范围和全年个税变化。" />
+    <meta name="robots" content="index,follow" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "极简个税工资薪金计算器",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "description": "支持城市社保公积金规则、工资薪金累计预扣、税率表、税务知识和常见问题的个人所得税测算工具。"
+      }
+    </script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="极简个税首页">
+          <span class="brand-mark">极</span>
+          <span>极简个税</span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          <a class="active" href="#calculator">工资薪金</a>
+          <a href="#bonus">年终奖</a>
+          <a href="#reverse">税后反推</a>
+          <a href="#deduction">专项扣除</a>
+          <a href="#tax-rate-table">税率表</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <button class="icon-button" id="themeToggle" type="button" aria-label="切换深色模式" title="切换深色模式">◐</button>
+      </header>
+
+      <main id="top" class="page-content">
+        <section class="page-intro" id="calculator">
+          <div>
+            <p class="eyebrow">工资薪金 · 2026</p>
+            <h1>先看懂，再算清。</h1>
+            <p class="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年明细。</p>
+          </div>
+          <div class="rule-date">
+            <span class="status-dot"></span>
+            <span>规则核对日期</span>
+            <strong>2026-07-27</strong>
+          </div>
+        </section>
+
+        <section class="workspace-grid" aria-label="个税计算器">
+          <form class="input-panel panel" id="taxForm">
+            <div class="panel-heading">
+              <h2>计算条件</h2>
+            </div>
+
+            <div class="field-block city-field">
+              <div class="label-with-action city-label-row">
+                <label for="city">缴费城市</label>
+                <span class="city-actions">
+                  <button class="text-button" id="locateButton" type="button">自动定位</button>
+                  <button class="text-button" id="cityRulesButton" type="button">查看规则</button>
+                </span>
+              </div>
+              <div class="select-wrap">
+                <select id="city" name="city">
+                  <option value="beijing">北京市</option>
+                  <option value="shanghai">上海市</option>
+                  <option value="shenzhen">深圳市</option>
+                  <option value="guangzhou">广州市</option>
+                  <option value="hangzhou">杭州市</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label for="salary">税前月薪</label>
+              <div class="money-input">
+                <span>¥</span>
+                <input id="salary" name="salary" type="number" min="0" step="100" value="20000" inputmode="decimal" />
+                <span class="unit">元</span>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field-block">
+                <label for="month">计算月份</label>
+                <div class="select-wrap">
+                  <select id="month" name="month">
+                    <option value="1">1 月</option>
+                    <option value="2">2 月</option>
+                    <option value="3">3 月</option>
+                    <option value="4">4 月</option>
+                    <option value="5">5 月</option>
+                    <option value="6">6 月</option>
+                    <option value="7">7 月</option>
+                    <option value="8" selected>8 月</option>
+                    <option value="9">9 月</option>
+                    <option value="10">10 月</option>
+                    <option value="11">11 月</option>
+                    <option value="12">12 月</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="startMonth">入职月份</label>
+                <div class="select-wrap">
+                  <select id="startMonth" name="startMonth">
+                    <option value="1" selected>1 月</option>
+                    <option value="2">2 月</option>
+                    <option value="3">3 月</option>
+                    <option value="4">4 月</option>
+                    <option value="5">5 月</option>
+                    <option value="6">6 月</option>
+                    <option value="7">7 月</option>
+                    <option value="8">8 月</option>
+                    <option value="9">9 月</option>
+                    <option value="10">10 月</option>
+                    <option value="11">11 月</option>
+                    <option value="12">12 月</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="panel-heading compact-heading">
+              <div>
+                <h3>缴费基数与比例</h3>
+              </div>
+            </div>
+
+            <div class="base-editor" id="baseEditor">
+              <div class="field-block">
+                <div class="label-with-action">
+                  <label for="socialBase">社保缴费基数</label>
+                  <button class="text-button edit-base-button" id="socialEditButton" type="button" aria-pressed="false">编辑</button>
+                </div>
+                <div class="money-input small-input">
+                  <span>¥</span>
+                  <input id="socialBase" type="number" value="20000" min="0" step="100" inputmode="decimal" readonly />
+                  <span class="unit">元</span>
+                </div>
+                <p class="field-meta" id="socialValidation">自动按工资估算 · 允许范围：¥6,326 - ¥31,884</p>
+              </div>
+              <div class="field-block">
+                <div class="label-with-action">
+                  <label for="housingBase">公积金缴费基数</label>
+                  <button class="text-button edit-base-button" id="housingEditButton" type="button" aria-pressed="false">编辑</button>
+                </div>
+                <div class="money-input small-input">
+                  <span>¥</span>
+                  <input id="housingBase" type="number" value="20000" min="0" step="100" inputmode="decimal" readonly />
+                  <span class="unit">元</span>
+                </div>
+                <p class="field-meta" id="housingValidation">自动按工资估算 · 允许范围：¥2,420 - ¥31,884</p>
+              </div>
+            </div>
+
+            <div class="ratio-grid">
+              <div class="field-block">
+                <label for="employeeHousingRate">公积金个人比例</label>
+                <div class="select-wrap">
+                  <select id="employeeHousingRate">
+                    <option value="3">3%</option>
+                    <option value="5">5%</option>
+                    <option value="7">7%</option>
+                    <option value="8">8%</option>
+                    <option value="10">10%</option>
+                    <option value="12" selected>12%</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="employerHousingRate">公积金单位比例</label>
+                <div class="select-wrap">
+                  <select id="employerHousingRate">
+                    <option value="3">3%</option>
+                    <option value="5">5%</option>
+                    <option value="7">7%</option>
+                    <option value="8">8%</option>
+                    <option value="10">10%</option>
+                    <option value="12" selected>12%</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <p class="field-meta">比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
+
+            <div class="deduction-block" id="deduction">
+              <button class="accordion-button" id="deductionToggle" type="button" aria-expanded="false">
+                <span>专项附加扣除</span>
+                <span class="accordion-value" id="deductionValue">本月 ¥0</span>
+                <span class="chevron">⌄</span>
+              </button>
+              <div class="deduction-content hidden" id="deductionContent">
+                <label class="check-row"><input type="checkbox" data-deduction="2000" /> <span>子女教育</span><strong>¥2,000 / 月</strong></label>
+                <label class="check-row"><input type="checkbox" data-deduction="2000" /> <span>3 岁以下婴幼儿照护</span><strong>¥2,000 / 月</strong></label>
+                <label class="check-row"><input type="checkbox" data-deduction="1500" /> <span>住房租金</span><strong>¥1,500 / 月</strong></label>
+                <label class="check-row"><input type="checkbox" data-deduction="3000" /> <span>赡养老人</span><strong>¥3,000 / 月</strong></label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="primary-button" type="submit">开始计算</button>
+              <button class="secondary-button" id="clearButton" type="button">清空</button>
+            </div>
+            <p class="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
+          </form>
+
+          <div class="results-column">
+            <section class="result-panel panel" aria-live="polite">
+              <div class="result-topline">
+                <div>
+                  <span class="result-context" id="resultContext">北京市 · 2026 年 8 月</span>
+                </div>
+                <span class="result-badge">累计预扣</span>
+              </div>
+              <div class="take-home-block">
+                <span>到手工资</span>
+                <strong id="takeHome">¥15,560.00</strong>
+                <small>税前 <b id="beforeTax">¥20,000</b></small>
+              </div>
+              <div class="wage-flow" aria-label="本月工资流向">
+                <div class="wage-flow-heading">
+                  <strong>本月工资流向</strong>
+                  <span id="wageFlowSummary">到手 72%</span>
+                </div>
+                <div class="flow-bar" aria-hidden="true">
+                  <span class="flow-segment flow-take-home" id="flowTakeHome"></span>
+                  <span class="flow-segment flow-social" id="flowSocial"></span>
+                  <span class="flow-segment flow-housing" id="flowHousing"></span>
+                  <span class="flow-segment flow-tax" id="flowTax"></span>
+                </div>
+                <div class="flow-legend">
+                  <div><span class="flow-dot flow-take-home-dot"></span><span>到手工资</span><strong id="flowTakeHomeValue">¥14,450</strong></div>
+                  <div><span class="flow-dot flow-social-dot"></span><span>个人社保</span><strong id="flowSocialValue">¥2,100</strong></div>
+                  <div><span class="flow-dot flow-housing-dot"></span><span>公积金</span><strong id="flowHousingValue">¥2,400</strong></div>
+                  <div><span class="flow-dot flow-tax-dot"></span><span>个人所得税</span><strong id="flowTaxValue">¥1,050</strong></div>
+                </div>
+              </div>
+              <div class="result-explanation" id="resultExplanation">你在 8 月累计应纳税所得额进入 10% 档位，所以本月个税比上月增加。</div>
+              <div class="tax-ladder" aria-label="个人所得税预扣率档位">
+                <div class="tax-ladder-heading"><span>当前预扣率档位</span><strong id="taxLadderLabel">10% 档</strong></div>
+                <div class="tax-ladder-rail" aria-hidden="true">
+                  <span class="tax-ladder-progress" id="taxLadderProgress"></span>
+                  <span class="tax-ladder-marker" id="taxLadderMarker"></span>
+                </div>
+                <div class="tax-ladder-levels">
+                  <span data-tax-level="3">3%</span><span data-tax-level="10">10%</span><span data-tax-level="20">20%</span><span data-tax-level="25">25%</span><span data-tax-level="30">30%</span><span data-tax-level="35">35%</span><span data-tax-level="45">45%</span>
+                </div>
+              </div>
+              <div class="result-actions">
+                <button class="link-button" id="calculationButton" type="button">查看计算过程 <span>→</span></button>
+              </div>
+              <div class="calculation-detail hidden" id="calculationDetail">
+                <div><span>累计应纳税所得额</span><strong id="taxableIncome">¥88,000</strong></div>
+                <div><span>预扣率 × 应纳税所得额</span><strong>10% × ¥88,000</strong></div>
+                <div><span>速算扣除数</span><strong>¥2,520</strong></div>
+              </div>
+            </section>
+
+            <section class="detail-panel panel">
+              <div class="section-heading-row">
+                <div class="heading-with-meta">
+                  <h2>五险一金汇缴明细</h2>
+                  <span class="month-label" id="detailMonth">2026 年 8 月</span>
+                </div>
+              </div>
+              <div class="detail-table-wrap">
+                <table class="insurance-table">
+                  <thead>
+                    <tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr>
+                  </thead>
+                  <tbody id="insuranceBody"></tbody>
+                </table>
+              </div>
+              <p class="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="annual-panel panel" aria-label="全年逐月明细">
+          <div class="section-heading-row">
+            <div class="heading-with-meta">
+              <h2>全年逐月明细</h2>
+              <span class="subtle-label">当前月份会高亮显示</span>
+            </div>
+          </div>
+          <div class="annual-table-wrap">
+            <table class="annual-table">
+              <thead>
+                <tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr>
+              </thead>
+              <tbody id="annualBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="content-section" id="tax-rate-table" aria-labelledby="tax-rate-title">
+          <div class="content-heading">
+            <div>
+              <h2 id="tax-rate-title">个人所得税预扣率表</h2>
+            </div>
+          </div>
+          <div class="rate-table-wrap panel">
+            <table class="rate-table">
+              <thead>
+                <tr><th>级数</th><th>累计预扣预缴应纳税所得额</th><th>预扣率</th><th>速算扣除数</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>不超过 36,000 元</td><td>3%</td><td>0</td></tr>
+                <tr><td>2</td><td>超过 36,000 元至 144,000 元</td><td>10%</td><td>2,520</td></tr>
+                <tr><td>3</td><td>超过 144,000 元至 300,000 元</td><td>20%</td><td>16,920</td></tr>
+                <tr><td>4</td><td>超过 300,000 元至 420,000 元</td><td>25%</td><td>31,920</td></tr>
+                <tr><td>5</td><td>超过 420,000 元至 660,000 元</td><td>30%</td><td>52,920</td></tr>
+                <tr><td>6</td><td>超过 660,000 元至 960,000 元</td><td>35%</td><td>85,920</td></tr>
+                <tr><td>7</td><td>超过 960,000 元</td><td>45%</td><td>181,920</td></tr>
+              </tbody>
+            </table>
+            <div class="source-line">本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div>
+          </div>
+        </section>
+
+        <section class="content-section faq-section" id="faq" aria-labelledby="faq-title">
+          <div class="content-heading stacked-heading">
+            <div>
+              <h2 id="faq-title">税务知识与常见问题</h2>
+            </div>
+            <p>围绕累计预扣、社保公积金、专项扣除和年度汇算，集中回答常见问题。</p>
+          </div>
+          <div class="faq-list">
+            <details open>
+              <summary>为什么我的工资一样，每个月个税不一样？</summary>
+              <p>工资薪金通常采用累计预扣法。累计收入、累计扣除和已预扣税额会随着月份变化，因此本月税额不一定固定。</p>
+            </details>
+            <details>
+              <summary>社保缴费基数可以和工资不一样吗？</summary>
+              <p>可以。不同城市和单位可能有不同的申报基数，但通常需要在对应城市政策允许范围内。计算器支持查看范围并手动填写。</p>
+            </details>
+            <details>
+              <summary>公积金比例可以自己选择吗？</summary>
+              <p>原型支持个人和单位分别选择 3% 至 12%。正式结果还要结合城市规则和单位实际缴纳方式。</p>
+            </details>
+            <details>
+              <summary>全年个税和年度汇算应纳税额是一回事吗？</summary>
+              <p>不是。页面中的全年个税默认指全年预扣合计估算，年度汇算最终结果还会受到全年综合所得、专项扣除和其他收入等因素影响。</p>
+            </details>
+            <details>
+              <summary>计算结果和工资条不一致怎么办？</summary>
+              <p>请检查城市、入职月份、社保公积金基数、比例、奖金和专项附加扣除。计算器只提供测算，最终以扣缴单位和税务机关口径为准。</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="source-section" aria-label="官方来源和相关工具">
+          <div>
+            <h2>每个结果都有出处</h2>
+            <p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p>
+          </div>
+          <div class="source-links">
+            <a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a>
+            <a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a>
+            <a href="#calculator">返回计算器 ↑</a>
+          </div>
+        </section>
+
+        <footer class="page-footer">
+          <span>极简个税 · 让每个数字都能被解释</span>
+          <span>规则来源以国家税务总局及城市官方政策为准</span>
+        </footer>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

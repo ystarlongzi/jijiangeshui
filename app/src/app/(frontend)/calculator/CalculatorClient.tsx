@@ -1,0 +1,144 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { cityRules, deductionOptions, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
+import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
+
+const money = (value: number, decimals = 2) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
+const wholeMoney = (value: number) => money(value, 0)
+const range = (min: number, max: number) => `${wholeMoney(min)} - ${wholeMoney(max)}`
+
+export default function CalculatorClient() {
+  const [city, setCity] = useState('beijing')
+  const [salary, setSalary] = useState(20000)
+  const [month, setMonth] = useState(8)
+  const [startMonth, setStartMonth] = useState(1)
+  const [socialBase, setSocialBase] = useState(20000)
+  const [housingBase, setHousingBase] = useState(20000)
+  const [editingSocial, setEditingSocial] = useState(false)
+  const [editingHousing, setEditingHousing] = useState(false)
+  const [employeeHousingRate, setEmployeeHousingRate] = useState(12)
+  const [employerHousingRate, setEmployerHousingRate] = useState(12)
+  const [deductions, setDeductions] = useState<string[]>([])
+  const [deductionsOpen, setDeductionsOpen] = useState(false)
+  const [calculationOpen, setCalculationOpen] = useState(false)
+  const [toast, setToast] = useState('')
+
+  const rule = cityRules[city]
+  const deduction = deductions.reduce((sum, label) => sum + (deductionOptions.find((item) => item.label === label)?.amount || 0), 0)
+
+  useEffect(() => {
+    if (!editingSocial) setSocialBase(clamp(salary, rule.socialMin, rule.socialMax))
+    if (!editingHousing) setHousingBase(clamp(salary, rule.housingMin, rule.housingMax))
+  }, [city, salary, rule, editingSocial, editingHousing])
+
+  const insurance = useMemo(() => calculateInsurance(rule, socialBase, housingBase, employeeHousingRate, employerHousingRate), [rule, socialBase, housingBase, employeeHousingRate, employerHousingRate])
+  const result = useMemo(() => calculateMonth(salary, month, startMonth, deduction, insurance), [salary, month, startMonth, deduction, insurance])
+  const rate = Math.round(result.bracket.rate * 100)
+  const socialItems = insurance.filter((item) => !item.housing)
+  const housingItems = insurance.filter((item) => item.housing)
+  const socialEmployee = socialItems.reduce((sum, item) => sum + item.employee, 0)
+  const socialEmployer = socialItems.reduce((sum, item) => sum + item.employer, 0)
+  const housingEmployee = housingItems.reduce((sum, item) => sum + item.employee, 0)
+  const housingEmployer = housingItems.reduce((sum, item) => sum + item.employer, 0)
+  const takeHomePercent = salary > 0 ? Math.round(result.takeHome / salary * 100) : 0
+  const flowTotal = Math.max(1, salary)
+  const ladderPosition = Math.max(0, taxBrackets.findIndex((item) => item.rate === result.bracket.rate)) / (taxBrackets.length - 1) * 100
+
+  const notify = (message: string) => {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 2400)
+  }
+
+  const reset = () => {
+    setCity('beijing'); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
+    setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductions([]); setDeductionsOpen(false); setCalculationOpen(false)
+    notify('已恢复城市默认设置')
+  }
+
+  const locate = () => {
+    if (!navigator.geolocation) return notify('当前浏览器不支持自动定位，请手动选择城市')
+    notify('正在获取位置，请允许浏览器访问定位权限')
+    navigator.geolocation.getCurrentPosition(() => notify('已获取位置，正式版将匹配对应城市规则'), () => notify('暂时无法获取位置，请手动选择城市'))
+  }
+
+  const toggleDeduction = (label: string) => setDeductions((current) => current.includes(label) ? current.filter((item) => item !== label) : [...current, label])
+  const formatTaxMessage = result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
+
+  return <div className="app-shell">
+    <header className="topbar">
+      <a className="brand" href="#top" aria-label="极简个税首页"><span className="brand-mark">极</span><span>极简个税</span></a>
+      <nav className="main-nav" aria-label="主导航"><a className="active" href="#calculator">工资薪金</a><a href="#bonus">年终奖</a><a href="#reverse">税后反推</a><a href="#deduction">专项扣除</a><a href="#tax-rate-table">税率表</a><a href="#faq">FAQ</a></nav>
+      <button className="icon-button" type="button" aria-label="切换深色模式" title="切换深色模式" onClick={() => { const dark = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem('tax-theme', dark ? 'light' : 'dark') }}>◐</button>
+    </header>
+
+    <main id="top" className="page-content">
+      <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · 2026</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>2026-07-27</strong></div></section>
+
+      <section className="workspace-grid" aria-label="个税计算器">
+        <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); notify('已更新计算结果') }}>
+          <div className="panel-heading"><h2>计算条件</h2></div>
+          <div className="field-block city-field"><div className="label-with-action city-label-row"><label htmlFor="city">缴费城市</label><span className="city-actions"><button className="text-button" type="button" onClick={locate}>自动定位</button><button className="text-button" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</button></span></div><div className="select-wrap"><select id="city" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
+          <div className="field-block"><label htmlFor="salary">税前月薪</label><div className="money-input"><span>¥</span><input id="salary" type="number" min="0" step="100" value={salary} onChange={(event) => setSalary(Number(event.target.value) || 0)} inputMode="decimal" /><span className="unit">元</span></div></div>
+          <div className="field-grid"><div className="field-block"><label htmlFor="month">计算月份</label><div className="select-wrap"><select id="month" value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div><div className="field-block"><label htmlFor="startMonth">入职月份</label><div className="select-wrap"><select id="startMonth" value={startMonth} onChange={(event) => setStartMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div></div>
+          <div className="section-divider" />
+          <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
+          <div className="base-editor">
+            <BaseField label="社保缴费基数" value={socialBase} min={rule.socialMin} max={rule.socialMax} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
+            <BaseField label="公积金缴费基数" value={housingBase} min={rule.housingMin} max={rule.housingMax} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
+          </div>
+          <div className="ratio-grid"><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className="field-meta">比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
+          <div className="deduction-block" id="deduction"><button className={`accordion-button${deductionsOpen ? ' open' : ''}`} type="button" aria-expanded={deductionsOpen} onClick={() => setDeductionsOpen(!deductionsOpen)}><span>专项附加扣除</span><span className="accordion-value">本月 {wholeMoney(deduction)}</span><span className="chevron">⌄</span></button>{deductionsOpen && <div className="deduction-content">{deductionOptions.map((item) => <label className="check-row" key={item.label}><input type="checkbox" checked={deductions.includes(item.label)} onChange={() => toggleDeduction(item.label)} /><span>{item.label}</span><strong>{wholeMoney(item.amount)} / 月</strong></label>)}</div>}</div>
+          <div className="form-actions"><button className="primary-button" type="submit">开始计算</button><button className="secondary-button" type="button" onClick={reset}>清空</button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
+        </form>
+
+        <div className="results-column">
+          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · 2026 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
+            <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: `${result.takeHome / flowTotal * 100}%` }} /><span className="flow-segment flow-social" style={{ width: `${socialEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-housing" style={{ width: `${housingEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-tax" style={{ width: `${result.currentTax / flowTotal * 100}%` }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} /></div></div>
+            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
+          <InsuranceTable insurance={insurance} month={month} />
+        </div>
+      </section>
+
+      <AnnualTable salary={salary} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} />
+      <RateTable />
+      <Faq />
+      <section className="source-section" aria-label="官方来源和相关工具"><div><h2>每个结果都有出处</h2><p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p></div><div className="source-links"><a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a><a href="#calculator">返回计算器 ↑</a></div></section>
+      <footer className="page-footer"><span>极简个税 · 让每个数字都能被解释</span><span>规则来源以国家税务总局及城市官方政策为准</span></footer>
+    </main><div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  </div>
+}
+
+function BaseField({ label, value, min, max, editing, onEdit, onChange }: { label: string; value: number; min: number; max: number; editing: boolean; onEdit: () => void; onChange: (value: number) => void }) {
+  return <div className="field-block"><div className="label-with-action"><label>{label}</label><button className="text-button edit-base-button" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</button></div><div className="money-input small-input"><span>¥</span><input type="number" value={value} min={min} max={max} step="100" readOnly={!editing} onChange={(event) => onChange(Number(event.target.value) || 0)} inputMode="decimal" /><span className="unit">元</span></div><p className="field-meta">允许范围：{range(min, max)}</p></div>
+}
+
+function RateSelect({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return <div className="field-block"><label>{label}</label><div className="select-wrap"><select value={value} onChange={(event) => onChange(Number(event.target.value))}>{housingRateOptions.map((rate) => <option key={rate} value={rate}>{rate}%</option>)}</select></div></div>
+}
+
+function FlowLegend({ className, label, value }: { className: string; label: string; value: number }) {
+  return <div><span className={`flow-dot ${className}`} /><span>{label}</span><strong>{wholeMoney(value)}</strong></div>
+}
+
+function InsuranceTable({ insurance, month }: { insurance: InsuranceItem[]; month: number }) {
+  const social = insurance.filter((item) => !item.housing)
+  const housing = insurance.filter((item) => item.housing)
+  const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
+  const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal)}</td></tr>
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">2026 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'))}</td><td>{money(sum(social, 'employer'))}</td><td>{money(sum(social, 'subtotal'))}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'))}</td><td>{money(sum(insurance, 'employer'))}</td><td>{money(sum(insurance, 'subtotal'))}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+}
+
+function AnnualTable({ salary, month, startMonth, deduction, insurance }: { salary: number; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[] }) {
+  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年逐月明细</h2><span className="subtle-label">当前月份会高亮显示</span></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{Array.from({ length: 12 }, (_, index) => index + 1).map((currentMonth) => { const inactive = currentMonth < startMonth; const item = calculateMonth(salary, currentMonth, startMonth, deduction, insurance); return <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : wholeMoney(item.takeHome)}</span>{!inactive && <span className="before-tax-value">税前 {wholeMoney(salary)}</span>}</td><td>{inactive ? '-' : wholeMoney(item.employeeInsurance)}</td><td>{inactive ? '-' : wholeMoney(item.taxable)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : wholeMoney(item.currentTax)}</td></tr> })}</tbody></table></div></section>
+}
+
+function RateTable() {
+  const rows = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
+  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><div className="rate-table-wrap panel"><table className="rate-table"><thead><tr><th>级数</th><th>累计预扣预缴应纳税所得额</th><th>预扣率</th><th>速算扣除数</th></tr></thead><tbody>{taxBrackets.map((item, index) => <tr key={item.rate}><td>{index + 1}</td><td>{rows[index]}</td><td>{Math.round(item.rate * 100)}%</td><td>{item.quick.toLocaleString('zh-CN')}</td></tr>)}</tbody></table><div className="source-line">本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></div></section>
+}
+
+function Faq() {
+  const items = [['为什么我的工资一样，每个月个税不一样？', '工资薪金通常采用累计预扣法。累计收入、累计扣除和已预扣税额会随着月份变化，因此本月税额不一定固定。'], ['社保缴费基数可以和工资不一样吗？', '可以。不同城市和单位可能有不同的申报基数，但通常需要在对应城市政策允许范围内。计算器支持查看范围并手动填写。'], ['公积金比例可以自己选择吗？', '原型支持个人和单位分别选择 3% 至 12%。正式结果还要结合城市规则和单位实际缴纳方式。'], ['全年个税和年度汇算应纳税额是一回事吗？', '不是。页面中的全年个税默认指全年预扣合计估算，年度汇算最终结果还会受到全年综合所得、专项扣除和其他收入等因素影响。'], ['计算结果和工资条不一致怎么办？', '请检查城市、入职月份、社保公积金基数、比例、奖金和专项附加扣除。计算器只提供测算，最终以扣缴单位和税务机关口径为准。']]
+  return <section className="content-section faq-section" id="faq"><div className="content-heading stacked-heading"><h2>税务知识与常见问题</h2><p>围绕累计预扣、社保公积金、专项扣除和年度汇算，集中回答常见问题。</p></div><div className="faq-list">{items.map(([question, answer], index) => <details open={index === 0} key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
+}

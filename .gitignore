@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+app/src/payload-types.ts
+app/public/media/
