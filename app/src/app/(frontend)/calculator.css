@@ -335,6 +335,41 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .info-section ul { display: grid; gap: 8px; margin: 16px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.7; }
 .info-bottom-action { padding: 22px 0 28px; }
 .info-bottom-action a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 13px; font-weight: 750; }
+.bonus-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 64px 0 42px; }
+.bonus-hero { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: end; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
+.bonus-eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 750; }
+.bonus-hero h1 { margin: 20px 0 16px; font-size: clamp(44px, 6vw, 76px); letter-spacing: -.05em; }
+.bonus-hero p { max-width: 700px; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.7; }
+.bonus-policy-note { display: grid; gap: 8px; padding: 18px; border-left: 3px solid var(--accent); background: var(--accent-soft); color: var(--muted); font-size: 11px; line-height: 1.7; }
+.bonus-policy-note strong { color: var(--ink); font-size: 13px; }
+.bonus-workspace { display: grid; grid-template-columns: minmax(320px, 390px) minmax(0, 1fr); gap: 20px; padding: 42px 0 58px; }
+.bonus-input, .bonus-result { padding: 26px; }
+.bonus-section-title { color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; }
+.bonus-section-title strong { float: right; color: var(--subtle); font-size: 11px; letter-spacing: 0; }
+.bonus-input h2 { margin: 10px 0 28px; font-size: 24px; }
+.bonus-field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.bonus-field .money-input { min-height: 50px; }
+.bonus-field .money-input input { font-size: 20px; }
+.bonus-field .money-input em { font-style: normal; font-size: 12px; }
+.bonus-form-grid { display: grid; gap: 2px; }
+.bonus-form-note, .bonus-result-note { margin: 8px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.65; }
+.bonus-form-actions { display: grid; grid-template-columns: 1fr 92px; gap: 10px; margin-top: 24px; }
+.bonus-form-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.bonus-result-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.bonus-result-heading p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.bonus-badge { padding: 7px 10px; border-radius: 7px; background: var(--accent-soft); color: var(--accent-deep); font-size: 11px; font-weight: 750; white-space: nowrap; }
+.bonus-recommendation { margin: 28px 0 22px; padding: 18px 20px; border-left: 3px solid var(--accent); background: var(--surface-muted); }
+.bonus-recommendation span { color: var(--muted); font-size: 12px; }.bonus-recommendation strong { display: block; margin-top: 3px; color: var(--accent-deep); font-size: 25px; }.bonus-recommendation p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.bonus-threshold-alert { display: flex; align-items: start; gap: 9px; margin: -6px 0 22px; padding: 13px 15px; border: 1px solid #fdba74; border-radius: 9px; background: #fff7ed; color: #9a3412; }
+.bonus-threshold-alert svg { flex: 0 0 auto; margin-top: 1px; color: #f97316; }
+.bonus-threshold-alert p { margin: 0; font-size: 12px; line-height: 1.65; }
+.bonus-threshold-alert strong { color: #ea580c; }
+.bonus-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.bonus-result-card { padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }.bonus-result-card.active { border-color: var(--accent); background: var(--accent-soft); }
+.bonus-card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.bonus-card-title h3 { font-size: 15px; }.bonus-better { display: inline-flex; align-items: center; gap: 4px; color: #f97316; font-size: 11px; font-weight: 750; }
+.bonus-card-takehome { display: grid; gap: 3px; margin: 24px 0 18px; }.bonus-card-takehome small { color: var(--muted); font-size: 11px; }.bonus-card-takehome strong { font-size: 30px; letter-spacing: -.04em; }
+.bonus-result-card dl { display: grid; gap: 9px; margin: 0; padding-top: 13px; border-top: 1px solid var(--line); }.bonus-result-card dl div { display: flex; justify-content: space-between; gap: 12px; }.bonus-result-card dt, .bonus-result-card dd { margin: 0; color: var(--muted); font-size: 11px; }.bonus-result-card dd { color: var(--ink); font-weight: 700; }.bonus-result-card p { min-height: 38px; margin: 18px 0 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.bonus-explain { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding: 28px 0; border-top: 1px solid var(--line); }.bonus-explain h2 { margin-bottom: 8px; font-size: 22px; }.bonus-explain p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }.bonus-explain a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
 .city-breadcrumb { display: flex; gap: 9px; margin-bottom: 54px; color: var(--muted); font-size: 12px; }
 .city-breadcrumb a { color: var(--accent); font-weight: 700; }
 .city-hero { display: flex; align-items: end; justify-content: space-between; gap: 36px; padding-bottom: 54px; border-bottom: 1px solid var(--line); }
@@ -493,6 +528,15 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .site-footer { display: grid; gap: 6px; }
   .city-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .info-page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .bonus-page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .bonus-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
+  .bonus-hero h1 { font-size: 44px; }
+  .bonus-hero p { font-size: 14px; }
+  .bonus-policy-note { max-width: 360px; }
+  .bonus-workspace { grid-template-columns: 1fr; gap: 14px; padding: 28px 0 42px; }
+  .bonus-input, .bonus-result { padding: 20px; }
+  .bonus-comparison { grid-template-columns: 1fr; }
+  .bonus-explain { align-items: start; flex-direction: column; gap: 18px; }
   .city-breadcrumb { margin-bottom: 34px; }
   .city-hero { display: grid; align-items: start; gap: 26px; padding-bottom: 36px; }
   .city-hero h1 { font-size: 44px; }
