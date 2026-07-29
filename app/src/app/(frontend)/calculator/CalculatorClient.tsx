@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cityRules, deductionOptions, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
+import { currentYear } from '@/lib/site'
 
 const money = (value: number, decimals = 2) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
 const wholeMoney = (value: number) => money(value, 0)
@@ -23,6 +24,11 @@ export default function CalculatorClient() {
   const [deductionsOpen, setDeductionsOpen] = useState(false)
   const [calculationOpen, setCalculationOpen] = useState(false)
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    const requestedCity = new URLSearchParams(window.location.search).get('city')
+    if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
+  }, [])
 
   const rule = cityRules[city]
   const deduction = deductions.reduce((sum, label) => sum + (deductionOptions.find((item) => item.label === label)?.amount || 0), 0)
@@ -68,12 +74,12 @@ export default function CalculatorClient() {
   return <div className="app-shell">
     <header className="topbar">
       <a className="brand" href="#top" aria-label="极简个税首页"><span className="brand-mark">极</span><span>极简个税</span></a>
-      <nav className="main-nav" aria-label="主导航"><a className="active" href="#calculator">工资薪金</a><a href="#bonus">年终奖</a><a href="#reverse">税后反推</a><a href="#deduction">专项扣除</a><a href="#tax-rate-table">税率表</a><a href="#faq">FAQ</a></nav>
+      <nav className="main-nav" aria-label="主导航"><a className="active" href="#calculator">工资薪金</a><a href="#bonus">年终奖</a><a href="#reverse">税后反推</a><a href="#deduction">专项扣除</a><a href="/tax-rate">税率表</a><a href="#faq">FAQ</a></nav>
       <button className="icon-button" type="button" aria-label="切换深色模式" title="切换深色模式" onClick={() => { const dark = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem('tax-theme', dark ? 'light' : 'dark') }}>◐</button>
     </header>
 
     <main id="top" className="page-content">
-      <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · 2026</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>2026-07-27</strong></div></section>
+      <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{currentYear}-07-27</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
         <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); notify('已更新计算结果') }}>
@@ -93,7 +99,7 @@ export default function CalculatorClient() {
         </form>
 
         <div className="results-column">
-          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · 2026 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
+          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: `${result.takeHome / flowTotal * 100}%` }} /><span className="flow-segment flow-social" style={{ width: `${socialEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-housing" style={{ width: `${housingEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-tax" style={{ width: `${result.currentTax / flowTotal * 100}%` }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} /></div></div>
             <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} />
@@ -126,7 +132,7 @@ function InsuranceTable({ insurance, month }: { insurance: InsuranceItem[]; mont
   const housing = insurance.filter((item) => item.housing)
   const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
   const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal)}</td></tr>
-  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">2026 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'))}</td><td>{money(sum(social, 'employer'))}</td><td>{money(sum(social, 'subtotal'))}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'))}</td><td>{money(sum(insurance, 'employer'))}</td><td>{money(sum(insurance, 'subtotal'))}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'))}</td><td>{money(sum(social, 'employer'))}</td><td>{money(sum(social, 'subtotal'))}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'))}</td><td>{money(sum(insurance, 'employer'))}</td><td>{money(sum(insurance, 'subtotal'))}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
 function AnnualTable({ salary, month, startMonth, deduction, insurance }: { salary: number; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[] }) {

@@ -67,6 +67,6 @@ npm install
 npm run dev
 ```
 
-后台地址：`http://localhost:3000/admin`
+后台地址：`http://localhost:4000/admin`
 
-计算器地址：`http://localhost:3000/calculator`
+计算器地址：`http://localhost:4000/calculator`
