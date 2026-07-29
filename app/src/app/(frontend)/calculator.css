@@ -255,7 +255,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 20; max-width: min(360px, calc(100vw - 48px)); padding: 11px 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--ink); color: var(--surface); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; }
 .toast.visible { opacity: 1; transform: translateY(0); }
 
-.home-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 76px 0 34px; }
+.home-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 0 0 34px; }
 .home-hero { display: flex; align-items: end; justify-content: space-between; gap: 40px; min-height: 390px; padding: 76px 0 70px; }
 .home-hero-copy { max-width: 720px; }
 .home-hero h1 { margin: 18px 0 20px; font-size: clamp(52px, 7vw, 92px); letter-spacing: -0.055em; }
@@ -301,6 +301,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .reading-links a svg:first-child { color: var(--accent); }
 .reading-links a svg:last-child { color: var(--muted); }
 .home-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 11px; }
+.site-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 11px; }
 .city-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .city-breadcrumb { display: flex; gap: 9px; margin-bottom: 54px; color: var(--muted); font-size: 12px; }
 .city-breadcrumb a { color: var(--accent); font-weight: 700; }
@@ -434,7 +435,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .source-section { align-items: start; flex-direction: column; gap: 20px; }
   .source-links { justify-content: start; }
   .page-footer { display: grid; gap: 6px; padding-top: 22px; }
-  .home-page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .home-page { width: min(100% - 28px, 600px); padding-top: 0; }
   .home-hero { display: grid; align-items: start; gap: 24px; min-height: 0; padding: 28px 0 54px; }
   .home-hero h1 { font-size: 54px; }
   .home-lead { font-size: 16px; }
@@ -450,6 +451,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .reading-links a + a { padding-left: 0; border-left: 0; }
   .home-reading-section { padding: 54px 0 34px; }
   .home-footer { display: grid; gap: 6px; }
+  .site-footer { display: grid; gap: 6px; }
   .city-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .city-breadcrumb { margin-bottom: 34px; }
   .city-hero { display: grid; align-items: start; gap: 26px; padding-bottom: 36px; }

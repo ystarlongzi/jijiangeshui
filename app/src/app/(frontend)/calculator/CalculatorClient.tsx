@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { cityRules, deductionOptions, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear } from '@/lib/site'
+import SiteHeader from '../SiteHeader'
+import SiteFooter from '../SiteFooter'
 
 const money = (value: number, decimals = 2) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
 const wholeMoney = (value: number) => money(value, 0)
@@ -72,11 +74,7 @@ export default function CalculatorClient() {
   const formatTaxMessage = result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
 
   return <div className="app-shell">
-    <header className="topbar">
-      <a className="brand" href="#top" aria-label="极简个税首页"><span className="brand-mark">极</span><span>极简个税</span></a>
-      <nav className="main-nav" aria-label="主导航"><a className="active" href="#calculator">工资薪金</a><a href="#bonus">年终奖</a><a href="#reverse">税后反推</a><a href="#deduction">专项扣除</a><a href="/tax-rate">税率表</a><a href="#faq">FAQ</a></nav>
-      <button className="icon-button" type="button" aria-label="切换深色模式" title="切换深色模式" onClick={() => { const dark = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = dark ? 'light' : 'dark'; localStorage.setItem('tax-theme', dark ? 'light' : 'dark') }}>◐</button>
-    </header>
+    <SiteHeader active="calculator" />
 
     <main id="top" className="page-content">
       <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{currentYear}-07-27</strong></div></section>
@@ -110,7 +108,7 @@ export default function CalculatorClient() {
       <RateTable />
       <Faq />
       <section className="source-section" aria-label="官方来源和相关工具"><div><h2>每个结果都有出处</h2><p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p></div><div className="source-links"><a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a><a href="#calculator">返回计算器 ↑</a></div></section>
-      <footer className="page-footer"><span>极简个税 · 让每个数字都能被解释</span><span>规则来源以国家税务总局及城市官方政策为准</span></footer>
+      <SiteFooter />
     </main><div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
   </div>
 }

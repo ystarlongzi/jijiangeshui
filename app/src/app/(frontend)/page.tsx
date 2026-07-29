@@ -12,7 +12,8 @@ import {
   ReceiptText,
   Sparkles,
 } from 'lucide-react'
-import ThemeToggle from './ThemeToggle'
+import SiteHeader from './SiteHeader'
+import SiteFooter from './SiteFooter'
 import { currentYear, siteName } from '@/lib/site'
 
 export const metadata = {
@@ -37,11 +38,7 @@ const highlights = [
 
 export default function HomePage() {
   return <div className="app-shell">
-    <header className="topbar">
-      <a className="brand" href="#top" aria-label="极简个税首页"><span className="brand-mark">极</span><span>极简个税</span></a>
-      <nav className="main-nav" aria-label="主导航"><a className="active" href="#top">首页</a><a href="/calculator">工资薪金</a><a href="/calculator#bonus">年终奖</a><a href="/calculator#reverse">税后反推</a><a href="/calculator#deduction">专项扣除</a><a href="/tax-rate">税率表</a><a href="/calculator#faq">FAQ</a></nav>
-      <ThemeToggle />
-    </header>
+    <SiteHeader active="home" />
     <main className="home-page" id="top">
     <section className="home-hero">
       <div className="home-hero-copy">
@@ -63,7 +60,7 @@ export default function HomePage() {
 
     <section className="home-city-section"><div className="home-section-heading"><h2>热门城市</h2><p>查看城市社保、公积金基数范围和缴费比例。</p></div><div className="city-links"><Link href="/city/beijing"><MapPin size={16} />北京市 <ArrowRight size={14} /></Link><Link href="/city/shanghai"><MapPin size={16} />上海市 <ArrowRight size={14} /></Link><Link href="/city/shenzhen"><MapPin size={16} />深圳市 <ArrowRight size={14} /></Link><Link href="/city/guangzhou"><MapPin size={16} />广州市 <ArrowRight size={14} /></Link><Link href="/city/hangzhou"><MapPin size={16} />杭州市 <ArrowRight size={14} /></Link></div></section>
 
-    <footer className="home-footer"><span>极简个税 · 让每个数字都能被解释</span><span>仅供测算，最终以官方和扣缴单位口径为准</span></footer>
+    <SiteFooter />
     </main>
   </div>
 }
