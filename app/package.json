@@ -18,6 +18,7 @@
     "@payloadcms/next": "3.86.0",
     "@payloadcms/richtext-lexical": "3.86.0",
     "graphql": "16.12.0",
+    "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "payload": "3.86.0",
     "react": "19.2.0",
@@ -28,7 +29,7 @@
     "@types/node": "22.15.30",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.6",
-    "typescript": "5.9.2",
-    "tsx": "4.20.3"
+    "tsx": "4.20.3",
+    "typescript": "5.9.2"
   }
 }
