@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { ArrowRight, Award, Gift, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import MoneyInput from '../MoneyInput'
 import { calculateBonusTax } from '@/lib/bonus-tax'
 import { currentYear } from '@/lib/site'
 
@@ -31,7 +32,7 @@ export default function BonusTaxClient() {
 }
 
 function BonusInput({ id, label, value, onChange }: { id: string; label: string; value: number; onChange: (value: number) => void }) {
-  return <label className="bonus-field" htmlFor={id}><span>{label}</span><div className="money-input"><b>¥</b><input id={id} type="number" min="0" step="100" value={value} onChange={(event) => onChange(Number(event.target.value) || 0)} inputMode="decimal" /><em>元</em></div></label>
+  return <label className="bonus-field" htmlFor={id}><span>{label}</span><MoneyInput id={id} value={value} onChange={onChange} /></label>
 }
 
 function BonusResultCard({ title, result, active, note }: { title: string; result: ReturnType<typeof calculateBonusTax>['separate']; active: boolean; note: string }) {

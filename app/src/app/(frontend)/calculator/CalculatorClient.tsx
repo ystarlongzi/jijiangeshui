@@ -6,6 +6,7 @@ import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@
 import { currentYear } from '@/lib/site'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import MoneyInput from '../MoneyInput'
 
 const money = (value: number, decimals = 2) => `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
 const wholeMoney = (value: number) => money(value, 0)
@@ -83,7 +84,7 @@ export default function CalculatorClient() {
         <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); notify('已更新计算结果') }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
           <div className="field-block city-field"><div className="label-with-action city-label-row"><label htmlFor="city">缴费城市</label><span className="city-actions"><button className="text-button" type="button" onClick={locate}>自动定位</button><button className="text-button" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</button></span></div><div className="select-wrap"><select id="city" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
-          <div className="field-block"><label htmlFor="salary">税前月薪</label><div className="money-input"><span>¥</span><input id="salary" type="number" min="0" step="100" value={salary} onChange={(event) => setSalary(Number(event.target.value) || 0)} inputMode="decimal" /><span className="unit">元</span></div></div>
+          <div className="field-block"><label htmlFor="salary">税前月薪</label><MoneyInput id="salary" value={salary} onChange={setSalary} /></div>
           <div className="field-grid"><div className="field-block"><label htmlFor="month">计算月份</label><div className="select-wrap"><select id="month" value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div><div className="field-block"><label htmlFor="startMonth">入职月份</label><div className="select-wrap"><select id="startMonth" value={startMonth} onChange={(event) => setStartMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div></div>
           <div className="section-divider" />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
@@ -114,7 +115,7 @@ export default function CalculatorClient() {
 }
 
 function BaseField({ label, value, min, max, editing, onEdit, onChange }: { label: string; value: number; min: number; max: number; editing: boolean; onEdit: () => void; onChange: (value: number) => void }) {
-  return <div className="field-block"><div className="label-with-action"><label>{label}</label><button className="text-button edit-base-button" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</button></div><div className="money-input small-input"><span>¥</span><input type="number" value={value} min={min} max={max} step="100" readOnly={!editing} onChange={(event) => onChange(Number(event.target.value) || 0)} inputMode="decimal" /><span className="unit">元</span></div><p className="field-meta">允许范围：{range(min, max)}</p></div>
+  return <div className="field-block"><div className="label-with-action"><label>{label}</label><button className="text-button edit-base-button" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</button></div><MoneyInput className="small-input" value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /><p className="field-meta">允许范围：{range(min, max)}</p></div>
 }
 
 function RateSelect({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
