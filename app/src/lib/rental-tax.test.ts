@@ -30,3 +30,12 @@ test('财产租赁：修缮费每次最多扣除 800 元', () => {
   assert.equal(result.taxable, 2800)
   assert.equal(result.tax, 560)
 })
+
+test('财产租赁：负数收入按 0 处理', () => {
+  const result = calculateRentalTax({ income: -1000, taxesAndFees: 100, repairExpense: 500 })
+
+  assert.equal(result.income, 0)
+  assert.equal(result.incomeAfterCosts, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.takeHome, 0)
+})

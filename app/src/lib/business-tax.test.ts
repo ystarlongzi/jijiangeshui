@@ -16,3 +16,21 @@ test('经营所得：扣除额超过收入时不产生应纳税所得额', () =>
   assert.equal(result.taxable, 0)
   assert.equal(result.tax, 0)
 })
+
+test('经营所得：高额应纳税所得额进入 35% 档', () => {
+  const result = calculateBusinessTax({ revenue: 600000 })
+
+  assert.equal(result.taxable, 600000)
+  assert.equal(result.bracket.rate, 0.35)
+  assert.equal(result.bracket.quick, 65500)
+  assert.equal(result.tax, 144500)
+})
+
+test('经营所得：负数收入按 0 处理', () => {
+  const result = calculateBusinessTax({ revenue: -1000, costsAndExpenses: 100 })
+
+  assert.equal(result.revenue, 0)
+  assert.equal(result.taxable, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.afterTax, 0)
+})

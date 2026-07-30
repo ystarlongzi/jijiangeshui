@@ -17,16 +17,17 @@ export function calculateRentalTax({
   repairExpense = 0,
   mode = 'housing',
 }: RentalTaxInput) {
+  const safeIncome = Math.max(0, income)
   const repairDeduction = Math.min(Math.max(0, repairExpense), 800)
   const deductibleCosts = Math.max(0, taxesAndFees) + Math.max(0, subleaseRent) + repairDeduction
-  const incomeAfterCosts = Math.max(0, income - deductibleCosts)
+  const incomeAfterCosts = Math.max(0, safeIncome - deductibleCosts)
   const statutoryDeduction = incomeAfterCosts <= 4000 ? Math.min(800, incomeAfterCosts) : incomeAfterCosts * 0.2
   const taxable = Math.max(0, incomeAfterCosts - statutoryDeduction)
   const rate = mode === 'housing' ? 0.1 : 0.2
   const tax = roundMoney(taxable * rate)
 
   return {
-    income: roundMoney(income),
+    income: roundMoney(safeIncome),
     taxesAndFees: roundMoney(taxesAndFees),
     subleaseRent: roundMoney(subleaseRent),
     repairExpense: roundMoney(repairExpense),
@@ -37,6 +38,6 @@ export function calculateRentalTax({
     taxable: roundMoney(taxable),
     rate,
     tax,
-    takeHome: roundMoney(income - tax),
+    takeHome: roundMoney(safeIncome - tax),
   }
 }

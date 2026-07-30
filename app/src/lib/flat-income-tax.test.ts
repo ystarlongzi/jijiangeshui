@@ -15,3 +15,11 @@ test('比例所得：收入为 0 时不产生税额', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 0)
 })
+
+test('比例所得：负数收入按 0 处理', () => {
+  const result = calculateFlatIncomeTax(-1000)
+
+  assert.equal(result.income, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.takeHome, 0)
+})

@@ -13,17 +13,18 @@ export const laborTaxBrackets: LaborBracket[] = [
 ]
 
 export function calculateLaborTax(income: number) {
-  const deduction = income <= 4000 ? Math.min(800, income) : income * 0.2
-  const taxable = Math.max(0, income - deduction)
+  const safeIncome = Math.max(0, income)
+  const deduction = safeIncome <= 4000 ? Math.min(800, safeIncome) : safeIncome * 0.2
+  const taxable = Math.max(0, safeIncome - deduction)
   const bracket = laborTaxBrackets.find((item) => taxable <= item.ceiling) || laborTaxBrackets[laborTaxBrackets.length - 1]
   const tax = roundMoney(Math.max(0, taxable * bracket.rate - bracket.quick))
 
   return {
-    income: roundMoney(income),
+    income: roundMoney(safeIncome),
     deduction: roundMoney(deduction),
     taxable: roundMoney(taxable),
     bracket,
     tax,
-    takeHome: roundMoney(income - tax),
+    takeHome: roundMoney(safeIncome - tax),
   }
 }

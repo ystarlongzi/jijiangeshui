@@ -17,3 +17,12 @@ test('财产转让：亏损或无增值时应纳税所得额不为负数', () =>
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 50000)
 })
+
+test('财产转让：负数收入按 0 处理', () => {
+  const result = calculatePropertyTransferTax({ income: -1000, originalValue: 3000, reasonableFees: 500 })
+
+  assert.equal(result.income, 0)
+  assert.equal(result.taxable, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.takeHome, 0)
+})

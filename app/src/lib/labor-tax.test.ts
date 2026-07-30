@@ -30,3 +30,20 @@ test('劳务报酬：应纳税所得额超过 20000 元时进入 30% 预扣率�
   assert.equal(result.tax, 5200)
   assert.equal(result.takeHome, 24800)
 })
+
+test('劳务报酬：应纳税所得额超过 50000 元时进入 40% 预扣率档', () => {
+  const result = calculateLaborTax(70000)
+
+  assert.equal(result.taxable, 56000)
+  assert.equal(Math.round(result.bracket.rate * 100), 40)
+  assert.equal(result.bracket.quick, 7000)
+  assert.equal(result.tax, 15400)
+})
+
+test('劳务报酬：负数收入按 0 处理', () => {
+  const result = calculateLaborTax(-1000)
+
+  assert.equal(result.income, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.takeHome, 0)
+})

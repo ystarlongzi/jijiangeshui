@@ -22,13 +22,14 @@ export type BusinessTaxInput = {
 }
 
 export function calculateBusinessTax({ revenue, costsAndExpenses = 0, losses = 0, otherDeductions = 0 }: BusinessTaxInput) {
+  const safeRevenue = Math.max(0, revenue)
   const totalDeduction = Math.max(0, costsAndExpenses) + Math.max(0, losses) + Math.max(0, otherDeductions)
-  const taxable = Math.max(0, revenue - totalDeduction)
+  const taxable = Math.max(0, safeRevenue - totalDeduction)
   const bracket = businessTaxBrackets.find((item) => taxable <= item.ceiling) || businessTaxBrackets[businessTaxBrackets.length - 1]
   const tax = roundMoney(Math.max(0, taxable * bracket.rate - bracket.quick))
 
   return {
-    revenue: roundMoney(revenue),
+    revenue: roundMoney(safeRevenue),
     costsAndExpenses: roundMoney(costsAndExpenses),
     losses: roundMoney(losses),
     otherDeductions: roundMoney(otherDeductions),
@@ -36,6 +37,6 @@ export function calculateBusinessTax({ revenue, costsAndExpenses = 0, losses = 0
     taxable: roundMoney(taxable),
     bracket,
     tax,
-    afterTax: roundMoney(revenue - tax),
+    afterTax: roundMoney(safeRevenue - tax),
   }
 }

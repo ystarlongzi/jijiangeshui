@@ -21,3 +21,12 @@ test('稿酬所得：超过 4000 元时先扣除 20% 费用再减按 70%', () =>
   assert.equal(result.tax, 1120)
   assert.equal(result.takeHome, 8880)
 })
+
+test('稿酬所得：负数收入按 0 处理', () => {
+  const result = calculateAuthorTax(-1000)
+
+  assert.equal(result.income, 0)
+  assert.equal(result.taxable, 0)
+  assert.equal(result.tax, 0)
+  assert.equal(result.takeHome, 0)
+})
