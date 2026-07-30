@@ -260,6 +260,10 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .rate-table tbody tr:first-child td { border-top: 0; }
 .source-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 11px; }
 .source-line a, .source-links a { color: var(--accent); font-weight: 700; }
+.rate-next-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 18px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--accent-soft); }
+.rate-next-card h2 { margin: 0 0 5px; font-size: 17px; }
+.rate-next-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.rate-next-card a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
 .faq-section { display: grid; grid-template-columns: 0.72fr 1.28fr; gap: 60px; align-items: start; }
 .faq-list { border-top: 1px solid var(--line); }
 .faq-list details { border-bottom: 1px solid var(--line); }
@@ -673,6 +677,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .rate-table { min-width: 640px; }
   .source-line { align-items: center; flex-direction: row; gap: 8px; padding-inline: 12px; font-size: 10px; white-space: nowrap; }
   .source-line a { white-space: nowrap; }
+  .rate-next-card { align-items: start; flex-direction: column; }
   .faq-section { display: grid; grid-template-columns: 1fr; gap: 22px; }
   .source-section { align-items: start; flex-direction: column; gap: 20px; }
   .source-links { justify-content: start; }

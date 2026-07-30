@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ExternalLink, Info } from 'lucide-react'
+import Link from 'next/link'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { businessTaxBrackets } from '@/lib/business-tax'
 import { taxBrackets } from '@/lib/tax-rules'
@@ -46,6 +47,18 @@ const incomeGroups: { label: string; items: { id: IncomeType; label: string }[] 
   { label: '分类所得', items: [{ id: 'business', label: '经营所得' }, { id: 'rent', label: '财产租赁' }, { id: 'transfer', label: '财产转让' }, { id: 'dividend', label: '利息、股息、红利' }, { id: 'accidental', label: '偶然所得' }] },
 ]
 
+const calculatorLinks: Record<IncomeType, { href: string; label: string }> = {
+  salary: { href: '/calculator', label: '用工资计算器测算' },
+  labor: { href: '/labor-tax', label: '计算劳务报酬个税' },
+  royalty: { href: '/author-tax', label: '计算稿酬个税' },
+  license: { href: '/license-tax', label: '计算特许权使用费' },
+  business: { href: '/business-tax', label: '计算经营所得个税' },
+  rent: { href: '/rental-tax', label: '计算财产租赁个税' },
+  transfer: { href: '/property-transfer-tax', label: '计算财产转让个税' },
+  dividend: { href: '/dividend-tax', label: '计算利息股息红利个税' },
+  accidental: { href: '/accidental-tax', label: '计算偶然所得个税' },
+}
+
 function getRateTab(identity: Identity, type: IncomeType): RateTab {
   const nonResident = identity === 'non-resident'
   const classified = ['business', 'rent', 'transfer', 'dividend', 'accidental'].includes(type)
@@ -67,6 +80,7 @@ export default function TaxRateTabs() {
   const [identity, setIdentity] = useState<Identity>('resident')
   const [activeType, setActiveType] = useState<IncomeType>('salary')
   const active = getRateTab(identity, activeType)
+  const calculatorLink = calculatorLinks[activeType]
   const currentGroup = incomeGroups.find((group) => group.label === (activeGroup === 'comprehensive' ? '综合所得' : '分类所得')) || incomeGroups[0]
 
   return <section className="rate-tabs-section" aria-label="个人所得税税率表">
@@ -74,6 +88,7 @@ export default function TaxRateTabs() {
     <div className="rate-income-nav" aria-label={currentGroup.label}><div className="rate-income-group"><div className="rate-income-options" role="tablist" aria-label={currentGroup.label}>{currentGroup.items.map((item) => <button key={item.id} className={activeType === item.id ? 'active' : ''} type="button" role="tab" aria-selected={activeType === item.id} onClick={() => setActiveType(item.id)}>{item.label}</button>)}</div></div></div>
     {activeGroup === 'comprehensive' && <div className="rate-identity-nav" role="tablist" aria-label="居民或非居民个人"><div className="rate-identity-options">{([{ id: 'resident', label: '居民个人' }, { id: 'non-resident', label: '非居民个人' }] as { id: Identity; label: string }[]).map((item) => <button key={item.id} className={identity === item.id ? 'active' : ''} type="button" role="tab" aria-selected={identity === item.id} onClick={() => setIdentity(item.id)}>{item.label}</button>)}</div></div>}
     <div className="rate-tab-panel panel" role="tabpanel"><div className="rate-table-heading"><div><h2>{active.title}</h2><p>{active.description}</p></div><span className="rate-year-label">{currentYear} 年</span></div>{active.rows ? <div className="rate-table-wrap"><table className="rate-table"><thead><tr><th>级数</th><th>应纳税所得额</th><th>税率 / 预扣率</th><th>速算扣除数</th></tr></thead><tbody>{active.rows.map((row, index) => <tr key={`${activeType}-${identity}-${row.range}`}><td>{index + 1}</td><td>{row.range}</td><td>{row.rate}</td><td>{formatQuick(row.quick, money)}</td></tr>)}</tbody></table></div> : <div className="simple-rate-panel"><div className="simple-rate-copy"><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className="rate-tab-note"><Info size={15} /><span>{active.note}</span></div>}<div className="source-line"><span>规则核对日期：{ruleCheckedDate}</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看国家税务总局规则 <ExternalLink size={13} /></a></div></div>
+    <section className="rate-next-card"><div><h2>看完税率表，直接测算</h2><p>税率只决定计算口径，实际结果还要结合收入、扣除、成本或费用。</p></div><Link href={calculatorLink.href}>{calculatorLink.label} <ExternalLink size={13} /></Link></section>
   </section>
 }
 
