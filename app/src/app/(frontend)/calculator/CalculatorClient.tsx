@@ -54,6 +54,15 @@ export default function CalculatorClient() {
   const wholeMoney = (value: number) => money(value, 0)
   const flowTotal = Math.max(1, salary)
   const ladderPosition = Math.max(0, taxBrackets.findIndex((item) => item.rate === result.bracket.rate)) / (taxBrackets.length - 1) * 100
+  const validationMessages = [
+    salary <= 0 ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
+    month < startMonth ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
+    socialBase < rule.socialMin || socialBase > rule.socialMax ? `社保缴费基数需要在 ${wholeMoney(rule.socialMin)} - ${wholeMoney(rule.socialMax)} 之间。` : '',
+    housingBase < rule.housingMin || housingBase > rule.housingMax ? `公积金缴费基数需要在 ${wholeMoney(rule.housingMin)} - ${wholeMoney(rule.housingMax)} 之间。` : '',
+    deductionAmount > salary ? '专项附加扣除已超过税前月薪，请确认是否填入了月度扣除额。' : '',
+  ].filter(Boolean)
+  const hasValidationMessages = validationMessages.length > 0
+  const flowWidth = (value: number) => `${Math.max(0, Math.min(100, value / flowTotal * 100))}%`
 
   const notify = (message: string) => {
     setToast(message)
@@ -91,7 +100,7 @@ export default function CalculatorClient() {
     setDeductionDialogOpen(false)
     notify('已回填专项附加扣除')
   }
-  const formatTaxMessage = result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
+  const formatTaxMessage = hasValidationMessages ? '当前输入存在需要确认的地方，先修正提示项后再查看计算结果。' : result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
 
   return <div className="app-shell">
     <SiteHeader active="calculator" />
@@ -113,12 +122,13 @@ export default function CalculatorClient() {
           </div>
           <div className="ratio-grid"><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className="field-meta">比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
           <div className="deduction-block" id="deduction"><div className="label-with-action deduction-label-row"><label htmlFor="deductionAmount">专项附加扣除</label><button className="text-button" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</button></div><MoneyInput id="deductionAmount" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /><p className="field-meta">{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : '可直接输入本月扣除总额，也可以按项目选择后自动回填。'}</p></div>
+          <ValidationMessages messages={validationMessages} />
           <div className="form-actions"><button className="primary-button" type="submit">开始计算</button><button className="secondary-button" type="button" onClick={reset}>清空</button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </form>
 
         <div className="results-column">
           <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
-            <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: `${result.takeHome / flowTotal * 100}%` }} /><span className="flow-segment flow-social" style={{ width: `${socialEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-housing" style={{ width: `${housingEmployee / flowTotal * 100}%` }} /><span className="flow-segment flow-tax" style={{ width: `${result.currentTax / flowTotal * 100}%` }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
+            <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
             <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
@@ -138,6 +148,14 @@ export default function CalculatorClient() {
       onSave={saveDeductionSelections}
     />
     <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  </div>
+}
+
+function ValidationMessages({ messages }: { messages: string[] }) {
+  if (messages.length === 0) return null
+  return <div className="validation-panel" role="alert" aria-live="polite">
+    <strong>请确认输入</strong>
+    <ul>{messages.map((message) => <li key={message}>{message}</li>)}</ul>
   </div>
 }
 

@@ -124,6 +124,9 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .deduction-label-row { padding: 16px 0 9px; }
 .deduction-block .money-input { width: 100%; }
 .deduction-block .field-meta { display: block; margin-top: 8px; }
+.validation-panel { display: grid; gap: 8px; margin-top: 16px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--orange) 34%, var(--line)); border-radius: var(--radius-small); background: var(--orange-soft); color: var(--ink); }
+.validation-panel strong { color: var(--orange); font-size: 12px; }
+.validation-panel ul { display: grid; gap: 5px; margin: 0; padding-left: 18px; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .accordion-button { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; width: 100%; padding: 16px 0 12px; border: 0; background: transparent; color: var(--ink); text-align: left; font-weight: 700; }
 .accordion-value { color: var(--muted); font-size: 11px; font-weight: 500; }
 .chevron { color: var(--muted); font-size: 18px; transition: transform 180ms ease; }

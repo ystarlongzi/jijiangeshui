@@ -44,9 +44,24 @@ export function calculateInsurance(rule: CityRule, socialBase: number, housingBa
 }
 
 export function calculateMonth(salary: number, month: number, startMonth: number, deduction: number, insuranceItems: InsuranceItem[]): MonthlyCalculation {
+  const monthsWorked = Math.max(0, month - startMonth + 1)
+  if (monthsWorked === 0) {
+    return {
+      employeeInsurance: 0,
+      employerInsurance: 0,
+      monthsWorked,
+      cumulativeSalary: 0,
+      cumulativeInsurance: 0,
+      taxable: 0,
+      bracket: taxBrackets[0],
+      cumulativeTax: 0,
+      currentTax: 0,
+      takeHome: 0,
+    }
+  }
+
   const employeeInsurance = insuranceItems.reduce((sum, item) => sum + item.employee, 0)
   const employerInsurance = insuranceItems.reduce((sum, item) => sum + item.employer, 0)
-  const monthsWorked = Math.max(0, month - startMonth + 1)
   const cumulativeSalary = salary * monthsWorked
   const cumulativeInsurance = employeeInsurance * monthsWorked
   const cumulativeDeductions = deduction * monthsWorked
