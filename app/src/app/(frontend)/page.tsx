@@ -18,12 +18,12 @@ import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 
 export const metadata = {
   title: `工资到手与个税计算器｜${siteName}`,
-  description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手、个人所得税与全年逐月明细。`,
+  description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手、个人所得税与全年预扣逐月明细。`,
   alternates: { canonical: '/' },
 }
 
 const tools = [
-  { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年变化。', label: '开始计算', featured: true },
+  { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年预扣变化。', label: '开始计算', featured: true },
   { href: '/bonus-tax', icon: Gift, title: '年终奖', description: '对比单独计税与并入综合所得，看看哪种方式更合适。', label: '查看规则' },
   { href: '/reverse-tax', icon: ReceiptText, title: '税后反推', description: '输入期望到手工资，反推需要的税前收入。', label: '查看说明' },
   { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '按子女教育、租金、房贷和赡养老人等项目，算出本月可扣金额。', label: '开始计算' },
@@ -33,19 +33,19 @@ const tools = [
 
 const highlights = [
   { icon: MapPin, title: '城市规则', text: '社保、公积金基数范围随城市变化，前提透明可核对。' },
-  { icon: CalendarRange, title: '全年明细', text: '逐月查看累计收入、扣除、税率和本月个税。' },
+  { icon: CalendarRange, title: '全年明细', text: '逐月查看累计收入、扣除、预扣率和本月个税。' },
   { icon: BarChart3, title: '结果解释', text: '不只告诉你数字，还说明本月为什么变化。' },
 ]
 
 export default function HomePage() {
-  const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年个税。` }
+  const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年预扣个税。` }
   return <div className="app-shell">
     <SiteHeader active="home" />
     <main className="home-page" id="top">
     <section className="home-hero">
       <div className="home-hero-copy">
         <h1>先看懂，<br />再算清。</h1>
-        <p className="home-lead">从工资到手、社保公积金，到全年个税变化，把每个数字讲明白。</p>
+        <p className="home-lead">从工资到手、社保公积金，到全年预扣变化，把每个数字讲明白。</p>
         <div className="home-actions"><Link className="home-primary-action" href="/calculator">开始算工资 <ArrowRight size={17} /></Link><Link className="home-secondary-action" href="/tax-rate">先看税率表</Link></div>
       </div>
       <div className="hero-snapshot" aria-label="工资去向概览">
