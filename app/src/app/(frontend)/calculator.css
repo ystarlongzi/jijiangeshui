@@ -425,6 +425,11 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .labor-process dt, .labor-process dd { margin: 0; font-size: 11px; line-height: 1.55; }
 .labor-process dt { color: var(--muted); }
 .labor-process dd { color: var(--ink); font-weight: 750; }
+.rental-mode-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 22px; }
+.rental-mode { display: grid; gap: 5px; padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; }
+.rental-mode strong { font-size: 12px; }
+.rental-mode span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.rental-mode.active { border-color: var(--accent); background: var(--accent-soft); }
 .reverse-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 64px 0 42px; }
 .reverse-hero { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: end; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
 .reverse-hero h1 { margin: 12px 0 16px; font-size: clamp(44px, 6vw, 72px); letter-spacing: -.05em; }
