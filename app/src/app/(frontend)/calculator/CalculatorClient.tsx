@@ -5,6 +5,7 @@ import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
+import { parseAmountParam } from '@/lib/url-params'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
@@ -30,11 +31,6 @@ export default function CalculatorClient() {
   const [deductionDialogOpen, setDeductionDialogOpen] = useState(false)
   const [calculationOpen, setCalculationOpen] = useState(false)
   const [toast, setToast] = useState('')
-
-  useEffect(() => {
-    const requestedCity = new URLSearchParams(window.location.search).get('city')
-    if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
-  }, [])
 
   const rule = cityRules[city]
   const deduction = deductionAmount
@@ -63,6 +59,19 @@ export default function CalculatorClient() {
     setToast(message)
     window.setTimeout(() => setToast(''), 2400)
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const requestedCity = params.get('city')
+    const requestedDeduction = parseAmountParam(params.get('deduction'))
+
+    if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
+    if (requestedDeduction > 0) {
+      setDeductionAmount(requestedDeduction)
+      setDeductionSelections({})
+      notify(`已带入专项附加扣除 ${money(requestedDeduction)} / 月`)
+    }
+  }, [])
 
   const reset = () => {
     setCity('beijing'); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)

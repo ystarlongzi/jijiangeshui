@@ -10,6 +10,7 @@ import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
 import { currentYear } from '@/lib/site'
 import { specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
+import { createDeductionHref } from '@/lib/url-params'
 
 type Mode = 'items' | 'manual'
 
@@ -90,7 +91,8 @@ export default function SpecialDeductionsClient() {
             {selectedItems.map((item) => item && <div key={item.id}><span>{item.group}</span><strong>{item.label}</strong><b>{money(item.amount)} / 月</b></div>)}
           </div>}
           <div className="special-actions">
-            <Link className="primary-button" href={`/calculator#deduction`}>去工资计算器使用 <ArrowRight size={16} /></Link>
+            <Link className="primary-button" href={createDeductionHref('/calculator', monthAmount, '#deduction')}>带入工资计算器 <ArrowRight size={16} /></Link>
+            <Link className="secondary-button" href={createDeductionHref('/reverse-tax', monthAmount)}>带入税后反推 <ArrowRight size={16} /></Link>
             <button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button>
           </div>
           <p className="special-note"><Info size={14} />扣除资格、分摊比例和申报口径以官方规定和个税 APP 为准。</p>

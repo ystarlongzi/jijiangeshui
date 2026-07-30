@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, LocateFixed, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
@@ -11,6 +11,7 @@ import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
 import { cityRules, housingRateOptions } from '@/lib/tax-rules'
 import { specialDeductionItems } from '@/lib/special-deductions'
+import { parseAmountParam } from '@/lib/url-params'
 
 export default function ReverseTaxClient() {
   const { money } = useMoneyFormat()
@@ -23,6 +24,15 @@ export default function ReverseTaxClient() {
   const [deductionAmount, setDeductionAmount] = useState(0)
   const [deductions, setDeductions] = useState<Record<string, string>>({})
   const [deductionDialogOpen, setDeductionDialogOpen] = useState(false)
+
+  useEffect(() => {
+    const requestedDeduction = parseAmountParam(new URLSearchParams(window.location.search).get('deduction'))
+    if (requestedDeduction > 0) {
+      setDeductionAmount(requestedDeduction)
+      setDeductions({})
+    }
+  }, [])
+
   const rule = cityRules[city]
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate])

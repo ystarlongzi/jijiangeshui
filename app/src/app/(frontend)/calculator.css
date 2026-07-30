@@ -490,7 +490,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .special-selected-list span { color: var(--muted); font-size: 11px; }
 .special-selected-list strong { color: var(--ink); font-size: 12px; line-height: 1.45; }
 .special-selected-list b { color: var(--accent); font-size: 11px; }
-.special-actions { display: grid; grid-template-columns: 1fr 92px; gap: 10px; }
+.special-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .special-actions a, .special-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; text-align: center; }
 .special-note { display: flex; align-items: start; gap: 7px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
 .special-note svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent); }
@@ -667,7 +667,6 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .special-input-heading .text-button { justify-self: start; margin-top: 0; }
   .special-result { position: static; }
   .special-content-grid { grid-template-columns: 1fr; gap: 10px; padding: 26px 0 38px; }
-  .special-actions { grid-template-columns: 1fr; }
   .deduction-option-grid { grid-template-columns: 1fr; }
   .bonus-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .reverse-page { width: min(100% - 28px, 600px); padding-top: 34px; }
