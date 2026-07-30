@@ -1,5 +1,5 @@
 type JsonLdProps = {
-  data: Record<string, unknown>
+  data: Record<string, unknown> | Record<string, unknown>[]
 }
 
 export function createCalculatorJsonLd({ name, description, url, siteName }: { name: string; description: unknown; url: string; siteName: string }) {
