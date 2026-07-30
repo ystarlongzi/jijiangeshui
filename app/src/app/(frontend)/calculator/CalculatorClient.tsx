@@ -13,6 +13,7 @@ import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionSelector from '../SpecialDeductionSelector'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { trackEvent } from '../analytics'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
@@ -171,6 +172,10 @@ export default function CalculatorClient() {
   const updateMonthlySalary = (targetMonth: number, value: number) => {
     setMonthlySalaries((current) => current.map((item, index) => index === targetMonth - 1 ? value : item))
   }
+  const calculate = () => {
+    trackEvent('calculate_complete', { calculator: 'salary', city, month, salaryMode, hasValidationMessages })
+    notify(hasValidationMessages ? '请先修正输入提示' : '已更新计算结果')
+  }
   const copyShareLink = async () => {
     const url = new URL(window.location.href)
     url.pathname = '/calculator'
@@ -191,6 +196,7 @@ export default function CalculatorClient() {
 
     try {
       await navigator.clipboard.writeText(url.toString())
+      trackEvent('share_link', { calculator: 'salary', city, month })
       notify('已复制当前计算链接')
     } catch {
       notify('当前浏览器无法自动复制，请复制地址栏链接')
@@ -205,7 +211,7 @@ export default function CalculatorClient() {
       <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
-        <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); notify(hasValidationMessages ? '请先修正输入提示' : '已更新计算结果') }}>
+        <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
           <div className="field-block city-field"><div className="label-with-action city-label-row"><label htmlFor="city">缴费城市</label><span className="city-actions"><button className="text-button" type="button" onClick={locate}>自动定位</button><button className="text-button" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</button></span></div><div className="select-wrap"><select id="city" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
           <div className="field-block"><div className="label-with-action salary-mode-row"><label htmlFor="salary">{salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`}</label><span><button className="text-button" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</button><button className="text-button" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</button></span></div><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{isSalaryInvalid && <p className="field-error">税前收入需要大于 0。</p>}{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</div>
@@ -226,7 +232,7 @@ export default function CalculatorClient() {
         <div className="results-column">
           <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
-            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
+            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
       </section>
@@ -304,6 +310,7 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
       inactive ? '' : `${Math.round(item.bracket.rate * 100)}%`,
       inactive ? '' : Math.round(item.currentTax),
     ].map(csvCell).join(','))
+    trackEvent('export_csv', { calculator: 'salary', rows: rows.length })
     downloadTextFile(`工资薪金逐月明细-${currentYear}.csv`, `\uFEFF${header.map(csvCell).join(',')}\n${lines.join('\n')}`)
   }
 
