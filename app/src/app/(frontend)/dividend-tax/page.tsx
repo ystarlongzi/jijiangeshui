@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import DividendTaxClient from './DividendTaxClient'
-import { currentYear, siteName } from '@/lib/site'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年利息股息红利个税计算器｜${siteName}`,
@@ -9,5 +10,8 @@ export const metadata: Metadata = {
 }
 
 export default function DividendTaxPage() {
-  return <DividendTaxClient />
+  return <>
+    <JsonLd data={createCalculatorJsonLd({ name: `${currentYear}年利息股息红利个税计算器`, description: metadata.description, url: `${siteUrl}/dividend-tax`, siteName })} />
+    <DividendTaxClient />
+  </>
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import AuthorTaxClient from './AuthorTaxClient'
-import { currentYear, siteName } from '@/lib/site'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年稿酬个税计算器｜${siteName}`,
@@ -9,5 +10,8 @@ export const metadata: Metadata = {
 }
 
 export default function AuthorTaxPage() {
-  return <AuthorTaxClient />
+  return <>
+    <JsonLd data={createCalculatorJsonLd({ name: `${currentYear}年稿酬个税计算器`, description: metadata.description, url: `${siteUrl}/author-tax`, siteName })} />
+    <AuthorTaxClient />
+  </>
 }

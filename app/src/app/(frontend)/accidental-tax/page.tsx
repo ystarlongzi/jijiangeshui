@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import AccidentalTaxClient from './AccidentalTaxClient'
-import { currentYear, siteName } from '@/lib/site'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年偶然所得个税计算器｜中奖个税｜${siteName}`,
@@ -9,5 +10,8 @@ export const metadata: Metadata = {
 }
 
 export default function AccidentalTaxPage() {
-  return <AccidentalTaxClient />
+  return <>
+    <JsonLd data={createCalculatorJsonLd({ name: `${currentYear}年偶然所得个税计算器`, description: metadata.description, url: `${siteUrl}/accidental-tax`, siteName })} />
+    <AccidentalTaxClient />
+  </>
 }
