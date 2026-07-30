@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { cityRules, deductionOptions, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
+import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear } from '@/lib/site'
+import { specialDeductionItems } from '@/lib/special-deductions'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import SpecialDeductionSelector from '../SpecialDeductionSelector'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
@@ -23,8 +25,9 @@ export default function CalculatorClient() {
   const [editingHousing, setEditingHousing] = useState(false)
   const [employeeHousingRate, setEmployeeHousingRate] = useState(12)
   const [employerHousingRate, setEmployerHousingRate] = useState(12)
-  const [deductions, setDeductions] = useState<string[]>([])
-  const [deductionsOpen, setDeductionsOpen] = useState(false)
+  const [deductionAmount, setDeductionAmount] = useState(0)
+  const [deductionSelections, setDeductionSelections] = useState<Record<string, string>>({})
+  const [deductionDialogOpen, setDeductionDialogOpen] = useState(false)
   const [calculationOpen, setCalculationOpen] = useState(false)
   const [toast, setToast] = useState('')
 
@@ -34,7 +37,8 @@ export default function CalculatorClient() {
   }, [])
 
   const rule = cityRules[city]
-  const deduction = deductions.reduce((sum, label) => sum + (deductionOptions.find((item) => item.label === label)?.amount || 0), 0)
+  const deduction = deductionAmount
+  const selectedDeductionItems = Object.values(deductionSelections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
 
   useEffect(() => {
     if (!editingSocial) setSocialBase(clamp(salary, rule.socialMin, rule.socialMax))
@@ -62,7 +66,7 @@ export default function CalculatorClient() {
 
   const reset = () => {
     setCity('beijing'); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
-    setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductions([]); setDeductionsOpen(false); setCalculationOpen(false)
+    setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductionSelections({}); setDeductionDialogOpen(false); setCalculationOpen(false)
     notify('已恢复城市默认设置')
   }
 
@@ -72,7 +76,12 @@ export default function CalculatorClient() {
     navigator.geolocation.getCurrentPosition(() => notify('已获取位置，正式版将匹配对应城市规则'), () => notify('暂时无法获取位置，请手动选择城市'))
   }
 
-  const toggleDeduction = (label: string) => setDeductions((current) => current.includes(label) ? current.filter((item) => item !== label) : [...current, label])
+  const saveDeductionSelections = (value: Record<string, string>, amount: number) => {
+    setDeductionSelections(value)
+    setDeductionAmount(amount)
+    setDeductionDialogOpen(false)
+    notify('已回填专项附加扣除')
+  }
   const formatTaxMessage = result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
 
   return <div className="app-shell">
@@ -94,7 +103,7 @@ export default function CalculatorClient() {
             <BaseField label="公积金缴费基数" value={housingBase} min={rule.housingMin} max={rule.housingMax} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
           </div>
           <div className="ratio-grid"><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className="field-meta">比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
-          <div className="deduction-block" id="deduction"><button className={`accordion-button${deductionsOpen ? ' open' : ''}`} type="button" aria-expanded={deductionsOpen} onClick={() => setDeductionsOpen(!deductionsOpen)}><span>专项附加扣除</span><span className="accordion-value">本月 {wholeMoney(deduction)}</span><span className="chevron">⌄</span></button>{deductionsOpen && <div className="deduction-content">{deductionOptions.map((item) => <label className="check-row" key={item.label}><input type="checkbox" checked={deductions.includes(item.label)} onChange={() => toggleDeduction(item.label)} /><span>{item.label}</span><strong>{wholeMoney(item.amount)} / 月</strong></label>)}</div>}</div>
+          <div className="deduction-block" id="deduction"><div className="label-with-action deduction-label-row"><label htmlFor="deductionAmount">专项附加扣除</label><button className="text-button" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</button></div><MoneyInput id="deductionAmount" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /><p className="field-meta">{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : '可直接输入本月扣除总额，也可以按项目选择后自动回填。'}</p></div>
           <div className="form-actions"><button className="primary-button" type="submit">开始计算</button><button className="secondary-button" type="button" onClick={reset}>清空</button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </form>
 
@@ -111,7 +120,15 @@ export default function CalculatorClient() {
       <Faq />
       <section className="source-section" aria-label="官方来源和相关工具"><div><h2>每个结果都有出处</h2><p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p></div><div className="source-links"><a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a><a href="#calculator">返回计算器 ↑</a></div></section>
       <SiteFooter />
-    </main><div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+    </main>
+    <SpecialDeductionSelector
+      open={deductionDialogOpen}
+      value={deductionSelections}
+      description="选择后会按月扣除额汇总，并回填到工资计算器。"
+      onClose={() => setDeductionDialogOpen(false)}
+      onSave={saveDeductionSelections}
+    />
+    <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
   </div>
 }
 

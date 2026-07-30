@@ -1,15 +1,16 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, ChevronDown, LocateFixed, RotateCcw, X } from 'lucide-react'
+import { ArrowRight, LocateFixed, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import SpecialDeductionSelector from '../SpecialDeductionSelector'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
 import { cityRules, housingRateOptions } from '@/lib/tax-rules'
-import { specialDeductionGroups, specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
+import { specialDeductionItems } from '@/lib/special-deductions'
 
 export default function ReverseTaxClient() {
   const { money } = useMoneyFormat()
@@ -22,25 +23,17 @@ export default function ReverseTaxClient() {
   const [deductionAmount, setDeductionAmount] = useState(0)
   const [deductions, setDeductions] = useState<Record<string, string>>({})
   const [deductionDialogOpen, setDeductionDialogOpen] = useState(false)
-  const [draftDeductions, setDraftDeductions] = useState<Record<string, string>>({})
-  const [expandedDeductionGroups, setExpandedDeductionGroups] = useState<string[]>([])
   const rule = cityRules[city]
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
-  const selectedDeductionAmount = sumSpecialDeductions(deductions)
-  const draftDeductionAmount = sumSpecialDeductions(draftDeductions)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate])
   const employeeInsurance = result.insurance.reduce((sum, item) => sum + item.employee, 0)
   const rate = Math.round(result.result.bracket.rate * 100)
-  const selectDraftDeduction = (group: string, option: string) => setDraftDeductions((current) => current[group] === option ? omitDeductionGroup(current, group) : { ...current, [group]: option })
-  const toggleDeductionGroup = (group: string) => setExpandedDeductionGroups((current) => current.includes(group) ? current.filter((item) => item !== group) : [...current, group])
-  const omitDeductionGroup = (current: Record<string, string>, group: string) => {
-    const next = { ...current }
-    delete next[group]
-    return next
+  const saveDeductions = (value: Record<string, string>, amount: number) => {
+    setDeductions(value)
+    setDeductionAmount(amount)
+    setDeductionDialogOpen(false)
   }
-  const openDeductionDialog = () => { setDraftDeductions(deductions); setDeductionDialogOpen(true) }
-  const saveDeductions = () => { setDeductions(draftDeductions); setDeductionAmount(draftDeductionAmount); setDeductionDialogOpen(false) }
-  const reset = () => { setTargetTakeHome(15000); setCity('beijing'); setMonth(8); setStartMonth(1); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductions({}); setDraftDeductions({}); setDeductionDialogOpen(false) }
+  const reset = () => { setTargetTakeHome(15000); setCity('beijing'); setMonth(8); setStartMonth(1); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductions({}); setDeductionDialogOpen(false) }
 
   return <>
   <div className="app-shell"><SiteHeader active="reverse-tax" /><main className="reverse-page">
@@ -55,10 +48,10 @@ export default function ReverseTaxClient() {
         <div className="reverse-deductions">
           <div className="label-with-action">
             <label htmlFor="reverseDeduction">专项附加扣除</label>
-            <button className="text-button" type="button" onClick={openDeductionDialog}>选择项目</button>
+            <button className="text-button" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</button>
           </div>
           <MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} />
-          <p>{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(selectedDeductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}</p>
+          <p>{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}</p>
         </div>
         <div className="bonus-form-actions"><button className="primary-button" type="submit">更新结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
@@ -67,44 +60,13 @@ export default function ReverseTaxClient() {
     <section className="bonus-explain"><div><h2>结果怎么使用？</h2><p>反推结果适合用于谈薪、核对 offer 和预算估算。实际工资条可能受到奖金、补发工资、单位缴费口径等因素影响。</p></div><a href="/calculator">进入工资薪金计算器 <ArrowRight size={15} /></a></section>
     <SiteFooter />
   </main></div>
-  {deductionDialogOpen && <div className="deduction-dialog-backdrop" role="presentation" onClick={() => setDeductionDialogOpen(false)}>
-    <section className="deduction-dialog panel" role="dialog" aria-modal="true" aria-labelledby="deductionDialogTitle" onClick={(event) => event.stopPropagation()}>
-      <div className="deduction-dialog-heading">
-        <div><h2 id="deductionDialogTitle">选择专项附加扣除</h2><p>选择后会按月扣除额汇总，并回填到输入框内。</p></div>
-        <button className="icon-button" type="button" aria-label="关闭" onClick={() => setDeductionDialogOpen(false)}><X size={17} /></button>
-      </div>
-      <div className="deduction-option-list">
-        {specialDeductionGroups.map((group) => {
-          const selectedOption = specialDeductionItems.find((item) => item.id === draftDeductions[group.key])
-          const expanded = expandedDeductionGroups.includes(group.key)
-          return <div className={`deduction-group${group.options.length === 0 ? ' disabled' : ''}`} key={group.key}>
-          <button className="deduction-group-heading" type="button" onClick={() => toggleDeductionGroup(group.key)} aria-expanded={expanded}>
-            <span className={`deduction-group-status${selectedOption ? ' selected' : ''}`} aria-hidden="true" />
-            <span><strong>{group.title}{selectedOption && <b>{money(selectedOption.amount)} / 月</b>}</strong><small>{group.note}</small></span>
-            <ChevronDown size={16} />
-          </button>
-          {expanded && (group.options.length > 0 ? <div className="deduction-option-grid">
-            {group.options.map((item) => <label className={`deduction-option${draftDeductions[group.key] === item.id ? ' selected' : ''}`} key={item.id}>
-              <input type="checkbox" checked={draftDeductions[group.key] === item.id} onChange={() => selectDraftDeduction(group.key, item.id)} />
-              <span>{item.label}</span>
-              <b>{money(item.amount)} / 月</b>
-            </label>)}
-          </div> : <p>大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资反推。</p>)}
-        </div>
-        })}
-      </div>
-      <div className="deduction-dialog-footer">
-        <div className="deduction-dialog-summary">
-          <span>本月合计</span>
-          <strong>{money(draftDeductionAmount)}</strong>
-        </div>
-        <div className="deduction-dialog-actions">
-          <button className="secondary-button" type="button" onClick={() => setDraftDeductions({})}>清空选择</button>
-          <button className="primary-button" type="button" onClick={saveDeductions}>保存并回填 <ArrowRight size={16} /></button>
-        </div>
-      </div>
-    </section>
-  </div>}
+  <SpecialDeductionSelector
+    open={deductionDialogOpen}
+    value={deductions}
+    emptyText="大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资反推。"
+    onClose={() => setDeductionDialogOpen(false)}
+    onSave={saveDeductions}
+  />
   </>
 }
 
