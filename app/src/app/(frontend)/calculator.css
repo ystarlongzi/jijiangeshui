@@ -565,6 +565,20 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .city-card dl div { display: flex; justify-content: space-between; gap: 18px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 12px; }
 .city-card dt { color: var(--muted); }
 .city-card dd { margin: 0; color: var(--ink); font-weight: 750; text-align: right; }
+.city-example-card { display: flex; align-items: center; justify-content: space-between; gap: 28px; margin-bottom: 34px; padding: 24px; }
+.city-example-card span { color: var(--accent); font-size: 12px; font-weight: 800; }
+.city-example-card h2 { max-width: 720px; margin: 8px 0 10px; font-size: 24px; }
+.city-example-card p { max-width: 760px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+.city-example-card a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
+.city-faq-section { padding: 4px 0 34px; }
+.city-faq-section h2 { margin-bottom: 14px; }
+.city-faq-list { border-top: 1px solid var(--line); }
+.city-faq-list details { border-bottom: 1px solid var(--line); }
+.city-faq-list summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; cursor: pointer; list-style: none; font-size: 14px; font-weight: 750; }
+.city-faq-list summary::-webkit-details-marker { display: none; }
+.city-faq-list summary::after { content: "+"; color: var(--accent); font-size: 20px; font-weight: 400; }
+.city-faq-list details[open] summary::after { content: "−"; }
+.city-faq-list p { max-width: 760px; margin: -2px 32px 16px 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
 .city-next-step { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 24px; border-radius: 12px; background: var(--accent-soft); }
 .city-next-step > div { display: flex; align-items: start; gap: 12px; }
 .city-next-step svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent); }
@@ -577,12 +591,19 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .city-index-card { display: grid; gap: 18px; min-height: 188px; padding: 22px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
 .city-index-card:hover { border-color: var(--accent); background: var(--accent-soft); }
 .city-index-card > span { color: var(--ink); font-size: 22px; font-weight: 800; }
+.city-index-card > small { margin-top: -12px; color: var(--muted); font-size: 11px; }
 .city-index-card dl { display: grid; gap: 10px; margin: 0; }
 .city-index-card dl div { display: flex; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 .city-index-card dt, .city-index-card dd { margin: 0; font-size: 11px; }
 .city-index-card dt { color: var(--muted); }
 .city-index-card dd { color: var(--ink); font-weight: 750; text-align: right; }
 .city-index-card strong { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; }
+.city-province-section { padding: 12px 0 34px; }
+.city-province-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.city-province-card { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-muted); }
+.city-province-card strong { font-size: 15px; }
+.city-province-card div { display: flex; flex-wrap: wrap; gap: 8px; }
+.city-province-card a { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--accent); font-size: 12px; font-weight: 750; }
 .rate-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .rate-page-header { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding-bottom: 40px; border-bottom: 1px solid var(--line); }
 .rate-title-line { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 14px; font-weight: 750; }
@@ -769,6 +790,9 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .city-content-grid { grid-template-columns: 1fr; padding: 28px 0; }
   .city-card p { min-height: 0; }
   .city-index-grid { grid-template-columns: 1fr; padding: 24px 0; }
+  .city-province-list { grid-template-columns: 1fr; }
+  .city-example-card { align-items: start; flex-direction: column; gap: 18px; }
+  .city-example-card h2 { font-size: 20px; }
   .city-next-step { align-items: start; flex-direction: column; }
   .info-hero { padding-bottom: 36px; }
   .info-hero h1 { font-size: 44px; }
