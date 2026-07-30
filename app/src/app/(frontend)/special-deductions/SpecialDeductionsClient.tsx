@@ -8,6 +8,7 @@ import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { currentYear } from '@/lib/site'
 import { specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
 import { createDeductionHref } from '@/lib/url-params'
@@ -114,10 +115,13 @@ export default function SpecialDeductionsClient() {
         </article>
       </section>
 
-      <section className="source-section" aria-label="官方来源">
-        <div><h2>规则来源</h2><p>专项附加扣除标准参考国务院、国家税务总局公开规则，政策变化后需要更新规则版本。</p></div>
-        <div className="source-links"><a href="https://fgk.chinatax.gov.cn/zcfgk/c102440/c5209858/content.html" target="_blank" rel="noreferrer">专项附加扣除暂行办法 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c102440/c5213594/content.html" target="_blank" rel="noreferrer">提高扣除标准通知 ↗</a></div>
-      </section>
+      <RuleSourcePanel
+        description="专项附加扣除标准参考国务院、国家税务总局公开规则，政策变化后需要更新规则版本和核对日期。"
+        links={[
+          { label: '专项附加扣除暂行办法', url: 'https://fgk.chinatax.gov.cn/zcfgk/c102440/c5209858/content.html' },
+          { label: '提高扣除标准通知', url: 'https://fgk.chinatax.gov.cn/zcfgk/c102440/c5213594/content.html' },
+        ]}
+      />
 
       <SiteFooter />
     </main>

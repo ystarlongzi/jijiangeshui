@@ -12,6 +12,7 @@ import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionSelector from '../SpecialDeductionSelector'
+import RuleSourcePanel from '../RuleSourcePanel'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
@@ -187,7 +188,14 @@ export default function CalculatorClient() {
       <AnnualTable salary={salary} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} money={money} />
       <RateTable money={money} />
       <Faq />
-      <section className="source-section" aria-label="官方来源和相关工具"><div><h2>每个结果都有出处</h2><p>计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。</p></div><div className="source-links"><a href="https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html" target="_blank" rel="noreferrer">累计预扣法说明 ↗</a><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html" target="_blank" rel="noreferrer">专项附加扣除标准 ↗</a><a href="#calculator">返回计算器 ↑</a></div></section>
+      <RuleSourcePanel
+        title="每个结果都有出处"
+        description="计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。"
+        links={[
+          { label: '累计预扣法说明', url: 'https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html' },
+          { label: '专项附加扣除标准', url: 'https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html' },
+        ]}
+      />
       <SiteFooter />
     </main>
     <SpecialDeductionSelector
