@@ -14,6 +14,7 @@ import {
   Percent,
   ReceiptText,
   Sparkles,
+  TrendingUp,
 } from 'lucide-react'
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
@@ -32,6 +33,7 @@ const tools = [
   { href: '/author-tax', icon: BookOpen, title: '稿酬', description: '按费用扣除和减按 70% 规则，估算稿酬到手。', label: '开始计算' },
   { href: '/license-tax', icon: BadgePercent, title: '特许权使用费', description: '按费用扣除和 20% 比例预扣规则，估算税后收入。', label: '开始计算' },
   { href: '/rental-tax', icon: Home, title: '财产租赁', description: '输入租金、税费和修缮费，估算出租收入个税。', label: '开始计算' },
+  { href: '/property-transfer-tax', icon: TrendingUp, title: '财产转让', description: '按收入、原值和合理费用，估算转让所得个税。', label: '开始计算' },
   { href: '/reverse-tax', icon: ReceiptText, title: '税后反推', description: '输入期望到手工资，反推需要的税前收入。', label: '查看说明' },
   { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '按子女教育、租金、房贷和赡养老人等项目，算出本月可扣金额。', label: '开始计算' },
   { href: '/tax-rate', icon: Percent, title: '税率表', description: '快速查看工资薪金累计预扣预缴税率和速算扣除数。', label: '查看税率' },
