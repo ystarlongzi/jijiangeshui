@@ -83,6 +83,32 @@ export default function ReverseTaxClient() {
       notify('当前浏览器无法自动复制，请复制地址栏链接')
     }
   }
+  const copyResult = async () => {
+    const lines = [
+      `${currentYear} 年税后反推测算`,
+      `缴费城市：${rule.label}`,
+      `计算月份：${month} 月`,
+      `入职月份：${startMonth} 月`,
+      `期望到手工资：${money(targetTakeHome)}`,
+      `专项附加扣除：${money(deductionAmount)} / 月`,
+      '',
+      `预计税前月薪：${money(result.salary)}`,
+      `预计到手：${money(result.result.takeHome, 2)}`,
+      `本月个税：${money(result.result.currentTax, 2)}`,
+      `个人五险一金：${money(employeeInsurance, 2)}`,
+      `适用预扣率：${rate}%`,
+      `到手偏差：${money(result.gap, 2)}`,
+      '',
+      '结果仅供测算，最终以工资条、扣缴单位或税务机关口径为准。',
+    ].join('\n')
+
+    try {
+      await navigator.clipboard.writeText(lines)
+      notify('已复制税后反推结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动选择结果')
+    }
+  }
   const reset = () => { setTargetTakeHome(15000); setCity('beijing'); setMonth(8); setStartMonth(1); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductions({}); setDeductionDialogOpen(false) }
 
   return <>
@@ -105,8 +131,9 @@ export default function ReverseTaxClient() {
         </div>
         <div className="bonus-form-actions"><button className="primary-button" type="submit">更新结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
-      <section className="reverse-result panel" aria-live="polite"><div className="bonus-result-heading"><div><span className="bonus-section-title">反推结果</span><p>{rule.label} · {currentYear} 年 {month} 月</p></div><span className="bonus-badge">累计预扣</span></div><div className="reverse-required"><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><div className="reverse-metrics"><div><span>预计到手</span><strong>{money(result.result.takeHome, 2)}</strong></div><div><span>本月个税</span><strong>{money(result.result.currentTax, 2)}</strong></div><div><span>个人五险一金</span><strong>{money(employeeInsurance, 2)}</strong></div><div><span>适用预扣率</span><strong>{rate}%</strong></div></div><div className="reverse-explain"><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><div className="result-actions"><a className="link-button" href="/calculator">进入工资计算器 <span>→</span></a><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div></section>
+      <section className="reverse-result panel" aria-live="polite"><div className="bonus-result-heading"><div><span className="bonus-section-title">反推结果</span><p>{rule.label} · {currentYear} 年 {month} 月</p></div><span className="bonus-badge">累计预扣</span></div><div className="reverse-required"><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><div className="reverse-metrics"><div><span>预计到手</span><strong>{money(result.result.takeHome, 2)}</strong></div><div><span>本月个税</span><strong>{money(result.result.currentTax, 2)}</strong></div><div><span>个人五险一金</span><strong>{money(employeeInsurance, 2)}</strong></div><div><span>适用预扣率</span><strong>{rate}%</strong></div></div><div className="reverse-explain"><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><div className="result-actions"><a className="link-button" href="/calculator">进入工资计算器 <span>→</span></a><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div></section>
     </section>
+    <ReverseProcess result={result} targetTakeHome={targetTakeHome} employeeInsurance={employeeInsurance} />
     <section className="bonus-explain"><div><h2>结果怎么使用？</h2><p>反推结果适合用于谈薪、核对 offer 和预算估算。实际工资条可能受到奖金、补发工资、单位缴费口径等因素影响。</p></div><a href="/calculator">进入工资薪金计算器 <ArrowRight size={15} /></a></section>
     <SiteFooter />
   </main></div>
@@ -119,6 +146,13 @@ export default function ReverseTaxClient() {
   />
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
   </>
+}
+
+function ReverseProcess({ result, targetTakeHome, employeeInsurance }: { result: ReturnType<typeof calculateReverseTax>; targetTakeHome: number; employeeInsurance: number }) {
+  const { money } = useMoneyFormat()
+  const rate = Math.round(result.result.bracket.rate * 100)
+
+  return <section className="bonus-process-panel reverse-process-panel"><div className="bonus-process-heading"><h2>计算过程</h2><p>先用二分法找到接近期望到手的税前工资，再套用工资薪金累计预扣法核算本月结果。</p></div><div className="bonus-process-section"><h3>反推条件</h3><dl><div><dt>期望到手</dt><dd>{money(targetTakeHome)}</dd></div><div><dt>税前月薪</dt><dd>约 {money(result.salary)}</dd></div><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div></dl></div><div className="bonus-process-section"><h3>本月核算</h3><dl><div><dt>累计应纳税所得额</dt><dd>{money(result.result.taxable)}</dd></div><div><dt>适用预扣率</dt><dd>{rate}%</dd></div><div><dt>本月个税</dt><dd>{money(result.result.currentTax, 2)}</dd></div><div><dt>到手工资</dt><dd>{money(result.salary)} - {money(employeeInsurance, 2)} - {money(result.result.currentTax, 2)} = {money(result.result.takeHome, 2)}</dd></div></dl></div></section>
 }
 
 function SelectField({ id, label, value, onChange, options }: { id: string; label: string; value: number; onChange: (value: number) => void; options: { value: number; label: string }[] }) {
