@@ -26,7 +26,7 @@ const tools = [
   { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年变化。', label: '开始计算', featured: true },
   { href: '/bonus-tax', icon: Gift, title: '年终奖', description: '对比单独计税与并入综合所得，看看哪种方式更合适。', label: '查看规则' },
   { href: '/reverse-tax', icon: ReceiptText, title: '税后反推', description: '输入期望到手工资，反推需要的税前收入。', label: '查看说明' },
-  { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '查看子女教育、租金、房贷和赡养老人等扣除标准。', label: '查看说明' },
+  { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '按子女教育、租金、房贷和赡养老人等项目，算出本月可扣金额。', label: '开始计算' },
   { href: '/tax-rate', icon: Percent, title: '税率表', description: '快速查看工资薪金累计预扣预缴税率和速算扣除数。', label: '查看税率' },
   { href: '/faq', icon: CircleHelp, title: '常见问题', description: '理解累计预扣、社保基数和全年汇算之间的关系。', label: '查看问答' },
 ]
@@ -65,7 +65,7 @@ export default function HomePage() {
 
     <section className="home-highlight-section" aria-label="产品特点"><div className="highlight-grid">{highlights.map(({ icon: Icon, title, text }) => <div className="highlight-item" key={title}><Icon className="highlight-icon" size={20} strokeWidth={1.8} /><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></section>
 
-    <section className="home-reading-section"><div className="home-section-heading"><h2>常用规则与内容</h2><Link href="/faq">查看全部 <ArrowRight size={15} /></Link></div><div className="reading-links"><Link href="/tax-rate"><Percent size={18} /><span>个人所得税预扣率表</span><ArrowRight size={15} /></Link><Link href="/special-deductions"><BookOpen size={18} /><span>专项附加扣除说明</span><ArrowRight size={15} /></Link><Link href="/faq"><CircleHelp size={18} /><span>工资个税常见问题</span><ArrowRight size={15} /></Link></div></section>
+    <section className="home-reading-section"><div className="home-section-heading"><h2>常用规则与内容</h2><Link href="/faq">查看全部 <ArrowRight size={15} /></Link></div><div className="reading-links"><Link href="/tax-rate"><Percent size={18} /><span>个人所得税预扣率表</span><ArrowRight size={15} /></Link><Link href="/special-deductions"><BookOpen size={18} /><span>专项附加扣除计算器</span><ArrowRight size={15} /></Link><Link href="/faq"><CircleHelp size={18} /><span>工资个税常见问题</span><ArrowRight size={15} /></Link></div></section>
 
     <section className="home-city-section"><div className="home-section-heading"><h2>热门城市</h2><p>查看城市社保、公积金基数范围和缴费比例。</p></div><div className="city-links"><Link href="/city/beijing"><MapPin size={16} />北京市 <ArrowRight size={14} /></Link><Link href="/city/shanghai"><MapPin size={16} />上海市 <ArrowRight size={14} /></Link><Link href="/city/shenzhen"><MapPin size={16} />深圳市 <ArrowRight size={14} /></Link><Link href="/city/guangzhou"><MapPin size={16} />广州市 <ArrowRight size={14} /></Link><Link href="/city/hangzhou"><MapPin size={16} />杭州市 <ArrowRight size={14} /></Link></div></section>
 
