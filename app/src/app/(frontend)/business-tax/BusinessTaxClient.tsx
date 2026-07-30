@@ -1,0 +1,109 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { ArrowRight, Briefcase, Copy, ReceiptText, RotateCcw } from 'lucide-react'
+import SiteFooter from '../SiteFooter'
+import SiteHeader from '../SiteHeader'
+import MoneyInput from '../MoneyInput'
+import { useMoneyFormat } from '../MoneyFormatProvider'
+import { calculateBusinessTax } from '@/lib/business-tax'
+import { currentYear, ruleCheckedDate } from '@/lib/site'
+import { parseAmountParam } from '@/lib/url-params'
+
+export default function BusinessTaxClient() {
+  const { money } = useMoneyFormat()
+  const [revenue, setRevenue] = useState(200000)
+  const [costsAndExpenses, setCostsAndExpenses] = useState(80000)
+  const [losses, setLosses] = useState(10000)
+  const [otherDeductions, setOtherDeductions] = useState(0)
+  const [toast, setToast] = useState('')
+  const result = useMemo(() => calculateBusinessTax({ revenue, costsAndExpenses, losses, otherDeductions }), [revenue, costsAndExpenses, losses, otherDeductions])
+  const rate = Math.round(result.bracket.rate * 100)
+
+  const notify = (message: string) => {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 2400)
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const requestedRevenue = parseAmountParam(params.get('revenue'))
+    const requestedCosts = parseAmountParam(params.get('costs'))
+    const requestedLosses = parseAmountParam(params.get('losses'))
+    const requestedOther = parseAmountParam(params.get('other'))
+    if (requestedRevenue > 0) setRevenue(requestedRevenue)
+    if (requestedCosts >= 0) setCostsAndExpenses(requestedCosts)
+    if (requestedLosses >= 0) setLosses(requestedLosses)
+    if (requestedOther >= 0) setOtherDeductions(requestedOther)
+  }, [])
+
+  const reset = () => {
+    setRevenue(200000)
+    setCostsAndExpenses(80000)
+    setLosses(10000)
+    setOtherDeductions(0)
+  }
+
+  const copyShareLink = async () => {
+    const url = new URL(window.location.href)
+    url.pathname = '/business-tax'
+    url.search = new URLSearchParams({
+      revenue: String(Math.round(revenue)),
+      costs: String(Math.round(costsAndExpenses)),
+      losses: String(Math.round(losses)),
+      other: String(Math.round(otherDeductions)),
+    }).toString()
+
+    try {
+      await navigator.clipboard.writeText(url.toString())
+      notify('已复制当前经营所得计算链接')
+    } catch {
+      notify('当前浏览器无法自动复制，请复制地址栏链接')
+    }
+  }
+
+  return <>
+  <div className="app-shell"><SiteHeader /><main className="labor-page">
+    <header className="labor-hero">
+      <div>
+        <div className="bonus-eyebrow"><Briefcase size={18} />{currentYear} 年经营所得个税计算器</div>
+        <h1>经营收入，<br />个税多少？</h1>
+        <p>输入年度收入总额、成本费用和损失，按经营所得五级超额累进税率估算年度个人所得税。</p>
+      </div>
+      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+    </header>
+
+    <section className="labor-workspace" aria-label="经营所得个税计算器">
+      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+        <h2>计算经营所得</h2>
+        <label className="bonus-field" htmlFor="businessRevenue"><span>年度收入总额</span><MoneyInput id="businessRevenue" value={revenue} onChange={setRevenue} /></label>
+        <label className="bonus-field" htmlFor="businessCosts"><span>成本、费用</span><MoneyInput id="businessCosts" value={costsAndExpenses} onChange={setCostsAndExpenses} /></label>
+        <label className="bonus-field" htmlFor="businessLosses"><span>经营损失</span><MoneyInput id="businessLosses" value={losses} onChange={setLosses} /></label>
+        <label className="bonus-field" htmlFor="businessOther"><span>其他可扣除金额</span><MoneyInput id="businessOther" value={otherDeductions} onChange={setOtherDeductions} /></label>
+        <p className="bonus-form-note">适合个体工商户、个人独资企业投资人、合伙企业个人合伙人等做年度粗算。查账、核定征收和投资者扣除口径可能不同。</p>
+        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+      </form>
+
+      <section className="labor-result panel" aria-live="polite">
+        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 经营收入 {money(revenue)}</p></div><span className="bonus-badge">{rate}% 档</span></div>
+        <div className="labor-takehome"><span>预计税后经营收入</span><strong>{money(result.afterTax)}</strong><p>应缴个税 {money(result.tax)}，适用税率 {rate}%。</p></div>
+        <div className="reverse-metrics"><div><span>总扣除</span><strong>{money(result.totalDeduction)}</strong></div><div><span>应纳税所得额</span><strong>{money(result.taxable)}</strong></div><div><span>税率</span><strong>{rate}%</strong></div><div><span>速算扣除数</span><strong>{money(result.bracket.quick)}</strong></div></div>
+        <div className="labor-process">
+          <h3>计算过程</h3>
+          <dl>
+            <div><dt>应纳税所得额</dt><dd>{money(revenue)} - {money(result.totalDeduction)} = {money(result.taxable)}</dd></div>
+            <div><dt>应缴个税</dt><dd>{money(result.taxable)} × {rate}% - {money(result.bracket.quick)} = {money(result.tax)}</dd></div>
+            <div><dt>税后经营收入</dt><dd>{money(revenue)} - {money(result.tax)} = {money(result.afterTax)}</dd></div>
+          </dl>
+        </div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+      </section>
+    </section>
+
+    <section className="bonus-explain"><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>
+    <SiteFooter />
+  </main></div>
+  <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  </>
+}

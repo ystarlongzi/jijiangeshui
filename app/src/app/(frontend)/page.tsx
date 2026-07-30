@@ -4,6 +4,7 @@ import {
   BadgePercent,
   BarChart3,
   BookOpen,
+  Briefcase,
   BriefcaseBusiness,
   Calculator,
   CalendarRange,
@@ -29,6 +30,7 @@ export const metadata = {
 const tools = [
   { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年预扣变化。', label: '开始计算', featured: true },
   { href: '/bonus-tax', icon: Gift, title: '年终奖', description: '对比单独计税与并入综合所得，看看哪种方式更合适。', label: '查看规则' },
+  { href: '/business-tax', icon: Briefcase, title: '经营所得', description: '按年度收入、成本费用和损失，估算经营个税。', label: '开始计算' },
   { href: '/labor-tax', icon: BriefcaseBusiness, title: '劳务报酬', description: '按次或按月估算劳务报酬预扣税和税后到手。', label: '开始计算' },
   { href: '/author-tax', icon: BookOpen, title: '稿酬', description: '按费用扣除和减按 70% 规则，估算稿酬到手。', label: '开始计算' },
   { href: '/license-tax', icon: BadgePercent, title: '特许权使用费', description: '按费用扣除和 20% 比例预扣规则，估算税后收入。', label: '开始计算' },

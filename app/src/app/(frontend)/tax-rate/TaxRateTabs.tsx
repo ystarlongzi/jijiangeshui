@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ExternalLink, Info } from 'lucide-react'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
+import { businessTaxBrackets } from '@/lib/business-tax'
 import { taxBrackets } from '@/lib/tax-rules'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 
@@ -32,6 +33,14 @@ const nonResidentRows = [
   { range: '超过 80,000 元', rate: '45%', quick: '15,160' },
 ]
 
+const businessRows = [
+  '不超过 30,000 元',
+  '超过 30,000 元至 90,000 元',
+  '超过 90,000 元至 300,000 元',
+  '超过 300,000 元至 500,000 元',
+  '超过 500,000 元',
+].map((range, index) => ({ range, rate: `${Math.round(businessTaxBrackets[index].rate * 100)}%`, quick: businessTaxBrackets[index].quick }))
+
 const incomeGroups: { label: string; items: { id: IncomeType; label: string }[] }[] = [
   { label: '综合所得', items: [{ id: 'salary', label: '工资薪金' }, { id: 'labor', label: '劳务报酬' }, { id: 'royalty', label: '稿酬' }, { id: 'license', label: '特许权使用费' }] },
   { label: '分类所得', items: [{ id: 'business', label: '经营所得' }, { id: 'rent', label: '财产租赁' }, { id: 'transfer', label: '财产转让' }, { id: 'dividend', label: '利息、股息、红利' }, { id: 'accidental', label: '偶然所得' }] },
@@ -45,7 +54,7 @@ function getRateTab(identity: Identity, type: IncomeType): RateTab {
   if (type === 'labor') return { title: `${identityLabel}劳务报酬${nonResident ? '税率表' : '预扣率表二'}`, description: `${identityLabel}劳务报酬所得适用`, rows: nonResident ? nonResidentRows : laborRows, note: nonResident ? '非居民个人劳务报酬通常按次或按月代扣代缴，适用非居民个人税率表。' : '居民个人劳务报酬通常按次或按月预扣，年度汇算时并入综合所得。' }
   if (type === 'royalty') return { title: `${identityLabel}稿酬所得预扣规则`, description: `${identityLabel}稿酬所得适用`, rate: '20% 比例预扣率', note: '稿酬所得收入额按规定减按 70% 计算，通常按次或按月预扣。' }
   if (type === 'license') return { title: `${identityLabel}特许权使用费预扣规则`, description: `${identityLabel}特许权使用费所得适用`, rate: '20% 比例预扣率', note: '特许权使用费通常按次或按月预扣，收入额按规定扣除费用后计算应纳税所得额。' }
-  if (type === 'business') return { title: '经营所得税率表', description: '个体工商户、个人独资企业投资人和合伙企业个人合伙人等适用', rate: '5% - 35% 超额累进税率', note: '经营所得按纳税年度收入总额减除成本、费用和损失后的余额计算。' }
+  if (type === 'business') return { title: '经营所得税率表', description: '个体工商户、个人独资企业投资人和合伙企业个人合伙人等适用', rows: businessRows, note: '经营所得按纳税年度收入总额减除成本、费用和损失后的余额计算。' }
   if (type === 'rent') return { title: '财产租赁所得税率', description: '出租不动产、机器设备、车船及其他财产取得的所得适用', rate: '20% 比例税率', note: '财产租赁所得通常按次或按月计算，按规定扣除相关费用后计算应纳税额。' }
   if (type === 'transfer') return { title: '财产转让所得税率', description: '转让有价证券、股权、不动产及其他财产取得的所得适用', rate: '20% 比例税率', note: '财产转让所得按收入额减除财产原值和合理费用后的余额计算。' }
   if (type === 'dividend') return { title: '利息、股息、红利所得税率', description: '取得利息、股息、红利所得适用', rate: '20% 比例税率', note: '利息、股息、红利所得通常按次计算个人所得税，有扣缴义务人的由其按规定代扣代缴。' }
