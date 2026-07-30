@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import CalculatorClient from './CalculatorClient'
-import { currentYear, siteName } from '@/lib/site'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import JsonLd from '../JsonLd'
 
 export const metadata: Metadata = {
   title: `工资薪金个税计算器｜${currentYear}年五险一金与全年预扣明细｜${siteName}`,
@@ -9,5 +10,18 @@ export const metadata: Metadata = {
 }
 
 export default function CalculatorPage() {
-  return <CalculatorClient />
+  return <>
+    <JsonLd data={{
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: `工资薪金个税计算器 ${currentYear}`,
+      url: `${siteUrl}/calculator`,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Web',
+      description: metadata.description,
+      offers: { '@type': 'Offer', price: 0, priceCurrency: 'CNY' },
+      publisher: { '@type': 'Organization', name: siteName },
+    }} />
+    <CalculatorClient />
+  </>
 }

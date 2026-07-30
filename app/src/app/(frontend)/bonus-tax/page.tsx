@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import BonusTaxClient from './BonusTaxClient'
-import { currentYear, siteName } from '@/lib/site'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import JsonLd from '../JsonLd'
 
 export const metadata: Metadata = {
   title: `年终奖个税计算与单独计税｜${currentYear}年｜${siteName}`,
@@ -9,5 +10,18 @@ export const metadata: Metadata = {
 }
 
 export default function BonusTaxPage() {
-  return <BonusTaxClient />
+  return <>
+    <JsonLd data={{
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: `年终奖个税计算器 ${currentYear}`,
+      url: `${siteUrl}/bonus-tax`,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Web',
+      description: metadata.description,
+      offers: { '@type': 'Offer', price: 0, priceCurrency: 'CNY' },
+      publisher: { '@type': 'Organization', name: siteName },
+    }} />
+    <BonusTaxClient />
+  </>
 }
