@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Copy } from 'lucide-react'
 import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
-import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
+import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
@@ -20,6 +20,8 @@ export default function CalculatorClient() {
   const { money } = useMoneyFormat()
   const [city, setCity] = useState('beijing')
   const [salary, setSalary] = useState(20000)
+  const [salaryMode, setSalaryMode] = useState<'fixed' | 'monthly'>('fixed')
+  const [monthlySalaries, setMonthlySalaries] = useState<number[]>(Array.from({ length: 12 }, () => 20000))
   const [month, setMonth] = useState(8)
   const [startMonth, setStartMonth] = useState(1)
   const [socialBase, setSocialBase] = useState(20000)
@@ -37,14 +39,17 @@ export default function CalculatorClient() {
   const rule = cityRules[city]
   const deduction = deductionAmount
   const selectedDeductionItems = Object.values(deductionSelections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
+  const activeSalary = salaryMode === 'fixed' ? salary : monthlySalaries[month - 1] || 0
+  const salaryForBase = salaryMode === 'fixed' ? salary : activeSalary
+  const salariesForCalculation = useMemo(() => salaryMode === 'fixed' ? Array.from({ length: 12 }, () => salary) : monthlySalaries, [salaryMode, salary, monthlySalaries])
 
   useEffect(() => {
-    if (!editingSocial) setSocialBase(clamp(salary, rule.socialMin, rule.socialMax))
-    if (!editingHousing) setHousingBase(clamp(salary, rule.housingMin, rule.housingMax))
-  }, [city, salary, rule, editingSocial, editingHousing])
+    if (!editingSocial) setSocialBase(clamp(salaryForBase, rule.socialMin, rule.socialMax))
+    if (!editingHousing) setHousingBase(clamp(salaryForBase, rule.housingMin, rule.housingMax))
+  }, [city, salaryForBase, rule, editingSocial, editingHousing])
 
   const insurance = useMemo(() => calculateInsurance(rule, socialBase, housingBase, employeeHousingRate, employerHousingRate), [rule, socialBase, housingBase, employeeHousingRate, employerHousingRate])
-  const result = useMemo(() => calculateMonth(salary, month, startMonth, deduction, insurance), [salary, month, startMonth, deduction, insurance])
+  const result = useMemo(() => calculateMonthFromSeries(salariesForCalculation, month, startMonth, deduction, insurance), [salariesForCalculation, month, startMonth, deduction, insurance])
   const rate = Math.round(result.bracket.rate * 100)
   const socialItems = insurance.filter((item) => !item.housing)
   const housingItems = insurance.filter((item) => item.housing)
@@ -52,15 +57,15 @@ export default function CalculatorClient() {
   const socialEmployer = socialItems.reduce((sum, item) => sum + item.employer, 0)
   const housingEmployee = housingItems.reduce((sum, item) => sum + item.employee, 0)
   const housingEmployer = housingItems.reduce((sum, item) => sum + item.employer, 0)
-  const takeHomePercent = salary > 0 ? Math.round(result.takeHome / salary * 100) : 0
+  const takeHomePercent = activeSalary > 0 ? Math.round(result.takeHome / activeSalary * 100) : 0
   const wholeMoney = (value: number) => money(value, 0)
-  const flowTotal = Math.max(1, salary)
+  const flowTotal = Math.max(1, activeSalary)
   const ladderPosition = Math.max(0, taxBrackets.findIndex((item) => item.rate === result.bracket.rate)) / (taxBrackets.length - 1) * 100
-  const isSalaryInvalid = salary <= 0
+  const isSalaryInvalid = activeSalary <= 0
   const isMonthInvalid = month < startMonth
   const isSocialBaseInvalid = socialBase < rule.socialMin || socialBase > rule.socialMax
   const isHousingBaseInvalid = housingBase < rule.housingMin || housingBase > rule.housingMax
-  const isDeductionInvalid = deductionAmount > salary
+  const isDeductionInvalid = deductionAmount > activeSalary
   const validationMessages = [
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
@@ -81,6 +86,8 @@ export default function CalculatorClient() {
     const requestedCity = params.get('city')
     const requestedDeduction = parseAmountParam(params.get('deduction'))
     const requestedSalary = parseAmountParam(params.get('salary'))
+    const requestedSalaryMode = params.get('salaryMode') === 'monthly' ? 'monthly' : 'fixed'
+    const requestedSalaries = (params.get('salaries') || '').split(',').map((item) => parseAmountParam(item)).filter((item) => item >= 0)
     const requestedSocialBase = parseAmountParam(params.get('socialBase'))
     const requestedHousingBase = parseAmountParam(params.get('housingBase'))
     const requestedMonth = parseIntegerParam(params.get('month'), 1, 12)
@@ -90,6 +97,10 @@ export default function CalculatorClient() {
 
     if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
     if (requestedSalary > 0) setSalary(requestedSalary)
+    if (requestedSalaryMode === 'monthly' && requestedSalaries.length === 12) {
+      setSalaryMode('monthly')
+      setMonthlySalaries(requestedSalaries)
+    }
     if (requestedSocialBase > 0) {
       setSocialBase(requestedSocialBase)
       setEditingSocial(true)
@@ -111,7 +122,7 @@ export default function CalculatorClient() {
 
   const reset = () => {
     setCity('beijing'); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
-    setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductionSelections({}); setDeductionDialogOpen(false); setCalculationOpen(false)
+    setSalaryMode('fixed'); setMonthlySalaries(Array.from({ length: 12 }, () => 20000)); setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductionSelections({}); setDeductionDialogOpen(false); setCalculationOpen(false)
     notify('已恢复城市默认设置')
   }
 
@@ -127,6 +138,28 @@ export default function CalculatorClient() {
     setDeductionDialogOpen(false)
     notify('已回填专项附加扣除')
   }
+  const switchSalaryMode = (mode: 'fixed' | 'monthly') => {
+    if (mode === salaryMode) return
+    if (mode === 'monthly') {
+      setMonthlySalaries(Array.from({ length: 12 }, () => salary))
+      setSalaryMode('monthly')
+      return
+    }
+
+    setSalary(monthlySalaries[month - 1] || salary)
+    setSalaryMode('fixed')
+  }
+  const updateActiveSalary = (value: number) => {
+    if (salaryMode === 'fixed') {
+      setSalary(value)
+      return
+    }
+
+    setMonthlySalaries((current) => current.map((item, index) => index === month - 1 ? value : item))
+  }
+  const updateMonthlySalary = (targetMonth: number, value: number) => {
+    setMonthlySalaries((current) => current.map((item, index) => index === targetMonth - 1 ? value : item))
+  }
   const copyShareLink = async () => {
     const url = new URL(window.location.href)
     url.pathname = '/calculator'
@@ -134,6 +167,8 @@ export default function CalculatorClient() {
     url.search = new URLSearchParams({
       city,
       salary: String(Math.round(salary)),
+      salaryMode,
+      salaries: monthlySalaries.map((value) => String(Math.round(value))).join(','),
       month: String(month),
       startMonth: String(startMonth),
       socialBase: String(Math.round(socialBase)),
@@ -162,7 +197,7 @@ export default function CalculatorClient() {
         <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); notify(hasValidationMessages ? '请先修正输入提示' : '已更新计算结果') }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
           <div className="field-block city-field"><div className="label-with-action city-label-row"><label htmlFor="city">缴费城市</label><span className="city-actions"><button className="text-button" type="button" onClick={locate}>自动定位</button><button className="text-button" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</button></span></div><div className="select-wrap"><select id="city" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
-          <div className="field-block"><label htmlFor="salary">税前月薪</label><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={salary} onChange={setSalary} />{isSalaryInvalid && <p className="field-error">税前月薪需要大于 0。</p>}</div>
+          <div className="field-block"><div className="label-with-action salary-mode-row"><label htmlFor="salary">{salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`}</label><span><button className="text-button" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</button><button className="text-button" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</button></span></div><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{isSalaryInvalid && <p className="field-error">税前收入需要大于 0。</p>}{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</div>
           <div className="field-grid"><div className="field-block"><label htmlFor="month">计算月份</label><div className={`select-wrap${isMonthInvalid ? ' input-error' : ''}`}><select id="month" value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div><div className="field-block"><label htmlFor="startMonth">入职月份</label><div className={`select-wrap${isMonthInvalid ? ' input-error' : ''}`}><select id="startMonth" value={startMonth} onChange={(event) => setStartMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div></div>
           {isMonthInvalid && <p className="field-error">计算月份不能早于入职月份。</p>}
           <div className="section-divider" />
@@ -178,14 +213,14 @@ export default function CalculatorClient() {
         </form>
 
         <div className="results-column">
-          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
+          <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
             <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
       </section>
 
-      <AnnualTable salary={salary} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} money={money} />
+      <AnnualTable salaries={salariesForCalculation} month={month} startMonth={startMonth} deduction={deduction} insurance={insurance} money={money} />
       <RateTable money={money} />
       <Faq />
       <RuleSourcePanel
@@ -239,8 +274,8 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
   return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
-function AnnualTable({ salary, month, startMonth, deduction, insurance, money }: { salary: number; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
-  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年预扣逐月明细</h2><span className="subtle-label">当前月份会高亮显示</span></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{Array.from({ length: 12 }, (_, index) => index + 1).map((currentMonth) => { const inactive = currentMonth < startMonth; const item = calculateMonth(salary, currentMonth, startMonth, deduction, insurance); return <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr> })}</tbody></table></div><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
+function AnnualTable({ salaries, month, startMonth, deduction, insurance, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
+  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年预扣逐月明细</h2><span className="subtle-label">当前月份会高亮显示</span></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{Array.from({ length: 12 }, (_, index) => index + 1).map((currentMonth) => { const inactive = currentMonth < startMonth; const salary = salaries[currentMonth - 1] || 0; const item = calculateMonthFromSeries(salaries, currentMonth, startMonth, deduction, insurance); return <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr> })}</tbody></table></div><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
 }
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {

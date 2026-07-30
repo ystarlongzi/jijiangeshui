@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { calculateInsurance, calculateMonth, clamp, getBracket } from './tax-calculator'
+import { calculateInsurance, calculateMonth, calculateMonthFromSeries, clamp, getBracket } from './tax-calculator'
 import { cityRules } from './tax-rules'
 
 test('北京工资薪金累计预扣：2 万月薪在 8 月进入 10% 档', () => {
@@ -43,6 +43,17 @@ test('专项附加扣除会降低累计应纳税所得额和本月个税', () =>
   assert.equal(result.taxable, 68000)
   assert.equal(result.currentTax, 850)
   assert.equal(result.takeHome, 14650)
+})
+
+test('逐月不同工资会按实际月份收入累计预扣', () => {
+  const salaries = [10000, 50000, ...Array.from({ length: 10 }, () => 0)]
+  const result = calculateMonthFromSeries(salaries, 2, 1, 0, [])
+
+  assert.equal(result.cumulativeSalary, 60000)
+  assert.equal(result.taxable, 50000)
+  assert.equal(Math.round(result.bracket.rate * 100), 10)
+  assert.equal(result.currentTax, 2330)
+  assert.equal(result.takeHome, 47670)
 })
 
 test('公积金比例可在 3% 到 12% 间改变个人缴费', () => {

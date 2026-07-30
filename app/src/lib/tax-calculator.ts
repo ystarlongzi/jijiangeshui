@@ -44,6 +44,10 @@ export function calculateInsurance(rule: CityRule, socialBase: number, housingBa
 }
 
 export function calculateMonth(salary: number, month: number, startMonth: number, deduction: number, insuranceItems: InsuranceItem[]): MonthlyCalculation {
+  return calculateMonthFromSeries(Array.from({ length: 12 }, () => salary), month, startMonth, deduction, insuranceItems)
+}
+
+export function calculateMonthFromSeries(salaries: number[], month: number, startMonth: number, deduction: number, insuranceItems: InsuranceItem[]): MonthlyCalculation {
   const monthsWorked = Math.max(0, month - startMonth + 1)
   if (monthsWorked === 0) {
     return {
@@ -62,13 +66,14 @@ export function calculateMonth(salary: number, month: number, startMonth: number
 
   const employeeInsurance = insuranceItems.reduce((sum, item) => sum + item.employee, 0)
   const employerInsurance = insuranceItems.reduce((sum, item) => sum + item.employer, 0)
-  const cumulativeSalary = salary * monthsWorked
+  const currentSalary = salaries[month - 1] || 0
+  const cumulativeSalary = salaries.slice(startMonth - 1, month).reduce((sum, item) => sum + item, 0)
   const cumulativeInsurance = employeeInsurance * monthsWorked
   const cumulativeDeductions = deduction * monthsWorked
   const taxable = Math.max(0, cumulativeSalary - cumulativeInsurance - cumulativeDeductions - 5000 * monthsWorked)
   const bracket = getBracket(taxable)
   const cumulativeTax = Math.max(0, taxable * bracket.rate - bracket.quick)
-  const previous = month > startMonth ? calculateMonth(salary, month - 1, startMonth, deduction, insuranceItems).cumulativeTax : 0
+  const previous = month > startMonth ? calculateMonthFromSeries(salaries, month - 1, startMonth, deduction, insuranceItems).cumulativeTax : 0
   const currentTax = Math.max(0, cumulativeTax - previous)
 
   return {
@@ -81,6 +86,6 @@ export function calculateMonth(salary: number, month: number, startMonth: number
     bracket,
     cumulativeTax,
     currentTax,
-    takeHome: salary - employeeInsurance - currentTax,
+    takeHome: currentSalary - employeeInsurance - currentTax,
   }
 }
