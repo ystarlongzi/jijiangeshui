@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/license-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/rental-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/property-transfer-tax`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/dividend-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/reverse-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/special-deductions`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/city`, changeFrequency: 'monthly', priority: 0.7 },
