@@ -187,6 +187,7 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .tax-ladder-levels span.active { color: var(--ink); font-weight: 800; }
 .result-actions { display: flex; justify-content: space-between; gap: 12px; padding-top: 17px; }
 .link-button { font-size: 12px; }
+.icon-link-button { display: inline-flex; align-items: center; gap: 5px; }
 .link-button span { font-size: 16px; vertical-align: -1px; }
 .calculation-detail, .employer-detail { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
 .calculation-detail div, .employer-detail div { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 12px; }

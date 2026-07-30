@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Copy } from 'lucide-react'
 import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
-import { parseAmountParam } from '@/lib/url-params'
+import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
@@ -73,8 +74,28 @@ export default function CalculatorClient() {
     const params = new URLSearchParams(window.location.search)
     const requestedCity = params.get('city')
     const requestedDeduction = parseAmountParam(params.get('deduction'))
+    const requestedSalary = parseAmountParam(params.get('salary'))
+    const requestedSocialBase = parseAmountParam(params.get('socialBase'))
+    const requestedHousingBase = parseAmountParam(params.get('housingBase'))
+    const requestedMonth = parseIntegerParam(params.get('month'), 1, 12)
+    const requestedStartMonth = parseIntegerParam(params.get('startMonth'), 1, 12)
+    const requestedEmployeeHousingRate = parseIntegerParam(params.get('employeeHousingRate'), 3, 12)
+    const requestedEmployerHousingRate = parseIntegerParam(params.get('employerHousingRate'), 3, 12)
 
     if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
+    if (requestedSalary > 0) setSalary(requestedSalary)
+    if (requestedSocialBase > 0) {
+      setSocialBase(requestedSocialBase)
+      setEditingSocial(true)
+    }
+    if (requestedHousingBase > 0) {
+      setHousingBase(requestedHousingBase)
+      setEditingHousing(true)
+    }
+    if (requestedMonth) setMonth(requestedMonth)
+    if (requestedStartMonth) setStartMonth(requestedStartMonth)
+    if (requestedEmployeeHousingRate && housingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
+    if (requestedEmployerHousingRate && housingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
     if (requestedDeduction > 0) {
       setDeductionAmount(requestedDeduction)
       setDeductionSelections({})
@@ -99,6 +120,29 @@ export default function CalculatorClient() {
     setDeductionAmount(amount)
     setDeductionDialogOpen(false)
     notify('已回填专项附加扣除')
+  }
+  const copyShareLink = async () => {
+    const url = new URL(window.location.href)
+    url.pathname = '/calculator'
+    url.hash = 'calculator'
+    url.search = new URLSearchParams({
+      city,
+      salary: String(Math.round(salary)),
+      month: String(month),
+      startMonth: String(startMonth),
+      socialBase: String(Math.round(socialBase)),
+      housingBase: String(Math.round(housingBase)),
+      employeeHousingRate: String(employeeHousingRate),
+      employerHousingRate: String(employerHousingRate),
+      deduction: String(Math.round(deductionAmount)),
+    }).toString()
+
+    try {
+      await navigator.clipboard.writeText(url.toString())
+      notify('已复制当前计算链接')
+    } catch {
+      notify('当前浏览器无法自动复制，请复制地址栏链接')
+    }
   }
   const formatTaxMessage = hasValidationMessages ? '当前输入存在需要确认的地方，先修正提示项后再查看计算结果。' : result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
 
@@ -129,7 +173,7 @@ export default function CalculatorClient() {
         <div className="results-column">
           <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(salary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
-            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
+            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => setCalculationOpen(!calculationOpen)}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
       </section>
