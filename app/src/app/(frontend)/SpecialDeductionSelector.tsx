@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ArrowRight, ChevronDown } from 'lucide-react'
-import { specialDeductionGroups, specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
+import { ArrowRight } from 'lucide-react'
+import { sumSpecialDeductions } from '@/lib/special-deductions'
 import { useMoneyFormat } from './MoneyFormatProvider'
 import Modal from './Modal'
+import SpecialDeductionGroupList from './SpecialDeductionGroupList'
 
 type SpecialDeductionSelectorProps = {
   open: boolean
@@ -65,29 +66,12 @@ export default function SpecialDeductionSelector({
       </div>
     </div>}
   >
-    <div className="deduction-option-list">
-      {specialDeductionGroups.map((group) => {
-        const selectedOption = specialDeductionItems.find((item) => item.id === draftValue[group.key])
-        const expanded = expandedGroups.includes(group.key)
-
-        return <div className={`deduction-group${group.options.length === 0 ? ' disabled' : ''}`} key={group.key}>
-          <button className="deduction-group-heading" type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded}>
-            <span className={`deduction-group-status${selectedOption ? ' selected' : ''}`} aria-hidden="true" />
-            <span>
-              <strong>{group.title}{selectedOption && <b>{money(selectedOption.amount)} / 月</b>}</strong>
-              <small>{group.note}</small>
-            </span>
-            <ChevronDown size={16} />
-          </button>
-          {expanded && (group.options.length > 0 ? <div className="deduction-option-grid">
-            {group.options.map((item) => <label className={`deduction-option${draftValue[group.key] === item.id ? ' selected' : ''}`} key={item.id}>
-              <input type="checkbox" checked={draftValue[group.key] === item.id} onChange={() => selectOption(group.key, item.id)} />
-              <span>{item.label}</span>
-              <b>{money(item.amount)} / 月</b>
-            </label>)}
-          </div> : <p>{emptyText}</p>)}
-        </div>
-      })}
-    </div>
+    <SpecialDeductionGroupList
+      selections={draftValue}
+      expandedGroups={expandedGroups}
+      emptyText={emptyText}
+      onSelect={selectOption}
+      onToggleGroup={toggleGroup}
+    />
   </Modal>
 }

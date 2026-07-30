@@ -467,12 +467,14 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .special-total-card strong { color: var(--accent-deep); font-size: 34px; letter-spacing: -.04em; }
 .special-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; padding: 38px 0 46px; }
 .special-input, .special-result { padding: 22px; }
-.special-mode-tabs { display: inline-flex; gap: 4px; margin-bottom: 18px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-muted); }
-.special-mode-tabs button { min-height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 750; }
-.special-mode-tabs button.active, .special-mode-tabs button:hover { background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px rgba(17, 53, 49, 0.08); }
-.special-manual { display: grid; gap: 12px; }
+.special-input-heading { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.special-input-heading h2 { margin: 0 0 6px; font-size: 22px; }
+.special-input-heading p { max-width: 520px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.special-input-heading .text-button { flex: 0 0 auto; margin-top: 4px; font-size: 12px; }
+.special-manual { display: grid; gap: 12px; margin-bottom: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
 .special-manual p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .special-groups { display: grid; gap: 10px; }
+.special-groups .deduction-option-list { gap: 10px; overflow: visible; padding: 0; }
 .special-result { align-self: start; position: sticky; top: 88px; display: grid; gap: 18px; }
 .special-result-heading { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 800; }
 .special-result-number { display: grid; gap: 7px; padding: 18px; border-left: 3px solid var(--accent); background: var(--surface-muted); }
@@ -661,6 +663,8 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .special-total-card { max-width: 360px; }
   .special-workspace { grid-template-columns: 1fr; gap: 14px; padding: 28px 0 42px; }
   .special-input, .special-result { padding: 20px; }
+  .special-input-heading { display: grid; gap: 10px; }
+  .special-input-heading .text-button { justify-self: start; margin-top: 0; }
   .special-result { position: static; }
   .special-content-grid { grid-template-columns: 1fr; gap: 10px; padding: 26px 0 38px; }
   .special-actions { grid-template-columns: 1fr; }

@@ -2,20 +2,22 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, ClipboardCheck, Info, RotateCcw } from 'lucide-react'
+import { ArrowRight, ClipboardCheck, Info, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
 import { currentYear } from '@/lib/site'
-import { specialDeductionGroups, specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
+import { specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
 
 type Mode = 'items' | 'manual'
 
 export default function SpecialDeductionsClient() {
   const { money } = useMoneyFormat()
   const [mode, setMode] = useState<Mode>('items')
-  const [manualAmount, setManualAmount] = useState(3000)
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualAmount, setManualAmount] = useState(0)
   const [selections, setSelections] = useState<Record<string, string>>({})
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['children'])
   const itemAmount = sumSpecialDeductions(selections)
@@ -27,9 +29,14 @@ export default function SpecialDeductionsClient() {
     const next = { ...current }
     if (next[group] === option) delete next[group]
     else next[group] = option
+    setMode('items')
     return next
   })
-  const reset = () => { setManualAmount(0); setSelections({}); setExpandedGroups(['children']); setMode('items') }
+  const updateManualAmount = (value: number) => {
+    setManualAmount(value)
+    setMode('manual')
+  }
+  const reset = () => { setManualAmount(0); setManualOpen(false); setSelections({}); setExpandedGroups(['children']); setMode('items') }
 
   return <div className="app-shell">
     <SiteHeader active="special-deductions" />
@@ -38,7 +45,7 @@ export default function SpecialDeductionsClient() {
         <div>
           <p className="eyebrow">{currentYear} 年专项附加扣除计算器</p>
           <h1>哪些支出，可以少缴个税？</h1>
-          <p>直接输入扣除总额，或按项目选择子女教育、住房租金、赡养老人等扣除口径，计算本月和全年可扣金额。</p>
+          <p>按项目选择子女教育、住房租金、赡养老人等扣除口径，汇总本月和全年可扣金额。</p>
         </div>
         <div className="special-total-card">
           <span>本月专项附加扣除</span>
@@ -49,33 +56,25 @@ export default function SpecialDeductionsClient() {
 
       <section className="special-workspace" aria-label="专项附加扣除计算器">
         <section className="special-input panel">
-          <div className="special-mode-tabs" role="tablist" aria-label="计算方式">
-            <button className={mode === 'items' ? 'active' : ''} type="button" onClick={() => setMode('items')}>按项目计算</button>
-            <button className={mode === 'manual' ? 'active' : ''} type="button" onClick={() => setMode('manual')}>直接输入总额</button>
+          <div className="special-input-heading">
+            <div>
+              <h2>按项目选择</h2>
+              <p>每个项目只选一种扣除方式，再由系统自动汇总月度金额。</p>
+            </div>
+            <button className="text-button" type="button" onClick={() => setManualOpen(!manualOpen)}>{manualOpen ? '收起总额输入' : '已有总额？直接输入'}</button>
           </div>
 
-          {mode === 'manual' ? <div className="special-manual">
-            <label className="bonus-field" htmlFor="manualDeduction"><span>本月专项附加扣除总额</span><MoneyInput id="manualDeduction" value={manualAmount} onChange={setManualAmount} /></label>
+          {manualOpen ? <div className="special-manual">
+            <label className="bonus-field" htmlFor="manualDeduction"><span>本月专项附加扣除总额</span><MoneyInput id="manualDeduction" value={manualAmount} onChange={updateManualAmount} /></label>
             <p>如果你已经在个税 APP 或工资条里看到扣除总额，可以直接填写这里。</p>
           </div> : <div className="special-groups">
-            {specialDeductionGroups.map((group) => {
-              const selectedOption = specialDeductionItems.find((item) => item.id === selections[group.key])
-              const expanded = expandedGroups.includes(group.key)
-              return <div className={`deduction-group${group.options.length === 0 ? ' disabled' : ''}`} key={group.key}>
-                <button className="deduction-group-heading" type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded}>
-                  <span className={`deduction-group-status${selectedOption ? ' selected' : ''}`} aria-hidden="true" />
-                  <span><strong>{group.title}{selectedOption && <b>{money(selectedOption.amount)} / 月</b>}</strong><small>{group.note}</small></span>
-                  <ChevronDown size={16} />
-                </button>
-                {expanded && (group.options.length > 0 ? <div className="deduction-option-grid">
-                  {group.options.map((item) => <label className={`deduction-option${selections[group.key] === item.id ? ' selected' : ''}`} key={item.id}>
-                    <input type="checkbox" checked={selections[group.key] === item.id} onChange={() => selectOption(group.key, item.id)} />
-                    <span>{item.label}</span>
-                    <b>{money(item.amount)} / 月</b>
-                  </label>)}
-                </div> : <p>大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资预扣计算。</p>)}
-              </div>
-            })}
+            <SpecialDeductionGroupList
+              selections={selections}
+              expandedGroups={expandedGroups}
+              emptyText="大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资预扣计算。"
+              onSelect={selectOption}
+              onToggleGroup={toggleGroup}
+            />
           </div>}
         </section>
 
@@ -84,10 +83,10 @@ export default function SpecialDeductionsClient() {
           <div className="special-result-number"><span>本月可扣除</span><strong>{money(monthAmount)}</strong></div>
           <dl>
             <div><dt>全年可扣除</dt><dd>{money(monthAmount * 12)}</dd></div>
-            <div><dt>计算方式</dt><dd>{mode === 'manual' ? '直接输入' : '按项目计算'}</dd></div>
-            <div><dt>已选项目</dt><dd>{mode === 'manual' ? '-' : `${selectedItems.length} 项`}</dd></div>
+            <div><dt>结果来源</dt><dd>{mode === 'manual' ? '直接输入总额' : '按项目汇总'}</dd></div>
+            <div><dt>已选项目</dt><dd>{selectedItems.length} 项</dd></div>
           </dl>
-          {mode === 'items' && selectedItems.length > 0 && <div className="special-selected-list">
+          {selectedItems.length > 0 && <div className="special-selected-list">
             {selectedItems.map((item) => item && <div key={item.id}><span>{item.group}</span><strong>{item.label}</strong><b>{money(item.amount)} / 月</b></div>)}
           </div>}
           <div className="special-actions">
