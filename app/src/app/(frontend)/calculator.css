@@ -308,6 +308,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .home-section-heading h2 { margin: 0; font-size: 28px; letter-spacing: -0.03em; }
 .home-section-heading > p { max-width: 420px; margin: 0; color: var(--muted); font-size: 13px; }
 .home-section-heading > a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 750; }
+.home-section-copy { max-width: 520px; margin: -8px 0 20px; color: var(--muted); font-size: 13px; line-height: 1.7; }
 .home-tool-section { padding: 24px 0 82px; }
 .tool-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
 .tool-entry { grid-column: span 2; display: grid; grid-template-columns: 42px 1fr auto; align-items: start; gap: 14px; min-height: 148px; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
@@ -547,6 +548,17 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .city-next-step p { margin: 0; color: var(--muted); font-size: 12px; }
 .city-next-step a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
 .city-disclaimer { margin: 22px 0 0; color: var(--subtle); font-size: 11px; }
+.city-index-hero { grid-template-columns: 1fr; }
+.city-index-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 32px 0; }
+.city-index-card { display: grid; gap: 18px; min-height: 188px; padding: 22px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
+.city-index-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+.city-index-card > span { color: var(--ink); font-size: 22px; font-weight: 800; }
+.city-index-card dl { display: grid; gap: 10px; margin: 0; }
+.city-index-card dl div { display: flex; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.city-index-card dt, .city-index-card dd { margin: 0; font-size: 11px; }
+.city-index-card dt { color: var(--muted); }
+.city-index-card dd { color: var(--ink); font-weight: 750; text-align: right; }
+.city-index-card strong { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; }
 .rate-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .rate-page-header { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding-bottom: 40px; border-bottom: 1px solid var(--line); }
 .rate-title-line { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 14px; font-weight: 750; }
@@ -730,6 +742,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .city-hero p { font-size: 14px; }
   .city-content-grid { grid-template-columns: 1fr; padding: 28px 0; }
   .city-card p { min-height: 0; }
+  .city-index-grid { grid-template-columns: 1fr; padding: 24px 0; }
   .city-next-step { align-items: start; flex-direction: column; }
   .info-hero { padding-bottom: 36px; }
   .info-hero h1 { font-size: 44px; }
