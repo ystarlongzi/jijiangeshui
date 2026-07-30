@@ -361,6 +361,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .site-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 11px; }
 .city-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .info-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
+.topic-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .info-hero { padding-bottom: 54px; border-bottom: 1px solid var(--line); }
 .info-hero h1 { max-width: 760px; margin: 18px 0 16px; font-size: clamp(40px, 6vw, 66px); }
 .info-lead { max-width: 720px; margin: 0 0 28px; color: var(--muted); font-size: 17px; line-height: 1.75; }
@@ -600,6 +601,23 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .city-next-step h2 { margin-bottom: 6px; font-size: 18px; }
 .city-next-step p { margin: 0; color: var(--muted); font-size: 12px; }
 .city-next-step a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
+.topic-hero { padding-bottom: 48px; border-bottom: 1px solid var(--line); }
+.topic-hero h1 { max-width: 760px; margin: 20px 0 18px; font-size: clamp(48px, 6vw, 76px); line-height: 0.96; letter-spacing: 0; }
+.topic-hero p { max-width: 800px; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.75; }
+.topic-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 42px 0 30px; }
+.topic-card { display: grid; gap: 14px; min-height: 230px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.topic-card:first-child, .topic-card:nth-child(2) { grid-column: span 3; }
+.topic-card:nth-child(n + 3) { grid-column: span 2; }
+.topic-card svg { color: var(--accent); }
+.topic-card span { font-size: 21px; font-weight: 850; line-height: 1.25; }
+.topic-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+.topic-card strong { align-self: end; display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; }
+.topic-income-section { display: grid; grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr); gap: 24px; align-items: start; padding: 28px 0 54px; border-top: 1px solid var(--line); }
+.topic-income-section h2 { margin-bottom: 8px; font-size: 24px; }
+.topic-income-section p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.topic-income-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.topic-income-links a { display: inline-flex; align-items: center; gap: 6px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 750; text-decoration: none; }
+.topic-income-links a svg { color: var(--accent); }
 .city-disclaimer { margin: 22px 0 0; color: var(--subtle); font-size: 11px; }
 .city-index-hero { grid-template-columns: 1fr; }
 .city-index-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 32px 0; }
@@ -755,6 +773,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .site-footer { display: grid; gap: 6px; }
   .city-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .info-page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .topic-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .special-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .special-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
   .special-hero h1 { font-size: 44px; }
@@ -814,6 +833,12 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .city-example-card { align-items: start; flex-direction: column; gap: 18px; }
   .city-example-card h2 { font-size: 20px; }
   .city-next-step { align-items: start; flex-direction: column; }
+  .topic-hero { padding-bottom: 36px; }
+  .topic-hero h1 { font-size: 44px; }
+  .topic-hero p { font-size: 14px; }
+  .topic-grid { grid-template-columns: 1fr; padding: 28px 0; }
+  .topic-card, .topic-card:first-child, .topic-card:nth-child(2), .topic-card:nth-child(n + 3) { grid-column: auto; min-height: auto; }
+  .topic-income-section { grid-template-columns: 1fr; gap: 14px; }
   .info-hero { padding-bottom: 36px; }
   .info-hero h1 { font-size: 44px; }
   .info-lead { font-size: 14px; }

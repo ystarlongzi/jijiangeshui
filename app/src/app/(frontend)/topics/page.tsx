@@ -1,0 +1,115 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, BookOpen, CalendarRange, MapPin, ReceiptText, TrendingUp } from 'lucide-react'
+import SiteFooter from '../SiteFooter'
+import SiteHeader from '../SiteHeader'
+import JsonLd from '../JsonLd'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+
+export const metadata: Metadata = {
+  title: `${currentYear}年个税专题｜年中入职、年底个税、城市工资到手｜${siteName}`,
+  description: `整理年中入职、年底个税变高、工资档位、城市工资到手和不同所得类型案例，快速进入对应计算器。`,
+  alternates: { canonical: '/topics' },
+}
+
+const topics = [
+  {
+    title: '年中入职个税怎么算？',
+    description: '入职月份会影响累计收入和累计扣除。用工资薪金计算器选择入职月份，可以查看入职后每个月的预扣变化。',
+    href: '/calculator',
+    action: '选择入职月份',
+    icon: CalendarRange,
+  },
+  {
+    title: '为什么年底个税会变高？',
+    description: '累计预扣法会随着全年收入累加调整税率档位。逐月明细能看出从哪一个月开始跨档。',
+    href: '/faq',
+    action: '查看原因',
+    icon: TrendingUp,
+  },
+  {
+    title: '月薪不同档位到手差多少？',
+    description: '同样是税前工资，社保公积金基数、专项附加扣除和预扣率都会影响实际到手。',
+    href: '/calculator',
+    action: '输入工资试算',
+    icon: ReceiptText,
+  },
+  {
+    title: '城市社保公积金影响到手工资',
+    description: '北京、上海、深圳、广州、杭州等城市的社保和公积金基数范围不同，城市页会展示对应规则。',
+    href: '/city',
+    action: '按城市查看',
+    icon: MapPin,
+  },
+  {
+    title: '劳务、稿酬和特许权怎么选？',
+    description: '不同所得类型适用不同预扣规则。先判断收入性质，再进入对应计算器估算税后收入。',
+    href: '/labor-tax',
+    action: '看劳务报酬',
+    icon: BookOpen,
+  },
+]
+
+const incomeLinks = [
+  { label: '劳务报酬', href: '/labor-tax' },
+  { label: '稿酬', href: '/author-tax' },
+  { label: '特许权使用费', href: '/license-tax' },
+  { label: '经营所得', href: '/business-tax' },
+  { label: '财产租赁', href: '/rental-tax' },
+  { label: '财产转让', href: '/property-transfer-tax' },
+  { label: '利息股息红利', href: '/dividend-tax' },
+  { label: '偶然所得', href: '/accidental-tax' },
+]
+
+export default function TopicsPage() {
+  return <div className="app-shell">
+    <SiteHeader active="home" />
+    <main className="topic-page">
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: `${currentYear} 年个税专题`,
+        url: `${siteUrl}/topics`,
+        description: metadata.description,
+        isPartOf: { '@type': 'WebSite', name: siteName, url: siteUrl },
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: topics.map((topic, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: topic.title,
+            url: `${siteUrl}${topic.href}`,
+          })),
+        },
+      }} />
+      <section className="topic-hero">
+        <div>
+          <div className="city-title-line"><BookOpen size={20} /><span>{currentYear} 年个税专题</span></div>
+          <h1>按场景找到该用的计算器</h1>
+          <p>把常见搜索问题整理成入口：年中入职、年底个税、工资档位、城市工资到手和不同所得类型。</p>
+        </div>
+      </section>
+
+      <section className="topic-grid" aria-label="个税专题入口">
+        {topics.map(({ title, description, href, action, icon: Icon }) => <Link className="topic-card" href={href} key={title}>
+          <Icon size={22} strokeWidth={1.8} />
+          <span>{title}</span>
+          <p>{description}</p>
+          <strong>{action} <ArrowRight size={15} /></strong>
+        </Link>)}
+      </section>
+
+      <section className="topic-income-section">
+        <div>
+          <h2>不同所得类型入口</h2>
+          <p>如果不是工资薪金收入，可以从这里进入对应的长尾计算器。</p>
+        </div>
+        <div className="topic-income-links">
+          {incomeLinks.map((item) => <Link href={item.href} key={item.href}>{item.label}<ArrowRight size={14} /></Link>)}
+        </div>
+      </section>
+
+      <SiteFooter />
+    </main>
+  </div>
+}
