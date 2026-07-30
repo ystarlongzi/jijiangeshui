@@ -34,6 +34,8 @@ Next.js
 | `admins` | 后台登录用户和角色 |
 | `cities` | 城市基础信息、第三方编码和城市 SEO 信息 |
 | `social-insurance-policies` | 社保公积金政策版本、基数和缴费项目 |
+| `tax-rate-rules` | 工资薪金、劳务报酬、经营所得和分类所得税率规则 |
+| `special-deduction-rules` | 专项附加扣除标准、适用条件和分摊方案 |
 | `articles` | 个税知识、城市政策、案例和税务内容 |
 | `faqs` | 常见问题 |
 | `import-jobs` | 规则采集和导入任务记录 |
@@ -53,7 +55,7 @@ Payload 内容系统负责“页面内容和 SEO”，不负责即时计算公�
 
 ### 3.2 规则后台边界
 
-规则后台负责“可计算的结构化规则”，包括城市、社保公积金政策、税率表、专项附加扣除标准和规则来源。当前已落地 `cities`、`social-insurance-policies` 和 `import-jobs`，税率表与专项附加扣除标准后续可以按同一原则扩展 collection。
+规则后台负责“可计算的结构化规则”，包括城市、社保公积金政策、税率表、专项附加扣除标准和规则来源。当前已落地 `cities`、`social-insurance-policies`、`tax-rate-rules`、`special-deduction-rules` 和 `import-jobs`。
 
 规则字段必须保留：
 
