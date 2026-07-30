@@ -97,7 +97,13 @@ export default function BonusTaxClient() {
 
 function ThresholdAlert({ optimization, bonus }: { optimization: NonNullable<ReturnType<typeof calculateBonusTax>['separateOptimization']>; bonus: number }) {
   const { money } = useMoneyFormat()
-  return <div className="bonus-threshold-alert"><div className="bonus-alert-copy"><Award size={18} /><p>单独计税下，当前奖金跨过税率临界点。把金额调整到 <strong>{money(optimization.suggestedBonus)}</strong>，预计到手反而更多。</p></div><div className="bonus-threshold-grid"><div><span>当前奖金</span><strong>{money(bonus)}</strong><small>到手 {money(optimization.currentTakeHome)}</small></div><div><span>建议金额</span><strong>{money(optimization.suggestedBonus)}</strong><small>到手 {money(optimization.suggestedTakeHome)}</small></div><div><span>到手差额</span><strong>{money(optimization.difference)}</strong><small>少发奖金，少跨档</small></div></div></div>
+  const maxValue = Math.max(bonus, optimization.suggestedBonus, optimization.currentTakeHome, optimization.suggestedTakeHome)
+  const currentTakeHomeWidth = `${Math.max(6, (optimization.currentTakeHome / maxValue) * 100)}%`
+  const suggestedTakeHomeWidth = `${Math.max(6, (optimization.suggestedTakeHome / maxValue) * 100)}%`
+  const currentBonusWidth = `${Math.max(6, (bonus / maxValue) * 100)}%`
+  const suggestedBonusWidth = `${Math.max(6, (optimization.suggestedBonus / maxValue) * 100)}%`
+
+  return <div className="bonus-threshold-alert"><div className="bonus-alert-copy"><Award size={18} /><p>单独计税下，当前奖金跨过税率临界点。把金额调整到 <strong>{money(optimization.suggestedBonus)}</strong>，预计到手反而更多。</p></div><div className="bonus-threshold-grid"><div><span>当前奖金</span><strong>{money(bonus)}</strong><small>到手 {money(optimization.currentTakeHome)}</small></div><div><span>建议金额</span><strong>{money(optimization.suggestedBonus)}</strong><small>到手 {money(optimization.suggestedTakeHome)}</small></div><div><span>到手差额</span><strong>{money(optimization.difference)}</strong><small>少发奖金，少跨档</small></div></div><div className="bonus-threshold-chart" aria-label="年终奖临界点到手对比"><div className="threshold-chart-row"><span>当前税前</span><i style={{ width: currentBonusWidth }} /><strong>{money(bonus)}</strong></div><div className="threshold-chart-row"><span>当前到手</span><i className="takehome-bar" style={{ width: currentTakeHomeWidth }} /><strong>{money(optimization.currentTakeHome)}</strong></div><div className="threshold-chart-row recommended"><span>建议税前</span><i style={{ width: suggestedBonusWidth }} /><strong>{money(optimization.suggestedBonus)}</strong></div><div className="threshold-chart-row recommended"><span>建议到手</span><i className="takehome-bar" style={{ width: suggestedTakeHomeWidth }} /><strong>{money(optimization.suggestedTakeHome)}</strong></div></div></div>
 }
 
 function BonusProcess({ result, bonus, annualSalary, annualInsurance, annualDeductions }: { result: ReturnType<typeof calculateBonusTax>; bonus: number; annualSalary: number; annualInsurance: number; annualDeductions: number }) {

@@ -406,6 +406,13 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .bonus-threshold-grid div { display: grid; gap: 3px; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.64); }
 .bonus-threshold-grid span, .bonus-threshold-grid small { color: #9a3412; font-size: 10px; opacity: .78; }
 .bonus-threshold-grid strong { font-size: 14px; }
+.bonus-threshold-chart { display: grid; gap: 7px; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.64); }
+.threshold-chart-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 92px; gap: 8px; align-items: center; }
+.threshold-chart-row span { color: #9a3412; font-size: 10px; opacity: .78; }
+.threshold-chart-row i { display: block; height: 8px; border-radius: 999px; background: rgba(154, 52, 18, 0.22); }
+.threshold-chart-row i.takehome-bar { background: #f97316; }
+.threshold-chart-row strong { justify-self: end; color: #9a3412; font-size: 11px; font-weight: 800; }
+.threshold-chart-row.recommended strong { color: #ea580c; }
 .bonus-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .bonus-result-card { padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }.bonus-result-card.active { border-color: var(--accent); background: var(--accent-soft); }
 .bonus-card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.bonus-card-title h3 { font-size: 15px; }.bonus-better { display: inline-flex; align-items: center; gap: 4px; color: #f97316; font-size: 11px; font-weight: 750; }
