@@ -228,6 +228,7 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .table-note { margin: 14px 0 0; color: var(--subtle); font-size: 10px; }
 
 .annual-panel { margin-top: 24px; padding: 26px; }
+.annual-heading-actions { display: flex; align-items: center; gap: 14px; }
 .trend-heading { align-items: center; }
 .view-switch { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
 .view-tab { border: 0; border-radius: 7px; background: transparent; color: var(--muted); padding: 8px 13px; font-size: 12px; font-weight: 700; }
