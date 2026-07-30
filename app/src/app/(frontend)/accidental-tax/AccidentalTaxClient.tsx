@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateFlatIncomeTax } from '@/lib/flat-income-tax'
@@ -93,6 +94,7 @@ export default function AccidentalTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>偶然所得怎么扣？</h2><p>偶然所得通常不扣除费用，以每次收入额作为应纳税所得额，按 20% 比例税率计算个人所得税。</p></div><Link href="/dividend-tax">算利息股息红利 <ReceiptText size={15} /></Link></section>
+    <LongTailInfo type="accidental" />
     <RuleSourcePanel />
     <SiteFooter />
   </main></div>

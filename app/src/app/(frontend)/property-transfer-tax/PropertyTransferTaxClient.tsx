@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculatePropertyTransferTax } from '@/lib/property-transfer-tax'
@@ -115,6 +116,7 @@ export default function PropertyTransferTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
+    <LongTailInfo type="transfer" />
     <RuleSourcePanel />
     <SiteFooter />
   </main></div>

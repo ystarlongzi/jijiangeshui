@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateLaborTax } from '@/lib/labor-tax'
@@ -99,6 +100,7 @@ export default function LaborTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>适合哪些收入？</h2><p>常见于独立设计、咨询、讲课、翻译、技术服务等非雇佣性质收入。年度汇算时，居民个人劳务报酬通常会并入综合所得。</p></div><Link href="/calculator">算工资薪金 <ReceiptText size={15} /></Link></section>
+    <LongTailInfo type="labor" />
     <RuleSourcePanel />
     <SiteFooter />
   </main></div>

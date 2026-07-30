@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateFlatIncomeTax } from '@/lib/flat-income-tax'
@@ -93,6 +94,7 @@ export default function DividendTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>这类所得有什么特点？</h2><p>利息、股息、红利所得不并入综合所得，通常按次用 20% 比例税率计算。不同金融产品可能存在免税或特殊口径，需要结合具体收入性质核对。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <LongTailInfo type="dividend" />
     <RuleSourcePanel />
     <SiteFooter />
   </main></div>
