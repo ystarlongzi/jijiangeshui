@@ -101,6 +101,7 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .money-input { position: relative; display: flex; align-items: center; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); padding: 0 14px; color: var(--muted); }
 .money-input input { min-height: 42px; border: 0; outline: 0; background: transparent; color: var(--ink); padding: 0 8px; font-size: 18px; font-weight: 700; text-align: right; }
 .money-input .unit { font-size: 12px; }
+.money-input.input-error, .select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
 .amount-input-box { position: relative; flex: 1; min-width: 0; }
 .amount-input input { display: block; font-variant-numeric: tabular-nums; }
 .amount-tip-track { position: absolute; inset: 0 8px; display: flex; justify-content: flex-end; align-items: center; color: transparent; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
@@ -127,6 +128,7 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .validation-panel { display: grid; gap: 8px; margin-top: 16px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--orange) 34%, var(--line)); border-radius: var(--radius-small); background: var(--orange-soft); color: var(--ink); }
 .validation-panel strong { color: var(--orange); font-size: 12px; }
 .validation-panel ul { display: grid; gap: 5px; margin: 0; padding-left: 18px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.field-error { margin: 7px 0 0; color: var(--orange); font-size: 11px; line-height: 1.5; }
 .accordion-button { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; width: 100%; padding: 16px 0 12px; border: 0; background: transparent; color: var(--ink); text-align: left; font-weight: 700; }
 .accordion-value { color: var(--muted); font-size: 11px; font-weight: 500; }
 .chevron { color: var(--muted); font-size: 18px; transition: transform 180ms ease; }
