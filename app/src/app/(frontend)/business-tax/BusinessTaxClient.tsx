@@ -6,6 +6,7 @@ import { ArrowRight, Briefcase, Copy, ReceiptText, RotateCcw } from 'lucide-reac
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateBusinessTax } from '@/lib/business-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -102,6 +103,7 @@ export default function BusinessTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>

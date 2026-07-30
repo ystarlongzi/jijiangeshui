@@ -6,6 +6,7 @@ import { ArrowRight, Copy, ReceiptText, RotateCcw, TrendingUp } from 'lucide-rea
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculatePropertyTransferTax } from '@/lib/property-transfer-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -95,6 +96,7 @@ export default function PropertyTransferTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>

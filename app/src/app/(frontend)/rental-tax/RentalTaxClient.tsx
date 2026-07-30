@@ -6,6 +6,7 @@ import { ArrowRight, Copy, Home, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateRentalTax, type RentalTaxRateMode } from '@/lib/rental-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -117,6 +118,7 @@ export default function RentalTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 20% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>

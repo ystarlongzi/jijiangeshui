@@ -6,6 +6,7 @@ import { ArrowRight, BookOpenText, Copy, ReceiptText, RotateCcw } from 'lucide-r
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateAuthorTax } from '@/lib/author-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -79,6 +80,7 @@ export default function AuthorTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>稿酬和劳务报酬有什么不同？</h2><p>稿酬所得通常指作品出版、发表取得的收入。和一般劳务报酬相比，稿酬所得收入额按规定减按 70% 计算。</p></div><Link href="/labor-tax">算劳务报酬 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>

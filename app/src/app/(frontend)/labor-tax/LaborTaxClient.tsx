@@ -6,6 +6,7 @@ import { ArrowRight, BriefcaseBusiness, Copy, ReceiptText, RotateCcw } from 'luc
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateLaborTax } from '@/lib/labor-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -79,6 +80,7 @@ export default function LaborTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>适合哪些收入？</h2><p>常见于独立设计、咨询、讲课、翻译、技术服务等非雇佣性质收入。年度汇算时，居民个人劳务报酬通常会并入综合所得。</p></div><Link href="/calculator">算工资薪金 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>

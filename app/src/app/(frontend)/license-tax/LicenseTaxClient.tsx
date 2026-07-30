@@ -6,6 +6,7 @@ import { ArrowRight, BadgePercent, Copy, ReceiptText, RotateCcw } from 'lucide-r
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import RuleSourcePanel from '../RuleSourcePanel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateLicenseTax } from '@/lib/license-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -78,6 +79,7 @@ export default function LicenseTaxClient() {
     </section>
 
     <section className="bonus-explain"><div><h2>和稿酬有什么不同？</h2><p>特许权使用费通常不适用稿酬所得“收入额减按 70%”的规则，适合专利、商标、著作权等使用权收入测算。</p></div><Link href="/author-tax">算稿酬 <ReceiptText size={15} /></Link></section>
+    <RuleSourcePanel />
     <SiteFooter />
   </main></div>
   <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
