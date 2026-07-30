@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/calculator`, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${siteUrl}/tax-rate`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/bonus-tax`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/labor-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/reverse-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/special-deductions`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },

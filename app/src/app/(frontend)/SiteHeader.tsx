@@ -8,7 +8,7 @@ import { ArrowUpRight, Calculator, FileText, Gift, Home, Menu, Percent, Sparkles
 
 type ActivePage = 'home' | 'calculator' | 'bonus-tax' | 'reverse-tax' | 'special-deductions' | 'tax-rate' | 'faq'
 
-export default function SiteHeader({ active }: { active: ActivePage }) {
+export default function SiteHeader({ active }: { active?: ActivePage }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { grouping, toggleGrouping } = useMoneyFormat()
   const closeMenu = () => setMenuOpen(false)
