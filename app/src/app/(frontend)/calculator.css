@@ -429,6 +429,14 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 .longtail-info-grid span { display: block; margin-bottom: 9px; color: var(--accent); font-size: 12px; font-weight: 800; }
 .longtail-info-grid h2 { margin-bottom: 10px; font-size: 18px; }
 .longtail-info-grid p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+.longtail-related { display: grid; grid-template-columns: minmax(180px, 0.75fr) minmax(0, 2fr); gap: 16px; align-items: start; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--accent-soft); }
+.longtail-related span { display: block; margin-bottom: 8px; color: var(--accent); font-size: 12px; font-weight: 800; }
+.longtail-related h2 { margin: 0; font-size: 18px; }
+.longtail-related-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.longtail-related-links a { position: relative; display: grid; gap: 5px; min-height: 88px; padding: 15px 42px 15px 16px; border: 1px solid rgba(18, 133, 112, 0.18); border-radius: 10px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.longtail-related-links a strong { font-size: 13px; line-height: 1.45; }
+.longtail-related-links a small { color: var(--muted); font-size: 11px; line-height: 1.55; }
+.longtail-related-links a svg { position: absolute; right: 15px; top: 17px; color: var(--accent); }
 .longtail-faq h2 { margin-bottom: 12px; font-size: 20px; }
 .labor-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 64px 0 42px; }
 .labor-hero { display: grid; grid-template-columns: minmax(0, 1fr) 260px; align-items: end; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
@@ -792,6 +800,9 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .bonus-explain { align-items: start; flex-direction: column; gap: 18px; }
   .longtail-info-grid { grid-template-columns: 1fr; }
   .longtail-info-section { gap: 22px; }
+  .longtail-related { grid-template-columns: 1fr; padding: 18px; }
+  .longtail-related-links { grid-template-columns: 1fr; }
+  .longtail-related-links a { min-height: auto; }
   .city-breadcrumb { margin-bottom: 34px; }
   .city-hero { display: grid; align-items: start; gap: 26px; padding-bottom: 36px; }
   .city-hero h1 { font-size: 44px; }
