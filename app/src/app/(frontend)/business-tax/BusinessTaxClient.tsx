@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateBusinessTax } from '@/lib/business-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -64,6 +65,27 @@ export default function BusinessTaxClient() {
     }
   }
 
+  const copyResult = async () => {
+    try {
+      await copyText(resultLines([
+        '经营所得个税计算结果',
+        `年度收入总额：${money(revenue)}`,
+        `成本、费用：${money(costsAndExpenses)}`,
+        `经营损失：${money(losses)}`,
+        `其他可扣除金额：${money(otherDeductions)}`,
+        `总扣除：${money(result.totalDeduction)}`,
+        `应纳税所得额：${money(result.taxable)}`,
+        `税率：${rate}%`,
+        `速算扣除数：${money(result.bracket.quick)}`,
+        `应缴个税：${money(result.tax)}`,
+        `预计税后经营收入：${money(result.afterTax)}`,
+      ]))
+      notify('已复制经营所得计算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动复制结果')
+    }
+  }
+
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
     <header className="labor-hero">
@@ -98,7 +120,7 @@ export default function BusinessTaxClient() {
             <div><dt>税后经营收入</dt><dd>{money(revenue)} - {money(result.tax)} = {money(result.afterTax)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

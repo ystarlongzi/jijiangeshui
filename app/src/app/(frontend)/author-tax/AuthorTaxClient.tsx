@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateAuthorTax } from '@/lib/author-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -39,6 +40,24 @@ export default function AuthorTaxClient() {
       notify('已复制当前稿酬计算链接')
     } catch {
       notify('当前浏览器无法自动复制，请复制地址栏链接')
+    }
+  }
+
+  const copyResult = async () => {
+    try {
+      await copyText(resultLines([
+        '稿酬个税计算结果',
+        `税前收入：${money(income)}`,
+        `费用扣除：${money(result.expenseDeduction)}`,
+        `扣除费用后：${money(result.incomeAfterExpense)}`,
+        `减按 70% 后：${money(result.taxable)}`,
+        '预扣率：20%',
+        `预扣个税：${money(result.tax)}`,
+        `预计到手：${money(result.takeHome)}`,
+      ]))
+      notify('已复制稿酬计算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动复制结果')
     }
   }
 
@@ -75,7 +94,7 @@ export default function AuthorTaxClient() {
             <div><dt>税后到手</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

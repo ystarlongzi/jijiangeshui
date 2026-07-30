@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateLaborTax } from '@/lib/labor-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -43,6 +44,24 @@ export default function LaborTaxClient() {
     }
   }
 
+  const copyResult = async () => {
+    try {
+      await copyText(resultLines([
+        '劳务报酬个税计算结果',
+        `税前收入：${money(income)}`,
+        `费用扣除：${money(result.deduction)}`,
+        `应纳税所得额：${money(result.taxable)}`,
+        `预扣率：${rate}%`,
+        `速算扣除数：${money(result.bracket.quick)}`,
+        `预扣个税：${money(result.tax)}`,
+        `预计到手：${money(result.takeHome)}`,
+      ]))
+      notify('已复制劳务报酬计算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动复制结果')
+    }
+  }
+
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
     <header className="labor-hero">
@@ -75,7 +94,7 @@ export default function LaborTaxClient() {
             <div><dt>税后到手</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

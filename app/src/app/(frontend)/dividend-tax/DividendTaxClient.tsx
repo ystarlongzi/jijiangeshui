@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateFlatIncomeTax } from '@/lib/flat-income-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -42,6 +43,21 @@ export default function DividendTaxClient() {
     }
   }
 
+  const copyResult = async () => {
+    try {
+      await copyText(resultLines([
+        '利息股息红利个税计算结果',
+        `税前收入：${money(result.income)}`,
+        '税率：20%',
+        `应缴个税：${money(result.tax)}`,
+        `税后收入：${money(result.takeHome)}`,
+      ]))
+      notify('已复制利息股息红利计算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动复制结果')
+    }
+  }
+
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
     <header className="labor-hero">
@@ -72,7 +88,7 @@ export default function DividendTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

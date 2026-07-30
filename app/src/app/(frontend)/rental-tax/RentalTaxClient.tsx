@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
+import { copyText, resultLines } from '../clipboard'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateRentalTax, type RentalTaxRateMode } from '@/lib/rental-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -74,6 +75,27 @@ export default function RentalTaxClient() {
     }
   }
 
+  const copyResult = async () => {
+    try {
+      await copyText(resultLines([
+        '财产租赁个税计算结果',
+        `租赁类型：${mode === 'housing' ? '出租住房' : '其他财产'}`,
+        `每月租赁税前收入：${money(income)}`,
+        `出租过程中已缴税费：${money(taxesAndFees)}`,
+        `转租支付租金：${money(subleaseRent)}`,
+        `本次修缮费用：${money(repairExpense)}`,
+        `可扣税费和成本：${money(result.deductibleCosts)}`,
+        `应纳税所得额：${money(result.taxable)}`,
+        `个税税率：${rate}%`,
+        `应缴个税：${money(result.tax)}`,
+        `预计税后收入：${money(result.takeHome)}`,
+      ]))
+      notify('已复制财产租赁计算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动复制结果')
+    }
+  }
+
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
     <header className="labor-hero">
@@ -113,7 +135,7 @@ export default function RentalTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 
