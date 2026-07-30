@@ -43,6 +43,20 @@ test('公积金比例可在 3% 到 12% 间改变个人缴费', () => {
   assert.equal(highHousing.find((item) => item.housing)?.employee, 2400)
 })
 
+test('社保和公积金基数可以不同，分别影响对应项目', () => {
+  const insurance = calculateInsurance(cityRules.beijing, 20000, 10000, 12, 12)
+  const pension = insurance.find((item) => item.name === '养老保险')
+  const housing = insurance.find((item) => item.housing)
+  const result = calculateMonth(20000, 8, 1, 0, insurance)
+
+  assert.equal(pension?.employee, 1600)
+  assert.equal(housing?.employee, 1200)
+  assert.equal(result.employeeInsurance, 3300)
+  assert.equal(result.taxable, 93600)
+  assert.equal(result.currentTax, 1170)
+  assert.equal(result.takeHome, 15530)
+})
+
 test('城市规则会影响单位缴费和规则版本日期', () => {
   const beijing = calculateInsurance(cityRules.beijing, 20000, 20000, 12, 12)
   const shenzhen = calculateInsurance(cityRules.shenzhen, 20000, 20000, 12, 12)
