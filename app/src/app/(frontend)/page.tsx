@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
-import { currentYear, siteName, siteUrl } from '@/lib/site'
+import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 
 export const metadata = {
   title: `工资到手与个税计算器｜${siteName}`,
@@ -55,7 +55,7 @@ export default function HomePage() {
         <div className="hero-snapshot-legend"><span><i className="legend-dot take-home" />到手工资 <b>¥15,710</b></span><span><i className="legend-dot insurance" />五险一金 <b>¥3,100</b></span><span><i className="legend-dot tax" />个人所得税 <b>¥1,190</b></span></div>
         <p>按北京市规则估算 · 8 月</p>
       </div>
-      <div className="home-hero-note"><span className="status-dot" /><span>规则核对日期</span><strong>{currentYear}-07-27</strong></div>
+      <div className="home-hero-note"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
     </section>
 
     <section className="home-tool-section" aria-labelledby="home-tools-title">

@@ -7,7 +7,7 @@ import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { calculateBonusTax } from '@/lib/bonus-tax'
-import { currentYear } from '@/lib/site'
+import { bonusPolicyEndDate, currentYear } from '@/lib/site'
 
 export default function BonusTaxClient() {
   const { money } = useMoneyFormat()
@@ -19,7 +19,7 @@ export default function BonusTaxClient() {
   const reset = () => { setBonus(60000); setAnnualSalary(240000); setAnnualInsurance(54000); setAnnualDeductions(0) }
 
   return <div className="app-shell"><SiteHeader active="bonus-tax" /><main className="bonus-page">
-    <header className="bonus-hero"><div><div className="bonus-eyebrow"><Gift size={18} />{currentYear} 年年终奖个税计算器</div><h1>年终奖，<br />哪种计税更划算？</h1><p>输入年终奖和全年收入，比较单独计税与并入综合所得后的奖金到手金额。</p></div><div className="bonus-policy-note"><strong>政策有效期</strong><span>全年一次性奖金单独计税政策执行至 2027 年 12 月 31 日</span></div></header>
+    <header className="bonus-hero"><div><div className="bonus-eyebrow"><Gift size={18} />{currentYear} 年年终奖个税计算器</div><h1>年终奖，<br />哪种计税更划算？</h1><p>输入年终奖和全年收入，比较单独计税与并入综合所得后的奖金到手金额。</p></div><div className="bonus-policy-note"><strong>政策有效期</strong><span>全年一次性奖金单独计税政策执行至 {bonusPolicyEndDate}</span></div></header>
     <section className="bonus-workspace" aria-label="年终奖个税计算器">
       <form className="bonus-input panel" onSubmit={(event) => event.preventDefault()}><h2>计算你的年终奖</h2><BonusInput id="bonus" label="年终奖税前金额" value={bonus} onChange={setBonus} />
         <div className="bonus-form-grid"><BonusInput id="annualSalary" label="全年税前工资薪金" value={annualSalary} onChange={setAnnualSalary} /><BonusInput id="annualInsurance" label="全年个人社保公积金" value={annualInsurance} onChange={setAnnualInsurance} /><BonusInput id="annualDeductions" label="全年专项附加扣除" value={annualDeductions} onChange={setAnnualDeductions} /></div>
