@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { calculateInsurance, calculateMonth } from './tax-calculator'
+import { calculateInsurance, calculateMonth, clamp, getBracket } from './tax-calculator'
 import { cityRules } from './tax-rules'
 
 test('北京工资薪金累计预扣：2 万月薪在 8 月进入 10% 档', () => {
@@ -13,6 +13,16 @@ test('北京工资薪金累计预扣：2 万月薪在 8 月进入 10% 档', () =
   assert.equal(result.currentTax, 1050)
   assert.equal(result.cumulativeTax, 5880)
   assert.equal(result.takeHome, 14450)
+})
+
+test('累计应纳税所得额在 36000 元临界点内外使用不同税率档', () => {
+  const firstBracket = getBracket(36000)
+  const secondBracket = getBracket(36000.01)
+
+  assert.equal(Math.round(firstBracket.rate * 100), 3)
+  assert.equal(firstBracket.quick, 0)
+  assert.equal(Math.round(secondBracket.rate * 100), 10)
+  assert.equal(secondBracket.quick, 2520)
 })
 
 test('年中入职：计算月份早于入职月份时不产生工资和税额', () => {
@@ -55,6 +65,20 @@ test('社保和公积金基数可以不同，分别影响对应项目', () => {
   assert.equal(result.taxable, 93600)
   assert.equal(result.currentTax, 1170)
   assert.equal(result.takeHome, 15530)
+})
+
+test('缴费基数超出城市范围时可以按规则上下限估算', () => {
+  const rule = cityRules.beijing
+  const socialBase = clamp(1000, rule.socialMin, rule.socialMax)
+  const housingBase = clamp(999999, rule.housingMin, rule.housingMax)
+  const insurance = calculateInsurance(rule, socialBase, housingBase, 12, 12)
+  const pension = insurance.find((item) => item.name === '养老保险')
+  const housing = insurance.find((item) => item.housing)
+
+  assert.equal(socialBase, rule.socialMin)
+  assert.equal(housingBase, rule.housingMax)
+  assert.equal(pension?.employeeFormula, `${rule.socialMin} × 8%`)
+  assert.equal(housing?.employeeFormula, `${rule.housingMax} × 12%`)
 })
 
 test('城市规则会影响单位缴费和规则版本日期', () => {
