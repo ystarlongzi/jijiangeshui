@@ -1,0 +1,166 @@
+.page {
+  width: min(980px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 56px 0 42px;
+}
+
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.titleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.header h1 {
+  margin: 18px 0 14px;
+  font-size: clamp(38px, 6vw, 64px);
+}
+
+.header p {
+  max-width: 660px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.header :global(.home-primary-action) {
+  flex: 0 0 auto;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.explanation {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 52px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.explanation h2,
+.faq h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.explanation p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.explanation a,
+.bottomActions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.nextActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.faq {
+  padding: 48px 0 30px;
+}
+
+.faq details {
+  border-top: 1px solid var(--line);
+}
+
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: '+';
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.faq details[open] summary::after {
+  content: '-';
+}
+
+.faq details p {
+  max-width: 680px;
+  margin: -3px 36px 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.bottomActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 680px) {
+  .page {
+    width: min(100% - 28px, 600px);
+    padding-top: 34px;
+  }
+
+  .header {
+    display: grid;
+    align-items: start;
+    gap: 24px;
+    padding-bottom: 32px;
+  }
+
+  .header h1 {
+    font-size: 44px;
+  }
+
+  .header p {
+    font-size: 14px;
+  }
+
+  .explanation {
+    display: grid;
+    align-items: start;
+    gap: 22px;
+    padding: 38px 0;
+  }
+
+  .bottomActions {
+    display: grid;
+    gap: 14px;
+  }
+}
