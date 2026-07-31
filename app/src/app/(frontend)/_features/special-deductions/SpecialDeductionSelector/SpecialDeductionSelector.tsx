@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Button } from '../Button'
-import { useMoneyFormat } from '../MoneyFormatProvider'
-import Modal from '../Modal'
+import { Button } from '../../../_components/Button'
+import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
+import Modal from '../../../_components/Modal'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
-import useSpecialDeductionSelection from '../../useSpecialDeductionSelection'
-import { trackEvent } from '../../_lib/analytics'
+import useSpecialDeductionSelection from '../useSpecialDeductionSelection'
+import { trackEvent } from '../../../_lib/analytics'
 import styles from './SpecialDeductionSelector.module.css'
 
 type SpecialDeductionSelectorProps = {

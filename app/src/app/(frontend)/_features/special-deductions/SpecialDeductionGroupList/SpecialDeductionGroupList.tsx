@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react'
 import { specialDeductionGroups, specialDeductionItems } from '@/lib/special-deductions'
-import { useMoneyFormat } from '../MoneyFormatProvider'
+import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import styles from './SpecialDeductionGroupList.module.css'
 
 type SpecialDeductionGroupListProps = {
