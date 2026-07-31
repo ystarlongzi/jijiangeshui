@@ -1,6 +1,6 @@
 'use client'
 
-export type AnalyticsEventName = 'page_view' | 'calculate_complete' | 'result_expand' | 'share_link' | 'copy_result' | 'export_csv'
+export type AnalyticsEventName = 'page_view' | 'calculate_complete' | 'result_expand' | 'share_link' | 'copy_result' | 'export_csv' | 'link_click'
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>
 
 type TrackedEvent = {

@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import TrackedLink from './TrackedLink'
 
 type LongTailType = 'labor' | 'author' | 'license' | 'rental' | 'transfer' | 'business' | 'dividend' | 'accidental'
 
@@ -162,11 +162,11 @@ export default function LongTailInfo({ type }: { type: LongTailType }) {
         <h2>还可以继续算什么？</h2>
       </div>
       <div className="longtail-related-links">
-        {info.related.map((item) => <Link key={item.href} href={item.href}>
+        {info.related.map((item) => <TrackedLink key={item.href} href={item.href} eventPayload={{ module: 'longtail_related', label: item.label, source: type }}>
           <strong>{item.label}</strong>
           <small>{item.note}</small>
           <ArrowRight size={15} />
-        </Link>)}
+        </TrackedLink>)}
       </div>
     </div>
     <div className="longtail-faq">
