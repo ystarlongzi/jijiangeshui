@@ -300,7 +300,18 @@ function FlowLegend({ className, label, value, money }: { className: string; lab
 
 function ContributionSegment({ className, label, value, total, money }: { className: string; label: string; value: number; total: number; money: (value: number, decimals?: number) => string }) {
   const percent = total > 0 ? value / total * 100 : 0
-  return <div className="contribution-item"><span className={`contribution-dot ${className}`} /><span>{label}</span><strong>{money(value, 0)}</strong><em>{Math.round(percent)}%</em></div>
+  return (
+    <div className="contribution-item">
+      <span className={`contribution-dot ${className}`} />
+      <span className="contribution-item-body">
+        <span className="contribution-item-main">
+          <span>{label}</span>
+          <strong>{money(value, 0)}</strong>
+        </span>
+        <em>{Math.round(percent)}%</em>
+      </span>
+    </div>
+  )
 }
 
 function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[]; month: number; money: (value: number, decimals?: number) => string }) {
