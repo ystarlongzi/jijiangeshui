@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
+import SectionHeading from '../SectionHeading'
 import { cityRules } from '@/lib/tax-rules'
 import { currentYear, siteName } from '@/lib/site'
 import styles from './CityPages.module.css'
@@ -37,7 +38,7 @@ export default function CityIndexPage() {
     </section>
 
     <section className={styles.provinceSection} aria-label="按地区浏览城市">
-      <div className="home-section-heading"><h2>按地区浏览</h2><p>先覆盖高频城市，后续接入规则后台后会扩展更多省市。</p></div>
+      <SectionHeading title="按地区浏览" description="先覆盖高频城市，后续接入规则后台后会扩展更多省市。" />
       <div className={styles.provinceList}>
         {Object.entries(cityGroups).map(([province, group]) => <div className={styles.provinceCard} key={province}>
           <strong>{province}</strong>
