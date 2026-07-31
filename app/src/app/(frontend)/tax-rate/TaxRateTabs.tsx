@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { businessTaxBrackets } from '@/lib/business-tax'
 import { taxBrackets } from '@/lib/tax-rules'
+import DataTable from '../DataTable'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { trackEvent } from '../analytics'
 
@@ -98,11 +99,17 @@ export default function TaxRateTabs() {
     trackEvent('tax_rate_tab_change', { level: 'identity', group: activeGroup, type: activeType, identity: nextIdentity })
   }
 
+  const rateColumns = [{ key: 'level', header: '级数' }, { key: 'range', header: '应纳税所得额' }, { key: 'rate', header: '税率 / 预扣率' }, { key: 'quick', header: '速算扣除数' }]
+  const rateRows = active.rows?.map((row, index) => ({
+    key: `${activeType}-${identity}-${row.range}`,
+    cells: { level: index + 1, range: row.range, rate: row.rate, quick: formatQuick(row.quick, money) },
+  })) ?? []
+
   return <section className="rate-tabs-section" aria-label="个人所得税税率表">
     <div className="rate-category-cards" role="tablist" aria-label="所得类型分类">{([{ id: 'comprehensive', label: '综合所得', description: '工资薪金、劳务报酬、稿酬、特许权使用费' }, { id: 'classified', label: '分类所得', description: '经营、财产、利息股息红利和偶然所得' }] as { id: IncomeGroup; label: string; description: string }[]).map((item) => <button key={item.id} className={activeGroup === item.id ? 'active' : ''} type="button" role="tab" aria-selected={activeGroup === item.id} onClick={() => selectGroup(item.id)}><strong>{item.label}</strong><span>{item.description}</span></button>)}</div>
     <div className="rate-income-nav" aria-label={currentGroup.label}><div className="rate-income-group"><div className="rate-income-options" role="tablist" aria-label={currentGroup.label}>{currentGroup.items.map((item) => <button key={item.id} className={activeType === item.id ? 'active' : ''} type="button" role="tab" aria-selected={activeType === item.id} onClick={() => selectType(item.id)}>{item.label}</button>)}</div></div></div>
     {activeGroup === 'comprehensive' && <div className="rate-identity-nav" role="tablist" aria-label="居民或非居民个人"><div className="rate-identity-options">{([{ id: 'resident', label: '居民个人' }, { id: 'non-resident', label: '非居民个人' }] as { id: Identity; label: string }[]).map((item) => <button key={item.id} className={identity === item.id ? 'active' : ''} type="button" role="tab" aria-selected={identity === item.id} onClick={() => selectIdentity(item.id)}>{item.label}</button>)}</div></div>}
-    <div className="rate-tab-panel panel" role="tabpanel"><div className="rate-table-heading"><div><h2>{active.title}</h2><p>{active.description}</p></div><span className="rate-year-label">{currentYear} 年</span></div>{active.rows ? <div className="rate-table-wrap"><table className="rate-table"><thead><tr><th>级数</th><th>应纳税所得额</th><th>税率 / 预扣率</th><th>速算扣除数</th></tr></thead><tbody>{active.rows.map((row, index) => <tr key={`${activeType}-${identity}-${row.range}`}><td>{index + 1}</td><td>{row.range}</td><td>{row.rate}</td><td>{formatQuick(row.quick, money)}</td></tr>)}</tbody></table></div> : <div className="simple-rate-panel"><div className="simple-rate-copy"><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className="rate-tab-note"><Info size={15} /><span>{active.note}</span></div>}<div className="source-line"><span>来源：国家税务总局法规库；规则核对日期：{ruleCheckedDate}</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看个人所得税法 <ExternalLink size={13} /></a></div></div>
+    <div className="rate-tab-panel panel" role="tabpanel"><div className="rate-table-heading"><div><h2>{active.title}</h2><p>{active.description}</p></div><span className="rate-year-label">{currentYear} 年</span></div>{active.rows ? <DataTable columns={rateColumns} rows={rateRows} wrapperClassName="rate-table-wrap" tableClassName="rate-table" /> : <div className="simple-rate-panel"><div className="simple-rate-copy"><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className="rate-tab-note"><Info size={15} /><span>{active.note}</span></div>}<div className="source-line"><span>来源：国家税务总局法规库；规则核对日期：{ruleCheckedDate}</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看个人所得税法 <ExternalLink size={13} /></a></div></div>
     <section className="rate-next-card"><div><h2>看完税率表，直接测算</h2><p>税率只决定计算口径，实际结果还要结合收入、扣除、成本或费用。</p></div><Link href={calculatorLink.href}>{calculatorLink.label} <ExternalLink size={13} /></Link></section>
   </section>
 }
