@@ -13,6 +13,7 @@ import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionSelector from '../SpecialDeductionSelector'
 import RuleSourcePanel from '../RuleSourcePanel'
+import DataTable from '../DataTable'
 import { trackEvent } from '../analytics'
 import { downloadCsv } from '../csv'
 
@@ -317,7 +318,21 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
     { className: 'employer-social', label: '企业社保', value: socialEmployer },
     { className: 'employer-housing', label: '企业公积金', value: housingEmployer },
   ]
-  const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee, 2)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer, 2)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal, 2)}</td></tr>
+  const amountWithFormula = (amount: number, formula: string) => <>{money(amount, 2)}<span className="formula">{formula}</span></>
+  const columns = [{ key: 'name', header: '缴纳项目' }, { key: 'employee', header: '个人缴纳' }, { key: 'employer', header: '企业缴纳' }, { key: 'subtotal', header: '小计' }]
+  const tableRows = [
+    ...social.map((item) => ({
+      key: item.name,
+      cells: { name: item.name, employee: amountWithFormula(item.employee, item.employeeFormula), employer: amountWithFormula(item.employer, item.employerFormula), subtotal: money(item.subtotal, 2) },
+    })),
+    { key: 'social-total', className: 'subtotal social-subtotal', cells: { name: '社保合计', employee: money(sum(social, 'employee'), 2), employer: money(sum(social, 'employer'), 2), subtotal: money(sum(social, 'subtotal'), 2) } },
+    ...housing.map((item) => ({
+      key: item.name,
+      className: 'housing-row',
+      cells: { name: item.name, employee: amountWithFormula(item.employee, item.employeeFormula), employer: amountWithFormula(item.employer, item.employerFormula), subtotal: money(item.subtotal, 2) },
+    })),
+    { key: 'insurance-total', className: 'subtotal total-subtotal', cells: { name: '社保、公积金合计', employee: money(sum(insurance, 'employee'), 2), employer: money(sum(insurance, 'employer'), 2), subtotal: money(sum(insurance, 'subtotal'), 2) } },
+  ]
   const exportCsv = () => {
     const header = ['缴纳项目', '个人缴纳', '个人公式', '企业缴纳', '企业公式', '小计']
     const rows = [
@@ -330,7 +345,7 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
     downloadCsv(`五险一金汇缴明细-${currentYear}-${month}月.csv`, rows)
   }
 
-  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><DataTable columns={columns} rows={tableRows} wrapperClassName="detail-table-wrap" tableClassName="insurance-table" /><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
 function AnnualTable({ salaries, month, startMonth, deduction, insurance, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
@@ -363,11 +378,25 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
     downloadCsv(`工资薪金逐月明细-${currentYear}.csv`, csvRows)
   }
 
+  const columns = [{ key: 'month', header: '月份' }, { key: 'income', header: '到手 / 税前' }, { key: 'insurance', header: '个人五险一金' }, { key: 'taxable', header: '累计应纳税所得额' }, { key: 'rate', header: '预扣率' }, { key: 'tax', header: '本月个税' }]
+  const tableRows = rows.map(({ currentMonth, inactive, salary, item }) => ({
+    key: currentMonth,
+    className: currentMonth === month ? 'current-month' : '',
+    cells: {
+      month: `${currentMonth} 月`,
+      income: <><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</>,
+      insurance: inactive ? '-' : money(item.employeeInsurance, 0),
+      taxable: inactive ? '-' : money(item.taxable, 0),
+      rate: inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`,
+      tax: inactive ? '-' : money(item.currentTax, 0),
+    },
+  }))
+
   return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年预扣逐月明细</h2><div className="annual-heading-actions"><span className="subtle-label">当前月份会高亮显示</span><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div></div><div className="annual-summary-card"><div className="annual-chart-summary"><div><span>全年预扣合计</span><strong>{money(annualTaxTotal, 0)}</strong></div><div><span>最高月个税</span><strong>{peakTaxRow ? `${peakTaxRow.currentMonth} 月 ${money(peakTaxRow.item.currentTax, 0)}` : '-'}</strong></div><div><span>税率变化</span><strong>{rateStepText}</strong></div></div></div><div className="annual-tax-chart" aria-label="全年个税走势"><div className="annual-tax-bars">{rows.map(({ currentMonth, inactive, item }) => {
     const height = inactive ? 0 : Math.max(6, item.currentTax / maxTax * 100)
     const style = { '--tax-height': `${height}%` } as CSSProperties
     return <div className={`annual-tax-bar ${currentMonth === month ? 'current' : ''} ${inactive ? 'inactive' : ''}`} key={currentMonth}><span className="bar-value">{inactive ? '-' : money(item.currentTax, 0)}</span><span className="bar-track"><span className="bar-fill" style={style} /></span><span className="bar-month">{currentMonth}月</span></div>
-  })}</div></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{rows.map(({ currentMonth, inactive, salary, item }) => <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr>)}</tbody></table></div><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
+  })}</div></div><DataTable columns={columns} rows={tableRows} wrapperClassName="annual-table-wrap" tableClassName="annual-table" /><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
 }
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
