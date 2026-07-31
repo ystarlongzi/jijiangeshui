@@ -266,11 +266,14 @@ table { width: 100%; border-collapse: collapse; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
 td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; text-align: right; white-space: nowrap; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface)); }
 .insurance-table th, .insurance-table td { padding: 13px 10px; }
 .insurance-table tbody tr.subtotal td { border-top-style: solid; color: var(--orange); font-weight: 750; }
 .insurance-table tbody tr.subtotal td:first-child { color: var(--ink); }
 .insurance-table tbody tr.social-subtotal td,
 .insurance-table tbody tr.housing-row td { background: var(--surface-muted); }
+.insurance-table tbody tr.social-subtotal:hover td,
+.insurance-table tbody tr.housing-row:hover td { background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface)); }
 .insurance-table tbody tr.social-subtotal td { border-top-style: solid; }
 .insurance-table tbody tr.housing-row td { border-top-style: solid; font-weight: 700; }
 .insurance-table tbody tr.housing-row .formula { font-weight: 400; }
