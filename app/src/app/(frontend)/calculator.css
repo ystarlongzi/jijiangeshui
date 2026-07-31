@@ -92,8 +92,8 @@ select, input[type="number"] { width: 100%; min-height: 44px; border: 1px solid 
 input[type="number"] { appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
 .field-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -1px 0 0; color: var(--subtle); font-size: 11px; }
-.text-button, .link-button { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 0; }
-.text-button:hover, .link-button:hover { color: var(--accent-deep); }
+.text-button { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 0; }
+.text-button:hover { color: var(--accent-deep); }
 .select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
 .select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
 .small-input input, .small-input .amount-tip-track { font-size: 15px; }
@@ -112,9 +112,6 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .primary-button:active, .secondary-button:active { transform: translateY(1px); }
 .form-footnote { margin: 13px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.55; }
 
-.link-button { font-size: 12px; }
-.icon-link-button { display: inline-flex; align-items: center; gap: 5px; }
-.link-button span { font-size: 16px; vertical-align: -1px; }
 table { width: 100%; border-collapse: collapse; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
