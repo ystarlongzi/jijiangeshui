@@ -2,7 +2,7 @@
 
 import Link, { type LinkProps } from 'next/link'
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
-import { trackEvent, type AnalyticsPayload } from './analytics'
+import { trackEvent, type AnalyticsPayload } from '../analytics'
 
 type TrackedLinkProps = LinkProps & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
   eventPayload?: AnalyticsPayload
