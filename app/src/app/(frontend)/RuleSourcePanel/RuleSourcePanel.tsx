@@ -1,4 +1,5 @@
 import { ruleCheckedDate } from '@/lib/site'
+import styles from './RuleSourcePanel.module.css'
 
 type RuleSourcePanelProps = {
   title?: string
@@ -17,13 +18,13 @@ export default function RuleSourcePanel({
 }: RuleSourcePanelProps) {
   const sourceLinks = links || [{ label: sourceLabel, url: sourceUrl }]
 
-  return <section className="source-section" aria-label="官方来源">
+  return <section className={styles.section} aria-label="官方来源">
     <div>
       <h2>{title}</h2>
       <p>{description}</p>
-      <p className="rule-source-date">规则核对日期：{ruleCheckedDate}</p>
+      <p className={styles.date}>规则核对日期：{ruleCheckedDate}</p>
     </div>
-    <div className="source-links">
+    <div className={styles.links}>
       {sourceLinks.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}
     </div>
   </section>

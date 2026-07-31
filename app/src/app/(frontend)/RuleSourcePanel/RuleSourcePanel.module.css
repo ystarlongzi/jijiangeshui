@@ -1,0 +1,45 @@
+.section {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 72px;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--line-strong);
+}
+
+.section h2 {
+  margin-bottom: 8px;
+}
+
+.section p {
+  max-width: 540px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.date {
+  margin-top: 8px !important;
+  color: var(--subtle) !important;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 12px 18px;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .section {
+    align-items: start;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .links {
+    justify-content: start;
+  }
+}
