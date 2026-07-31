@@ -104,11 +104,6 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .form-actions { display: grid; grid-template-columns: 1fr 84px; gap: 10px; margin-top: 22px; }
 .form-footnote { margin: 13px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.55; }
 
-table { width: 100%; border-collapse: collapse; }
-th { color: var(--muted); font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; text-align: right; white-space: nowrap; }
-tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface)); }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 20; max-width: min(360px, calc(100vw - 48px)); padding: 11px 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--ink); color: var(--surface); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; }
 .toast.visible { opacity: 1; transform: translateY(0); }
 
