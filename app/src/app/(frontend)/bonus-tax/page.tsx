@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import BonusTaxClient from './BonusTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
-import JsonLd from '../JsonLd'
+import JsonLd from '../_components/JsonLd'
 
 export const metadata: Metadata = {
   title: `年终奖个税计算与单独计税｜${currentYear}年｜${siteName}`,

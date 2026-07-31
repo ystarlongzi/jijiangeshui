@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import BusinessTaxClient from './BusinessTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
-import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
+import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年经营所得个税计算器｜个体工商户个税｜${siteName}`,

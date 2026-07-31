@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import ToolContentPage from '../ToolContentPage'
+import ToolContentPage from '../_components/ToolContentPage'
 import { currentYear, siteName } from '@/lib/site'
 
 export const metadata: Metadata = {

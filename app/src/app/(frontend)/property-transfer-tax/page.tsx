@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import PropertyTransferTaxClient from './PropertyTransferTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
-import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
+import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年财产转让个税计算器｜转让所得个税｜${siteName}`,

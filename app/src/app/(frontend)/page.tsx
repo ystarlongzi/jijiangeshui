@@ -1,4 +1,4 @@
-import TrackedLink from './TrackedLink'
+import TrackedLink from './_components/TrackedLink'
 import styles from './page.module.css'
 import {
   ArrowRight,
@@ -20,10 +20,10 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
-import SiteHeader from './SiteHeader'
-import SiteFooter from './SiteFooter'
-import SectionHeading from './SectionHeading'
-import PrimaryActionLink from './PrimaryActionLink'
+import SiteHeader from './_components/SiteHeader'
+import SiteFooter from './_components/SiteFooter'
+import SectionHeading from './_components/SectionHeading'
+import PrimaryActionLink from './_components/PrimaryActionLink'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 
 export const metadata = {

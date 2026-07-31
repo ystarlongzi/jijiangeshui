@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { ArrowRight, BookOpen, CalendarRange, MapPin, ReceiptText, TrendingUp } from 'lucide-react'
-import SiteFooter from '../SiteFooter'
-import SiteHeader from '../SiteHeader'
-import JsonLd from '../JsonLd'
-import TrackedLink from '../TrackedLink'
+import SiteFooter from '../_components/SiteFooter'
+import SiteHeader from '../_components/SiteHeader'
+import JsonLd from '../_components/JsonLd'
+import TrackedLink from '../_components/TrackedLink'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import styles from './TopicsPage.module.css'
 

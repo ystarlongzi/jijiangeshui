@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import AccidentalTaxClient from './AccidentalTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
-import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
+import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年偶然所得个税计算器｜中奖个税｜${siteName}`,

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { siteName, siteUrl } from '@/lib/site'
-import AnalyticsReporter from './AnalyticsReporter'
-import AnalyticsScripts from './AnalyticsScripts'
-import { MoneyFormatProvider } from './MoneyFormatProvider'
+import AnalyticsReporter from './_components/AnalyticsReporter'
+import AnalyticsScripts from './_components/AnalyticsScripts'
+import { MoneyFormatProvider } from './_components/MoneyFormatProvider'
 
 import './calculator.css'
 

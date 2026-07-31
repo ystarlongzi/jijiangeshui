@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '../ThemeToggle'
 import { useMoneyFormat } from '../MoneyFormatProvider'
-import { trackEvent } from '../analytics'
+import { trackEvent } from '../../analytics'
 import { ArrowUpRight, Calculator, FileText, Gift, Home, Menu, Percent, Sparkles, X } from 'lucide-react'
 import styles from './SiteHeader.module.css'
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import LaborTaxClient from './LaborTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
-import JsonLd, { createCalculatorJsonLd } from '../JsonLd'
+import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
 export const metadata: Metadata = {
   title: `${currentYear}年劳务报酬个税计算器｜${siteName}`,
