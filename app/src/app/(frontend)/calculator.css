@@ -560,11 +560,11 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
 .reverse-input .text-button { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; }
 .reverse-deductions { display: grid; gap: 9px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
 .reverse-deductions p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
-.deduction-dialog-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgba(18, 41, 38, 0.22); }
-.deduction-dialog { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(620px, 100%); max-height: min(760px, calc(100dvh - 48px)); overflow: hidden; padding: 0; }
-.deduction-dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; padding: 22px 22px 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
-.deduction-dialog-heading h2 { margin: 0 0 6px; font-size: 22px; }
-.deduction-dialog-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgba(18, 41, 38, 0.22); }
+.modal-panel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(620px, 100%); max-height: min(760px, calc(100dvh - 48px)); overflow: hidden; padding: 0; }
+.modal-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; padding: 22px 22px 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modal-heading h2 { margin: 0 0 6px; font-size: 22px; }
+.modal-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .deduction-option-list { display: grid; gap: 10px; overflow: auto; padding: 18px 22px; }
 .deduction-group { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .deduction-group.disabled { background: var(--surface-muted); }

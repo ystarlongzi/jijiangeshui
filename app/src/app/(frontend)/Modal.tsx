@@ -17,9 +17,9 @@ export default function Modal({ open, title, description, children, footer, onCl
 
   if (!open) return null
 
-  return <div className="deduction-dialog-backdrop" role="presentation" onClick={onClose}>
-    <section className="deduction-dialog panel" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={(event) => event.stopPropagation()}>
-      <div className="deduction-dialog-heading">
+  return <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <section className="modal-panel panel" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={(event) => event.stopPropagation()}>
+      <div className="modal-heading">
         <div>
           <h2 id={titleId}>{title}</h2>
           {description && <p>{description}</p>}
