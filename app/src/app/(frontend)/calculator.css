@@ -210,6 +210,22 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .section-heading-row { align-items: end; flex-wrap: wrap; margin-bottom: 18px; }
 .heading-with-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; }
 .subtle-label { color: var(--subtle); font-size: 11px; }
+.contribution-chart { display: grid; gap: 14px; margin-bottom: 18px; padding: 16px; border-radius: 12px; background: var(--surface-muted); }
+.contribution-total { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.contribution-total span { color: var(--muted); font-size: 11px; }
+.contribution-total strong { color: var(--ink); font-size: 22px; }
+.contribution-stack { display: flex; height: 12px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.contribution-segment { flex: 0 0 var(--segment-width); min-width: 0; }
+.contribution-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px; }
+.contribution-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; min-width: 0; color: var(--muted); font-size: 11px; }
+.contribution-item span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.contribution-item strong { color: var(--ink); font-size: 12px; }
+.contribution-item em { grid-column: 2 / 4; color: var(--subtle); font-size: 10px; font-style: normal; }
+.contribution-dot { width: 8px; height: 8px; border-radius: 50%; }
+.personal-social { background: var(--accent); }
+.personal-housing { background: #63b6a1; }
+.employer-social { background: #d9a14f; }
+.employer-housing { background: var(--orange); }
 .detail-table-wrap, .annual-table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
@@ -758,6 +774,8 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .monthly-salary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .take-home-block > strong { font-size: 42px; }
   .result-actions { align-items: start; flex-direction: column; }
+  .contribution-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contribution-total { align-items: flex-start; flex-direction: column; gap: 4px; }
   .detail-table-wrap { margin-inline: -8px; }
   .insurance-table { min-width: 630px; }
   .annual-heading-actions { align-items: flex-start; flex-direction: column; gap: 8px; }

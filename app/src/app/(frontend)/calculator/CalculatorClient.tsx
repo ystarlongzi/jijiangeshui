@@ -297,10 +297,26 @@ function FlowLegend({ className, label, value, money }: { className: string; lab
   return <div><span className={`flow-dot ${className}`} /><span>{label}</span><strong>{money(value, 0)}</strong></div>
 }
 
+function ContributionSegment({ className, label, value, total, money }: { className: string; label: string; value: number; total: number; money: (value: number, decimals?: number) => string }) {
+  const percent = total > 0 ? value / total * 100 : 0
+  return <div className="contribution-item"><span className={`contribution-dot ${className}`} /><span>{label}</span><strong>{money(value, 0)}</strong><em>{Math.round(percent)}%</em></div>
+}
+
 function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[]; month: number; money: (value: number, decimals?: number) => string }) {
   const social = insurance.filter((item) => !item.housing)
   const housing = insurance.filter((item) => item.housing)
   const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
+  const socialEmployee = sum(social, 'employee')
+  const socialEmployer = sum(social, 'employer')
+  const housingEmployee = sum(housing, 'employee')
+  const housingEmployer = sum(housing, 'employer')
+  const contributionTotal = sum(insurance, 'subtotal')
+  const contributionSegments = [
+    { className: 'personal-social', label: '个人社保', value: socialEmployee },
+    { className: 'personal-housing', label: '个人公积金', value: housingEmployee },
+    { className: 'employer-social', label: '企业社保', value: socialEmployer },
+    { className: 'employer-housing', label: '企业公积金', value: housingEmployer },
+  ]
   const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee, 2)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer, 2)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal, 2)}</td></tr>
   const exportCsv = () => {
     const header = ['缴纳项目', '个人缴纳', '个人公式', '企业缴纳', '企业公式', '小计']
@@ -314,7 +330,7 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
     downloadCsv(`五险一金汇缴明细-${currentYear}-${month}月.csv`, rows)
   }
 
-  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
 function AnnualTable({ salaries, month, startMonth, deduction, insurance, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
