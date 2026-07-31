@@ -10,6 +10,7 @@ import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
+import Toast from '../Toast'
 import FormField from '../FormField'
 import MoneyInput from '../MoneyInput'
 import SelectField from '../SelectField'
@@ -278,7 +279,7 @@ export default function CalculatorClient() {
       onClose={() => setDeductionDialogOpen(false)}
       onSave={saveDeductionSelections}
     />
-    <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+    <Toast message={toast} />
   </div>
 }
 

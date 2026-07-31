@@ -5,6 +5,7 @@ import { ArrowRight, Copy, LocateFixed, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
+import Toast from '../Toast'
 import FormField from '../FormField'
 import MoneyInput from '../MoneyInput'
 import SelectField from '../SelectField'
@@ -143,7 +144,7 @@ export default function ReverseTaxClient() {
     onClose={() => setDeductionDialogOpen(false)}
     onSave={saveDeductions}
   />
-  <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  <Toast message={toast} />
   </>
 }
 

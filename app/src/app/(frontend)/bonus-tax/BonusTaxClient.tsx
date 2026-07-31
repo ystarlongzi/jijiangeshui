@@ -5,6 +5,7 @@ import { ArrowRight, Award, Copy, Download, Gift, RotateCcw } from 'lucide-react
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
+import Toast from '../Toast'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { trackEvent } from '../analytics'
@@ -115,7 +116,7 @@ export default function BonusTaxClient() {
     <section className={styles.explain}><div><h2>两种方式怎么理解？</h2><p>符合条件的居民个人取得全年一次性奖金，可以选择不并入当年综合所得，单独计算纳税，也可以选择并入当年综合所得计算。</p></div><a href="https://fgk.chinatax.gov.cn/zcfgk/c102416/c5211524/content.html" target="_blank" rel="noreferrer">查看官方政策 <ArrowRight size={15} /></a></section>
     <SiteFooter />
   </main></div>
-  <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  <Toast message={toast} />
   </>
 }
 

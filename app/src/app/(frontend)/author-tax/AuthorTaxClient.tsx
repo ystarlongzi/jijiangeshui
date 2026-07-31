@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, BookOpenText, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
+import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -125,6 +126,6 @@ export default function AuthorTaxClient() {
     <RuleSourcePanel />
     <SiteFooter />
   </main></div>
-  <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+  <Toast message={toast} />
   </>
 }
