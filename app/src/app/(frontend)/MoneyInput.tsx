@@ -45,7 +45,7 @@ export default function MoneyInput({
     if (!readOnly && Number(event.target.value) === 0) event.target.select()
   }
 
-  return <div className={`money-input amount-input${className ? ` ${className}` : ''}`}>
+  return <div className={`money-input amount-input${readOnly ? ' is-readonly' : ''}${className ? ` ${className}` : ''}`}>
     <span>{prefix}</span>
     <span className="amount-input-box">
       <input id={id} type="number" min={min} max={max} step={step} value={value} readOnly={readOnly} onFocus={selectZero} onChange={updateValue} inputMode="decimal" />

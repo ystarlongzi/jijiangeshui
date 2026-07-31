@@ -126,10 +126,14 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .city-label-row { min-height: 18px; }
 .text-button, .link-button { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 0; }
 .text-button:hover, .link-button:hover { color: var(--accent-deep); }
-.money-input { position: relative; display: flex; align-items: center; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); padding: 0 14px; color: var(--muted); transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
-.money-input:focus-within, .select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-soft) 70%, transparent); }
+.money-input { position: relative; display: flex; align-items: center; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); padding: 0 14px; color: var(--muted); transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease; }
+.money-input:focus-within, .select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
 .money-input input { min-height: 42px; border: 0; outline: 0; background: transparent; color: var(--ink); padding: 0 8px; font-size: 18px; font-weight: 700; text-align: right; }
 .money-input .unit { font-size: 12px; }
+.money-input.is-readonly { border-color: var(--line); background: color-mix(in srgb, var(--surface-muted) 72%, var(--surface)); color: var(--subtle); cursor: not-allowed; }
+.money-input.is-readonly:focus-within { border-color: var(--line); box-shadow: none; }
+.money-input.is-readonly input { color: var(--muted); cursor: not-allowed; -webkit-text-fill-color: var(--muted); }
+.money-input.is-readonly .unit { color: var(--subtle); }
 .money-input.input-error, .select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
 .amount-input-box { position: relative; flex: 1; min-width: 0; }
 .amount-input input { display: block; font-variant-numeric: tabular-nums; }
@@ -149,8 +153,9 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .salary-mode-row .text-button { color: var(--muted); font-size: 11px; }
 .salary-mode-row .text-button[aria-pressed="true"] { color: var(--accent); }
 .edit-base-button { font-size: 11px; }
-.base-editor input[readonly] { border-color: transparent; background: var(--surface); color: var(--ink); }
-.base-editor input:not([readonly]) { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.base-editor .money-input.is-readonly { background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface)); }
+.base-editor input[readonly] { border-color: transparent; color: var(--muted); }
+.base-editor input:not([readonly]) { border-color: var(--accent); }
 .base-editor .field-meta { display: block; }
 .monthly-salary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface-muted); }
 .monthly-salary-grid label { display: grid; gap: 5px; min-width: 0; }
