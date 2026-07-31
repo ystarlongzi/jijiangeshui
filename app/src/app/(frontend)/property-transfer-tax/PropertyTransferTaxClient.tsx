@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import ResultActions, { ResultActionButton, ResultActionLink } from '../ResultActions/ResultActions'
 import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
@@ -130,7 +131,7 @@ export default function PropertyTransferTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
       </section>
     </section>
 

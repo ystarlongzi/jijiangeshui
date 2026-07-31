@@ -459,14 +459,6 @@
   font-weight: 800;
 }
 
-.pageContent :global(.result-actions) {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 17px;
-}
-
 .pageContent :global(.calculation-detail),
 .pageContent :global(.employer-detail) {
   display: grid;
@@ -983,11 +975,6 @@
 
   .pageContent :global(.take-home-block > strong) {
     font-size: 42px;
-  }
-
-  .pageContent :global(.result-actions) {
-    align-items: start;
-    flex-direction: column;
   }
 
   .pageContent :global(.contribution-list) {
