@@ -6,6 +6,7 @@ import { ArrowRight, BookOpenText, Copy, Download, ReceiptText, RotateCcw } from
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
@@ -101,7 +102,7 @@ export default function AuthorTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 稿酬 {money(income)}</p></div><span className="bonus-badge">居民个人</span></div>
         <div className="labor-takehome"><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
-        <div className="reverse-metrics"><div><span>费用扣除</span><strong>{money(result.expenseDeduction)}</strong></div><div><span>减按 70% 后</span><strong>{money(result.taxable)}</strong></div><div><span>预扣率</span><strong>20%</strong></div><div><span>预扣个税</span><strong>{money(result.tax)}</strong></div></div>
+        <MetricGrid items={[{ label: '费用扣除', value: money(result.expenseDeduction) }, { label: '减按 70% 后', value: money(result.taxable) }, { label: '预扣率', value: '20%' }, { label: '预扣个税', value: money(result.tax) }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>

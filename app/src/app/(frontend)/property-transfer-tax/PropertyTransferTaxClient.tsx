@@ -6,6 +6,7 @@ import { ArrowRight, Copy, Download, ReceiptText, RotateCcw, TrendingUp } from '
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
@@ -119,7 +120,7 @@ export default function PropertyTransferTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className="bonus-badge">20% 税率</span></div>
         <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，应纳税所得额 {money(result.taxable)}。</p></div>
-        <div className="reverse-metrics"><div><span>转让收入</span><strong>{money(result.income)}</strong></div><div><span>财产原值</span><strong>{money(result.originalValue)}</strong></div><div><span>合理费用</span><strong>{money(result.reasonableFees)}</strong></div><div><span>应纳税所得额</span><strong>{money(result.taxable)}</strong></div></div>
+        <MetricGrid items={[{ label: '转让收入', value: money(result.income) }, { label: '财产原值', value: money(result.originalValue) }, { label: '合理费用', value: money(result.reasonableFees) }, { label: '应纳税所得额', value: money(result.taxable) }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>

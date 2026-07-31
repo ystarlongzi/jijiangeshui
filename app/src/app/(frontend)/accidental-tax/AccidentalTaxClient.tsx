@@ -6,6 +6,7 @@ import { ArrowRight, Copy, Dice5, Download, ReceiptText, RotateCcw } from 'lucid
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
@@ -95,7 +96,7 @@ export default function AccidentalTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 偶然所得 {money(income)}</p></div><span className="bonus-badge">20% 税率</span></div>
         <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}。</p></div>
-        <div className="reverse-metrics"><div><span>税前收入</span><strong>{money(result.income)}</strong></div><div><span>税率</span><strong>20%</strong></div><div><span>应缴个税</span><strong>{money(result.tax)}</strong></div><div><span>税后收入</span><strong>{money(result.takeHome)}</strong></div></div>
+        <MetricGrid items={[{ label: '税前收入', value: money(result.income) }, { label: '税率', value: '20%' }, { label: '应缴个税', value: money(result.tax) }, { label: '税后收入', value: money(result.takeHome) }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>

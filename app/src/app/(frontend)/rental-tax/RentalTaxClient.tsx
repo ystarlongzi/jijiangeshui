@@ -6,6 +6,7 @@ import { ArrowRight, Copy, Download, Home, ReceiptText, RotateCcw } from 'lucide
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
@@ -146,7 +147,7 @@ export default function RentalTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 财产租赁 {money(income)}</p></div><span className="bonus-badge">{mode === 'housing' ? '出租住房' : '其他财产'}</span></div>
         <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，适用 {rate}% 税率。</p></div>
-        <div className="reverse-metrics"><div><span>可扣税费和成本</span><strong>{money(result.deductibleCosts)}</strong></div><div><span>法定费用扣除</span><strong>{money(result.statutoryDeduction)}</strong></div><div><span>应纳税所得额</span><strong>{money(result.taxable)}</strong></div><div><span>个税税率</span><strong>{rate}%</strong></div></div>
+        <MetricGrid items={[{ label: '可扣税费和成本', value: money(result.deductibleCosts) }, { label: '法定费用扣除', value: money(result.statutoryDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '个税税率', value: `${rate}%` }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>

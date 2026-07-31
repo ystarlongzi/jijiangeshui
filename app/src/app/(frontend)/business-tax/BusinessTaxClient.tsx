@@ -6,6 +6,7 @@ import { ArrowRight, Briefcase, Copy, Download, ReceiptText, RotateCcw } from 'l
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
@@ -132,7 +133,7 @@ export default function BusinessTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 经营收入 {money(revenue)}</p></div><span className="bonus-badge">{rate}% 档</span></div>
         <div className="labor-takehome"><span>预计税后经营收入</span><strong>{money(result.afterTax)}</strong><p>应缴个税 {money(result.tax)}，适用税率 {rate}%。</p></div>
-        <div className="reverse-metrics"><div><span>总扣除</span><strong>{money(result.totalDeduction)}</strong></div><div><span>应纳税所得额</span><strong>{money(result.taxable)}</strong></div><div><span>税率</span><strong>{rate}%</strong></div><div><span>速算扣除数</span><strong>{money(result.bracket.quick)}</strong></div></div>
+        <MetricGrid items={[{ label: '总扣除', value: money(result.totalDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '税率', value: `${rate}%` }, { label: '速算扣除数', value: money(result.bracket.quick) }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>
