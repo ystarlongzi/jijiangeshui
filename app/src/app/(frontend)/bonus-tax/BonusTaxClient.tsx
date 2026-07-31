@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, Award, Copy, Gift, RotateCcw } from 'lucide-react'
+import { ArrowRight, Award, Copy, Download, Gift, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { trackEvent } from '../analytics'
+import { downloadCsv } from '../csv'
 import { calculateBonusTax } from '@/lib/bonus-tax'
 import { bonusPolicyEndDate, currentYear } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
@@ -80,6 +81,23 @@ export default function BonusTaxClient() {
       notify('当前浏览器无法自动复制，请手动选择结果')
     }
   }
+  const exportCsv = () => {
+    const betterLabel = result.better === 'separate' ? '单独计税' : '并入综合所得'
+    const rows = [
+      ['项目', '金额/结果', '说明'],
+      ['年终奖税前金额', bonus.toFixed(2), '用户输入'],
+      ['全年税前工资薪金', annualSalary.toFixed(2), '用于估算并入综合所得方案'],
+      ['全年个人社保公积金', annualInsurance.toFixed(2), '用于估算并入综合所得方案'],
+      ['全年专项附加扣除', annualDeductions.toFixed(2), '用于估算并入综合所得方案'],
+      ['推荐方案', betterLabel, `预计多到手 ${result.difference.toFixed(2)}`],
+      ['单独计税-奖金到手', result.separate.takeHome.toFixed(2), `个税 ${result.separate.tax.toFixed(2)}，税率 ${Math.round(result.separate.bracket.rate * 100)}%`],
+      ['并入综合所得-奖金到手', result.combined.takeHome.toFixed(2), `个税 ${result.combined.tax.toFixed(2)}，税率 ${Math.round(result.combined.bracket.rate * 100)}%`],
+      ['临界点建议', result.separateOptimization ? result.separateOptimization.suggestedBonus.toFixed(2) : '', result.separateOptimization ? `预计到手 ${result.separateOptimization.suggestedTakeHome.toFixed(2)}` : '未触发'],
+    ]
+    trackEvent('export_csv', { calculator: 'bonus_tax', better: result.better, rows: rows.length - 1 })
+    downloadCsv(`年终奖个税测算-${currentYear}.csv`, rows)
+    notify('已导出年终奖测算明细')
+  }
 
   return <>
   <div className="app-shell"><SiteHeader active="bonus-tax" /><main className="bonus-page">
@@ -88,7 +106,7 @@ export default function BonusTaxClient() {
       <form className="bonus-input panel" onSubmit={(event) => { event.preventDefault(); trackEvent('calculate_complete', { calculator: 'bonus_tax', better: result.better, hasThresholdTip: Boolean(result.separateOptimization) }) }}><h2>计算你的年终奖</h2><BonusInput id="bonus" label="年终奖税前金额" value={bonus} onChange={setBonus} />
         <div className="bonus-form-grid"><BonusInput id="annualSalary" label="全年税前工资薪金" value={annualSalary} onChange={setAnnualSalary} /><BonusInput id="annualInsurance" label="全年个人社保公积金" value={annualInsurance} onChange={setAnnualInsurance} /><BonusInput id="annualDeductions" label="全年专项附加扣除" value={annualDeductions} onChange={setAnnualDeductions} /></div>
         <p className="bonus-form-note">全年工资、个人缴费和专项附加扣除用于估算并入综合所得方案，不等同于年度汇算最终结果。实际情况以工资条和申报信息为准。</p><div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div></form>
-      <section className="bonus-result panel" aria-live="polite"><div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 年终奖 {money(bonus)}</p></div><span className="bonus-badge">推荐方案</span></div><div className="bonus-recommendation"><span>预计更划算</span><strong>{result.better === 'separate' ? '单独计税' : '并入综合所得'}</strong><p>预计多到手 {money(result.difference)}。你可以根据单位发放和年度申报情况进一步确认。</p></div>{result.separateOptimization && <ThresholdAlert optimization={result.separateOptimization} bonus={bonus} />}<div className="bonus-comparison"><BonusResultCard title="单独计税" result={result.separate} active={result.better === 'separate'} note="年终奖除以 12 个月确定税率，再单独计算奖金税额。" /><BonusResultCard title="并入综合所得" result={result.combined} active={result.better === 'combined'} note="年终奖并入全年综合所得，按年度税率计算增量税额。" /></div><p className="bonus-result-note">以上为居民个人全年一次性奖金测算，不适用于劳务报酬、股权激励等其他收入类型。</p><div className="result-actions"><a className="link-button" href="/tax-rate">查看税率表 <span>→</span></a><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div></section>
+      <section className="bonus-result panel" aria-live="polite"><div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 年终奖 {money(bonus)}</p></div><span className="bonus-badge">推荐方案</span></div><div className="bonus-recommendation"><span>预计更划算</span><strong>{result.better === 'separate' ? '单独计税' : '并入综合所得'}</strong><p>预计多到手 {money(result.difference)}。你可以根据单位发放和年度申报情况进一步确认。</p></div>{result.separateOptimization && <ThresholdAlert optimization={result.separateOptimization} bonus={bonus} />}<div className="bonus-comparison"><BonusResultCard title="单独计税" result={result.separate} active={result.better === 'separate'} note="年终奖除以 12 个月确定税率，再单独计算奖金税额。" /><BonusResultCard title="并入综合所得" result={result.combined} active={result.better === 'combined'} note="年终奖并入全年综合所得，按年度税率计算增量税额。" /></div><p className="bonus-result-note">以上为居民个人全年一次性奖金测算，不适用于劳务报酬、股权激励等其他收入类型。</p><div className="result-actions"><a className="link-button" href="/tax-rate">查看税率表 <span>→</span></a><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div></section>
     </section>
     <BonusProcess result={result} bonus={bonus} annualSalary={annualSalary} annualInsurance={annualInsurance} annualDeductions={annualDeductions} />
     <section className="bonus-explain"><div><h2>两种方式怎么理解？</h2><p>符合条件的居民个人取得全年一次性奖金，可以选择不并入当年综合所得，单独计算纳税，也可以选择并入当年综合所得计算。</p></div><a href="https://fgk.chinatax.gov.cn/zcfgk/c102416/c5211524/content.html" target="_blank" rel="noreferrer">查看官方政策 <ArrowRight size={15} /></a></section>

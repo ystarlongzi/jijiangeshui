@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, ReceiptText, RotateCcw, TrendingUp } from 'lucide-react'
+import { ArrowRight, Copy, Download, ReceiptText, RotateCcw, TrendingUp } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
+import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import { trackEvent } from '../analytics'
 import { calculatePropertyTransferTax } from '@/lib/property-transfer-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
@@ -77,6 +79,21 @@ export default function PropertyTransferTaxClient() {
       notify('当前浏览器无法自动复制，请手动复制结果')
     }
   }
+  const exportCsv = () => {
+    const rows = [
+      ['项目', '金额/结果'],
+      ['转让收入', result.income.toFixed(2)],
+      ['财产原值', result.originalValue.toFixed(2)],
+      ['合理费用', result.reasonableFees.toFixed(2)],
+      ['应纳税所得额', result.taxable.toFixed(2)],
+      ['税率', '20%'],
+      ['应缴个税', result.tax.toFixed(2)],
+      ['预计税后收入', result.takeHome.toFixed(2)],
+    ]
+    trackEvent('export_csv', { calculator: 'property_transfer_tax', rows: rows.length - 1 })
+    downloadCsv(`财产转让个税测算-${currentYear}.csv`, rows)
+    notify('已导出财产转让测算明细')
+  }
 
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
@@ -111,7 +128,7 @@ export default function PropertyTransferTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

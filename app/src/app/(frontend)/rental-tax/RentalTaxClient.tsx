@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, Home, ReceiptText, RotateCcw } from 'lucide-react'
+import { ArrowRight, Copy, Download, Home, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
+import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import { trackEvent } from '../analytics'
 import { calculateRentalTax, type RentalTaxRateMode } from '@/lib/rental-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
@@ -96,6 +98,25 @@ export default function RentalTaxClient() {
       notify('当前浏览器无法自动复制，请手动复制结果')
     }
   }
+  const exportCsv = () => {
+    const rows = [
+      ['项目', '金额/结果'],
+      ['租赁类型', mode === 'housing' ? '出租住房' : '其他财产'],
+      ['每月租赁税前收入', result.income.toFixed(2)],
+      ['出租过程中已缴税费', result.taxesAndFees.toFixed(2)],
+      ['转租支付租金', result.subleaseRent.toFixed(2)],
+      ['本次修缮费用', result.repairExpense.toFixed(2)],
+      ['可扣税费和成本', result.deductibleCosts.toFixed(2)],
+      ['法定费用扣除', result.statutoryDeduction.toFixed(2)],
+      ['应纳税所得额', result.taxable.toFixed(2)],
+      ['个税税率', `${rate}%`],
+      ['应缴个税', result.tax.toFixed(2)],
+      ['预计税后收入', result.takeHome.toFixed(2)],
+    ]
+    trackEvent('export_csv', { calculator: 'rental_tax', rows: rows.length - 1 })
+    downloadCsv(`财产租赁个税测算-${currentYear}.csv`, rows)
+    notify('已导出财产租赁测算明细')
+  }
 
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
@@ -136,7 +157,7 @@ export default function RentalTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

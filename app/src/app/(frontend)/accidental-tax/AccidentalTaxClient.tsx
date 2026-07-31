@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, Dice5, ReceiptText, RotateCcw } from 'lucide-react'
+import { ArrowRight, Copy, Dice5, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
+import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import { trackEvent } from '../analytics'
 import { calculateFlatIncomeTax } from '@/lib/flat-income-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
@@ -58,6 +60,18 @@ export default function AccidentalTaxClient() {
       notify('当前浏览器无法自动复制，请手动复制结果')
     }
   }
+  const exportCsv = () => {
+    const rows = [
+      ['项目', '金额/结果'],
+      ['税前收入', result.income.toFixed(2)],
+      ['税率', '20%'],
+      ['应缴个税', result.tax.toFixed(2)],
+      ['税后收入', result.takeHome.toFixed(2)],
+    ]
+    trackEvent('export_csv', { calculator: 'accidental_tax', rows: rows.length - 1 })
+    downloadCsv(`偶然所得个税测算-${currentYear}.csv`, rows)
+    notify('已导出偶然所得测算明细')
+  }
 
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
@@ -89,7 +103,7 @@ export default function AccidentalTaxClient() {
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 

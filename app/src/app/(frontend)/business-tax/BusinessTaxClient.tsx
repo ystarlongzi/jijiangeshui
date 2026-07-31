@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Copy, ReceiptText, RotateCcw } from 'lucide-react'
+import { ArrowRight, Briefcase, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import { copyText, resultLines } from '../clipboard'
+import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
+import { trackEvent } from '../analytics'
 import { calculateBusinessTax } from '@/lib/business-tax'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
@@ -86,6 +88,24 @@ export default function BusinessTaxClient() {
       notify('当前浏览器无法自动复制，请手动复制结果')
     }
   }
+  const exportCsv = () => {
+    const rows = [
+      ['项目', '金额/结果'],
+      ['年度收入总额', result.revenue.toFixed(2)],
+      ['成本、费用', result.costsAndExpenses.toFixed(2)],
+      ['经营损失', result.losses.toFixed(2)],
+      ['其他可扣除金额', result.otherDeductions.toFixed(2)],
+      ['总扣除', result.totalDeduction.toFixed(2)],
+      ['应纳税所得额', result.taxable.toFixed(2)],
+      ['税率', `${rate}%`],
+      ['速算扣除数', result.bracket.quick.toFixed(2)],
+      ['应缴个税', result.tax.toFixed(2)],
+      ['预计税后经营收入', result.afterTax.toFixed(2)],
+    ]
+    trackEvent('export_csv', { calculator: 'business_tax', rows: rows.length - 1 })
+    downloadCsv(`经营所得个税测算-${currentYear}.csv`, rows)
+    notify('已导出经营所得测算明细')
+  }
 
   return <>
   <div className="app-shell"><SiteHeader /><main className="labor-page">
@@ -121,7 +141,7 @@ export default function BusinessTaxClient() {
             <div><dt>税后经营收入</dt><dd>{money(revenue)} - {money(result.tax)} = {money(result.afterTax)}</dd></div>
           </dl>
         </div>
-        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
+        <div className="result-actions"><Link className="link-button" href="/tax-rate">查看税率表 <span>→</span></Link><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button><button className="link-button icon-link-button" type="button" onClick={copyResult}><Copy size={14} />复制结果</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>
       </section>
     </section>
 
