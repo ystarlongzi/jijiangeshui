@@ -589,11 +589,6 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
 .reverse-required span { color: var(--muted); font-size: 12px; }
 .reverse-required strong { color: var(--accent-deep); font-size: clamp(38px, 5vw, 56px); line-height: 1; letter-spacing: -.04em; }
 .reverse-required p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
-.reverse-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 10px; }
-.reverse-metrics div { display: grid; gap: 7px; padding: 14px; border-left: 1px solid var(--line); }
-.reverse-metrics div:first-child { border-left: 0; }
-.reverse-metrics span { color: var(--muted); font-size: 11px; }
-.reverse-metrics strong { color: var(--ink); font-size: 16px; }
 .reverse-explain { margin-top: 20px; padding: 16px; border-radius: 10px; background: var(--accent-soft); }
 .reverse-explain h3 { margin-bottom: 8px; font-size: 14px; }
 .reverse-explain p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
@@ -888,9 +883,6 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
   .reverse-hero-card { max-width: 360px; }
   .reverse-workspace { grid-template-columns: 1fr; gap: 14px; padding: 28px 0 42px; }
   .reverse-input, .reverse-result { padding: 20px; }
-  .reverse-metrics { grid-template-columns: 1fr 1fr; }
-  .reverse-metrics div:nth-child(odd) { border-left: 0; }
-  .reverse-metrics div:nth-child(n + 3) { border-top: 1px solid var(--line); }
   .bonus-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
   .bonus-hero h1 { font-size: 44px; }
   .bonus-hero p { font-size: 14px; }
