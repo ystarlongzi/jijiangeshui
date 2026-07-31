@@ -82,7 +82,6 @@ h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 8px; font-size: clamp(32px, 4vw, 54px); line-height: 1.04; letter-spacing: -0.03em; }
 h2 { margin-bottom: 0; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; }
 h3 { margin-bottom: 0; font-size: 15px; }
-.panel { border: 1px solid color-mix(in srgb, var(--line) 88%, var(--surface)); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 96%, var(--surface-muted)); box-shadow: var(--shadow); }
 select, input[type="number"] { width: 100%; min-height: 44px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); color: var(--ink); padding: 0 14px; appearance: none; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
 input[type="number"] { appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }

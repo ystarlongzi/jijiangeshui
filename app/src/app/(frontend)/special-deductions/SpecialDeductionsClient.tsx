@@ -6,6 +6,7 @@ import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button, ButtonLink } from '../Button'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
 import useSpecialDeductionSelection from '../useSpecialDeductionSelection'
@@ -59,7 +60,7 @@ export default function SpecialDeductionsClient() {
       </header>
 
       <section className={styles.workspace} aria-label="专项附加扣除计算器">
-        <section className={`${styles.input} panel`}>
+        <Panel as="section" className={styles.input}>
           <div className={styles.inputHeading}>
             <div>
               <h2>按项目选择</h2>
@@ -81,9 +82,9 @@ export default function SpecialDeductionsClient() {
               onToggleGroup={toggleGroup}
             />
           </div>}
-        </section>
+        </Panel>
 
-        <aside className={`${styles.result} panel`}>
+        <Panel as="aside" className={styles.result}>
           <div className={styles.resultHeading}><ClipboardCheck size={18} /><span>计算结果</span></div>
           <div className={styles.resultNumber}><span>本月可扣除</span><strong>{money(monthAmount)}</strong></div>
           <dl>
@@ -100,7 +101,7 @@ export default function SpecialDeductionsClient() {
             <Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button>
           </div>
           <p className={styles.note}><Info size={14} />扣除资格、分摊比例和申报口径以官方规定和个税 APP 为准。</p>
-        </aside>
+        </Panel>
       </section>
 
       <section className={styles.contentGrid}>

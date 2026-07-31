@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
@@ -94,14 +95,14 @@ export default function LicenseTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="特许权使用费个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算特许权使用费</h2>
         <label className={styles.field} htmlFor="licenseIncome"><span>特许权使用费税前收入</span><MoneyInput id="licenseIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>居民个人特许权使用费通常先扣除费用，再按 20% 比例预扣个人所得税。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 特许权使用费 {money(income)}</p></div><span className={styles.badge}>居民个人</span></div>
         <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
         <MetricGrid items={[{ label: '费用扣除', value: money(result.deduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '预扣率', value: '20%' }, { label: '预扣个税', value: money(result.tax) }]} />
@@ -115,7 +116,7 @@ export default function LicenseTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>和稿酬有什么不同？</h2><p>特许权使用费通常不适用稿酬所得“收入额减按 70%”的规则，适合专利、商标、著作权等使用权收入测算。</p></div><Link href="/author-tax">算稿酬 <ReceiptText size={15} /></Link></section>

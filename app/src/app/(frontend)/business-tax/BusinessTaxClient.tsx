@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
@@ -124,7 +125,7 @@ export default function BusinessTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="经营所得个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算经营所得</h2>
         <label className={styles.field} htmlFor="businessRevenue"><span>年度收入总额</span><MoneyInput id="businessRevenue" value={revenue} onChange={setRevenue} /></label>
         <label className={styles.field} htmlFor="businessCosts"><span>成本、费用</span><MoneyInput id="businessCosts" value={costsAndExpenses} onChange={setCostsAndExpenses} /></label>
@@ -132,9 +133,9 @@ export default function BusinessTaxClient() {
         <label className={styles.field} htmlFor="businessOther"><span>其他可扣除金额</span><MoneyInput id="businessOther" value={otherDeductions} onChange={setOtherDeductions} /></label>
         <p className={styles.formNote}>适合个体工商户、个人独资企业投资人、合伙企业个人合伙人等做年度粗算。查账、核定征收和投资者扣除口径可能不同。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 经营收入 {money(revenue)}</p></div><span className={styles.badge}>{rate}% 档</span></div>
         <div className={styles.takeHome}><span>预计税后经营收入</span><strong>{money(result.afterTax)}</strong><p>应缴个税 {money(result.tax)}，适用税率 {rate}%。</p></div>
         <MetricGrid items={[{ label: '总扣除', value: money(result.totalDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '税率', value: `${rate}%` }, { label: '速算扣除数', value: money(result.bracket.quick) }]} />
@@ -147,7 +148,7 @@ export default function BusinessTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>

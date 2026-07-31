@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../ResultActions/ResultActions'
@@ -97,14 +98,14 @@ export default function LaborTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="劳务报酬个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算劳务报酬</h2>
         <label className={styles.field} htmlFor="laborIncome"><span>劳务报酬税前收入</span><MoneyInput id="laborIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>居民个人劳务报酬通常按次或按月预扣。每次收入不超过 4000 元，费用按 800 元扣除；超过 4000 元，费用按收入 20% 扣除。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 劳务报酬 {money(income)}</p></div><span className={styles.badge}>居民个人</span></div>
         <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用预扣率 {rate}%。</p></div>
         <MetricGrid items={[{ label: '费用扣除', value: money(result.deduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '预扣率', value: `${rate}%` }, { label: '速算扣除数', value: money(result.bracket.quick) }]} />
@@ -118,7 +119,7 @@ export default function LaborTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>适合哪些收入？</h2><p>常见于独立设计、咨询、讲课、翻译、技术服务等非雇佣性质收入。年度汇算时，居民个人劳务报酬通常会并入综合所得。</p></div><Link href="/calculator">算工资薪金 <ReceiptText size={15} /></Link></section>

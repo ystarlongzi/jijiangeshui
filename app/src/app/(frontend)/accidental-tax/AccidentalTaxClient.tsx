@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
@@ -90,14 +91,14 @@ export default function AccidentalTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="偶然所得个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算偶然所得</h2>
         <label className={styles.field} htmlFor="accidentalIncome"><span>本次税前收入</span><MoneyInput id="accidentalIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>偶然所得以每次取得该项收入为一次，通常直接按 20% 比例税率计算个人所得税。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 偶然所得 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
         <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}。</p></div>
         <MetricGrid items={[{ label: '税前收入', value: money(result.income) }, { label: '税率', value: '20%' }, { label: '应缴个税', value: money(result.tax) }, { label: '税后收入', value: money(result.takeHome) }]} />
@@ -109,7 +110,7 @@ export default function AccidentalTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>偶然所得怎么扣？</h2><p>偶然所得通常不扣除费用，以每次收入额作为应纳税所得额，按 20% 比例税率计算个人所得税。</p></div><Link href="/dividend-tax">算利息股息红利 <ReceiptText size={15} /></Link></section>

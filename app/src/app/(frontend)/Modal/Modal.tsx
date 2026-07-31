@@ -2,6 +2,7 @@
 
 import { useId, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import Panel from '../Panel'
 import styles from './Modal.module.css'
 
 type ModalProps = {
@@ -19,7 +20,7 @@ export default function Modal({ open, title, description, children, footer, onCl
   if (!open) return null
 
   return <div className={styles.backdrop} role="presentation" onClick={onClose}>
-    <section className={`${styles.panel} panel`} role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={(event) => event.stopPropagation()}>
+    <Panel as="section" className={styles.panel} role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={(event) => event.stopPropagation()}>
       <div className={styles.heading}>
         <div>
           <h2 id={titleId}>{title}</h2>
@@ -31,6 +32,6 @@ export default function Modal({ open, title, description, children, footer, onCl
       </div>
       {children}
       {footer}
-    </section>
+    </Panel>
   </div>
 }

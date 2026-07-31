@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
@@ -135,7 +136,7 @@ export default function RentalTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="财产租赁个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产租赁</h2>
         <div className={styles.rentalModeList} aria-label="租赁类型">
           {modes.map((item) => <button className={`${styles.rentalMode}${mode === item.value ? ` ${styles.active}` : ''}`} type="button" key={item.value} onClick={() => setMode(item.value)}><strong>{item.label}</strong><span>{item.hint}</span></button>)}
@@ -146,9 +147,9 @@ export default function RentalTaxClient() {
         <label className={styles.field} htmlFor="rentalRepair"><span>本次修缮费用</span><MoneyInput id="rentalRepair" value={repairExpense} onChange={setRepairExpense} /></label>
         <p className={styles.formNote}>修缮费用每次最多扣除 800 元；输入框仅做测算，实际应以有效凭证和当地税务口径为准。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产租赁 {money(income)}</p></div><span className={styles.badge}>{mode === 'housing' ? '出租住房' : '其他财产'}</span></div>
         <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，适用 {rate}% 税率。</p></div>
         <MetricGrid items={[{ label: '可扣税费和成本', value: money(result.deductibleCosts) }, { label: '法定费用扣除', value: money(result.statutoryDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '个税税率', value: `${rate}%` }]} />
@@ -163,7 +164,7 @@ export default function RentalTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 20% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>

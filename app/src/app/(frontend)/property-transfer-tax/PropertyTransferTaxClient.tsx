@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import Toast from '../Toast'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
+import Panel from '../Panel'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
@@ -112,16 +113,16 @@ export default function PropertyTransferTaxClient() {
     </header>
 
     <section className={styles.workspace} aria-label="财产转让个税计算器">
-      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
+      <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产转让</h2>
         <label className={styles.field} htmlFor="transferIncome"><span>转让收入</span><MoneyInput id="transferIncome" value={income} onChange={setIncome} /></label>
         <label className={styles.field} htmlFor="transferOriginal"><span>财产原值</span><MoneyInput id="transferOriginal" value={originalValue} onChange={setOriginalValue} /></label>
         <label className={styles.field} htmlFor="transferFees"><span>合理费用</span><MoneyInput id="transferFees" value={reasonableFees} onChange={setReasonableFees} /></label>
         <p className={styles.formNote}>这里适合做通用测算。房屋、股权等财产转让可能有更细的核定、免税或地方口径，正式申报前需要再核对凭证和政策。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
-      </form>
+      </Panel>
 
-      <section className={`${styles.result} panel`} aria-live="polite">
+      <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
         <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，应纳税所得额 {money(result.taxable)}。</p></div>
         <MetricGrid items={[{ label: '转让收入', value: money(result.income) }, { label: '财产原值', value: money(result.originalValue) }, { label: '合理费用', value: money(result.reasonableFees) }, { label: '应纳税所得额', value: money(result.taxable) }]} />
@@ -134,7 +135,7 @@ export default function PropertyTransferTaxClient() {
           </dl>
         </div>
         <ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>
-      </section>
+      </Panel>
     </section>
 
     <section className={styles.explain}><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
