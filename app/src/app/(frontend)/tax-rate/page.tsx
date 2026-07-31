@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { ArrowRight, BookOpen, Calculator } from 'lucide-react'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
-import TaxRateTabs from './TaxRateTabs'
+import TaxRateTabs from '../_features/tax-rate/TaxRateTabs'
 import styles from './page.module.css'
 import SiteHeader from '../_components/SiteHeader'
 import SiteFooter from '../_components/SiteFooter'
