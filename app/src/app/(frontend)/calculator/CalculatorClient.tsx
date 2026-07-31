@@ -17,6 +17,7 @@ import DataTable from '../DataTable'
 import ValidationPanel from '../ValidationPanel'
 import { trackEvent } from '../analytics'
 import { downloadCsv } from '../csv'
+import styles from './CalculatorClient.module.css'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
@@ -223,7 +224,7 @@ export default function CalculatorClient() {
   return <div className="app-shell">
     <SiteHeader active="calculator" />
 
-    <main id="top" className="page-content">
+    <main id="top" className={styles.pageContent}>
       <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
