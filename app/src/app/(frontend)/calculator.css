@@ -78,7 +78,6 @@ button, select { cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid rgba(21, 131, 111, 0.28); outline-offset: 2px; }
 a { color: inherit; text-decoration: none; }
 
-.eyebrow, .section-kicker { margin: 0 0 7px; color: var(--accent); font-size: 11px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 8px; font-size: clamp(32px, 4vw, 54px); line-height: 1.04; letter-spacing: -0.03em; }
 h2 { margin-bottom: 0; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; }

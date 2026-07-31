@@ -230,7 +230,7 @@ export default function CalculatorClient() {
     <SiteHeader active="calculator" />
 
     <main id="top" className={styles.pageContent}>
-      <section className="page-intro" id="calculator"><div><p className="eyebrow">工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div></section>
+      <section className="page-intro" id="calculator"><div><p className={styles.eyebrow}>工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
         <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
