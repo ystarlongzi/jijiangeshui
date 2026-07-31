@@ -28,6 +28,7 @@ type TrackedEvent = {
 declare global {
   interface Window {
     dataLayer?: unknown[]
+    plausible?: (eventName: string, options?: { props?: AnalyticsPayload }) => void
   }
 }
 
@@ -43,4 +44,5 @@ export function trackEvent(name: AnalyticsEventName, payload: AnalyticsPayload =
 
   window.dispatchEvent(new CustomEvent('jijian-geshui:analytics', { detail }))
   window.dataLayer?.push({ event: `jijian_${name}`, ...payload, path: detail.path })
+  window.plausible?.(`jijian_${name}`, { props: { ...payload, path: detail.path } })
 }
