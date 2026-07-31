@@ -280,7 +280,8 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 
 .annual-panel { margin-top: 24px; padding: 26px; }
 .annual-heading-actions { display: flex; align-items: center; gap: 14px; }
-.annual-tax-chart { display: grid; gap: 18px; margin: 22px 0 20px; padding: 18px 20px; border-radius: 12px; background: var(--surface-muted); }
+.annual-summary-card { margin: 22px 0 12px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 10px 24px rgba(25, 54, 46, 0.05); }
+.annual-tax-chart { display: grid; gap: 18px; margin: 0 0 20px; padding: 18px 20px; border-radius: 12px; background: var(--surface-muted); }
 .annual-chart-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .annual-chart-summary div { display: grid; gap: 4px; min-width: 0; }
 .annual-chart-summary span { color: var(--muted); font-size: 11px; }
