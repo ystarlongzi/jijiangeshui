@@ -7,7 +7,7 @@ import { useMoneyFormat } from '../MoneyFormatProvider'
 import Modal from '../Modal'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
 import useSpecialDeductionSelection from '../../useSpecialDeductionSelection'
-import { trackEvent } from '../../analytics'
+import { trackEvent } from '../../_lib/analytics'
 import styles from './SpecialDeductionSelector.module.css'
 
 type SpecialDeductionSelectorProps = {

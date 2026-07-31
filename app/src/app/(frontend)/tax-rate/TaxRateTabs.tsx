@@ -10,7 +10,7 @@ import styles from './TaxRateTabs.module.css'
 import DataTable from '../_components/DataTable'
 import { useMoneyFormat } from '../_components/MoneyFormatProvider'
 import Panel from '../_components/Panel'
-import { trackEvent } from '../analytics'
+import { trackEvent } from '../_lib/analytics'
 
 type Identity = 'resident' | 'non-resident'
 type IncomeGroup = 'comprehensive' | 'classified'

@@ -21,8 +21,8 @@ import RuleSourcePanel from '../_components/RuleSourcePanel'
 import DataTable from '../_components/DataTable'
 import ValidationPanel from '../_components/ValidationPanel'
 import ResultActions, { ResultActionButton } from '../_components/ResultActions/ResultActions'
-import { trackEvent } from '../analytics'
-import { downloadCsv } from '../csv'
+import { trackEvent } from '../_lib/analytics'
+import { downloadCsv } from '../_lib/csv'
 import styles from './CalculatorClient.module.css'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
