@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, ClipboardCheck, Info, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
@@ -8,9 +8,9 @@ import SiteFooter from '../SiteFooter'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
+import useSpecialDeductionSelection from '../useSpecialDeductionSelection'
 import RuleSourcePanel from '../RuleSourcePanel'
 import { currentYear } from '@/lib/site'
-import { specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
 import { createDeductionHref } from '@/lib/url-params'
 
 type Mode = 'items' | 'manual'
@@ -20,25 +20,26 @@ export default function SpecialDeductionsClient() {
   const [mode, setMode] = useState<Mode>('items')
   const [manualOpen, setManualOpen] = useState(false)
   const [manualAmount, setManualAmount] = useState(0)
-  const [selections, setSelections] = useState<Record<string, string>>({})
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['children'])
-  const itemAmount = sumSpecialDeductions(selections)
+  const {
+    amount: itemAmount,
+    expandedGroups,
+    resetSelectionState,
+    selectOption,
+    selectedItems,
+    selections,
+    toggleGroup,
+  } = useSpecialDeductionSelection({ initialExpandedGroups: ['children'] })
   const monthAmount = mode === 'manual' ? manualAmount : itemAmount
-  const selectedItems = useMemo(() => Object.values(selections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean), [selections])
 
-  const toggleGroup = (group: string) => setExpandedGroups((current) => current.includes(group) ? current.filter((item) => item !== group) : [...current, group])
-  const selectOption = (group: string, option: string) => setSelections((current) => {
-    const next = { ...current }
-    if (next[group] === option) delete next[group]
-    else next[group] = option
+  const selectItemOption = (group: string, option: string) => {
+    selectOption(group, option)
     setMode('items')
-    return next
-  })
+  }
   const updateManualAmount = (value: number) => {
     setManualAmount(value)
     setMode('manual')
   }
-  const reset = () => { setManualAmount(0); setManualOpen(false); setSelections({}); setExpandedGroups(['children']); setMode('items') }
+  const reset = () => { setManualAmount(0); setManualOpen(false); resetSelectionState({}, ['children']); setMode('items') }
 
   return <div className="app-shell">
     <SiteHeader active="special-deductions" />
@@ -74,7 +75,7 @@ export default function SpecialDeductionsClient() {
               selections={selections}
               expandedGroups={expandedGroups}
               emptyText="大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资预扣计算。"
-              onSelect={selectOption}
+              onSelect={selectItemOption}
               onToggleGroup={toggleGroup}
             />
           </div>}

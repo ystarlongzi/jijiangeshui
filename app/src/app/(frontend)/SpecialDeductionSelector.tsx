@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { sumSpecialDeductions } from '@/lib/special-deductions'
 import { useMoneyFormat } from './MoneyFormatProvider'
 import Modal from './Modal'
 import SpecialDeductionGroupList from './SpecialDeductionGroupList'
+import useSpecialDeductionSelection from './useSpecialDeductionSelection'
 import { trackEvent } from './analytics'
 
 type SpecialDeductionSelectorProps = {
@@ -26,38 +26,27 @@ export default function SpecialDeductionSelector({
   onSave,
 }: SpecialDeductionSelectorProps) {
   const { money } = useMoneyFormat()
-  const [draftValue, setDraftValue] = useState<Record<string, string>>(value)
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([])
-  const draftAmount = sumSpecialDeductions(draftValue)
-
-  useEffect(() => {
-    if (!open) return
-    setDraftValue(value)
-    setExpandedGroups([])
-    trackEvent('deduction_selector_open', { selectedGroups: Object.keys(value).length })
-  }, [open, value])
-
-  const toggleGroup = (group: string) => {
-    setExpandedGroups((current) => {
-      const expanded = !current.includes(group)
-      trackEvent('deduction_selector_group_toggle', { group, expanded })
-      return expanded ? [...current, group] : current.filter((item) => item !== group)
-    })
-  }
-
-  const selectOption = (group: string, option: string) => {
-    setDraftValue((current) => {
-      const next = { ...current }
-      const selected = next[group] !== option
-      if (selected) next[group] = option
-      else delete next[group]
-      trackEvent('deduction_selector_option_toggle', { group, option, selected })
-      return next
-    })
-  }
+  const trackGroupToggle = useCallback((group: string, expanded: boolean) => {
+    trackEvent('deduction_selector_group_toggle', { group, expanded })
+  }, [])
+  const trackOptionToggle = useCallback((group: string, option: string, selected: boolean) => {
+    trackEvent('deduction_selector_option_toggle', { group, option, selected })
+  }, [])
+  const {
+    amount: draftAmount,
+    clearSelections: clearDraftSelections,
+    expandedGroups,
+    resetSelectionState,
+    selectOption,
+    selections: draftValue,
+    toggleGroup,
+  } = useSpecialDeductionSelection({
+    onGroupToggle: trackGroupToggle,
+    onOptionToggle: trackOptionToggle,
+  })
 
   const clearSelections = () => {
-    setDraftValue({})
+    clearDraftSelections()
     trackEvent('deduction_selector_clear', { amount: draftAmount })
   }
 
@@ -65,6 +54,12 @@ export default function SpecialDeductionSelector({
     trackEvent('deduction_selector_save', { amount: draftAmount, selectedGroups: Object.keys(draftValue).length })
     onSave(draftValue, draftAmount)
   }
+
+  useEffect(() => {
+    if (!open) return
+    resetSelectionState(value)
+    trackEvent('deduction_selector_open', { selectedGroups: Object.keys(value).length })
+  }, [open, resetSelectionState, value])
 
   return <Modal
     open={open}
