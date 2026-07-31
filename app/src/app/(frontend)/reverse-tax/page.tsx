@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import ReverseTaxClient from './ReverseTaxClient'
+import ReverseTaxClient from '../_features/reverse-tax/ReverseTaxClient'
 import { currentYear, siteName } from '@/lib/site'
 
 export const metadata: Metadata = {
