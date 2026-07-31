@@ -8,6 +8,7 @@ import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import MetricGrid from '../MetricGrid'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -102,7 +103,7 @@ export default function LaborTaxClient() {
       <section className="labor-result panel" aria-live="polite">
         <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 劳务报酬 {money(income)}</p></div><span className="bonus-badge">居民个人</span></div>
         <div className="labor-takehome"><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用预扣率 {rate}%。</p></div>
-        <div className="reverse-metrics"><div><span>费用扣除</span><strong>{money(result.deduction)}</strong></div><div><span>应纳税所得额</span><strong>{money(result.taxable)}</strong></div><div><span>预扣率</span><strong>{rate}%</strong></div><div><span>速算扣除数</span><strong>{money(result.bracket.quick)}</strong></div></div>
+        <MetricGrid items={[{ label: '费用扣除', value: money(result.deduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '预扣率', value: `${rate}%` }, { label: '速算扣除数', value: money(result.bracket.quick) }]} />
         <div className="labor-process">
           <h3>计算过程</h3>
           <dl>
