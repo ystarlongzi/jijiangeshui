@@ -248,7 +248,7 @@ export default function CalculatorClient() {
           <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className={styles.fieldMeta}>比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : '可直接输入本月扣除总额，也可以按项目选择后自动回填。'} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
-          <div className="form-actions"><Button variant="primary" type="submit">开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
+          <div className={styles.formActions}><Button variant="primary" type="submit">开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className={styles.formFootnote}>结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </form>
 
         <div className="results-column">
@@ -286,7 +286,7 @@ export default function CalculatorClient() {
 function BaseField({ label, value, min, max, invalid, editing, onEdit, onChange }: { label: string; value: number; min: number; max: number; invalid: boolean; editing: boolean; onEdit: () => void; onChange: (value: number) => void }) {
   const { money } = useMoneyFormat()
   const range = (min: number, max: number) => `${money(min, 0)} - ${money(max, 0)}`
-  return <FormField className={styles.baseField} label={label} action={<Button className={styles.editBaseButton} variant="text" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</Button>} meta={`允许范围：${range(min, max)}`} error={invalid ? `${label}需要在允许范围内。` : ''}><MoneyInput className={`small-input${invalid ? ' input-error' : ''}`} value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /></FormField>
+  return <FormField className={styles.baseField} label={label} action={<Button className={styles.editBaseButton} variant="text" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</Button>} meta={`允许范围：${range(min, max)}`} error={invalid ? `${label}需要在允许范围内。` : ''}><MoneyInput className={[styles.smallInput, invalid ? 'input-error' : ''].filter(Boolean).join(' ')} value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /></FormField>
 }
 
 function RateSelect({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {

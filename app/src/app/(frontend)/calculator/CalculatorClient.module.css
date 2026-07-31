@@ -173,6 +173,11 @@
   display: block;
 }
 
+.smallInput input,
+.smallInput :global(.amount-tip-track) {
+  font-size: 15px;
+}
+
 .pageContent :global(.monthly-salary-grid) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -235,6 +240,20 @@
 .deductionBlock p {
   display: block;
   margin-top: 8px;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.formFootnote {
+  margin: 13px 0 0;
+  color: var(--subtle);
+  font-size: 10px;
+  line-height: 1.55;
 }
 
 .pageContent :global(.results-column) {

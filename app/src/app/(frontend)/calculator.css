@@ -88,10 +88,7 @@ select, input[type="number"] { width: 100%; min-height: 44px; border: 1px solid 
 input[type="number"] { appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
 input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
-.small-input input, .small-input .amount-tip-track { font-size: 15px; }
 .hidden { display: none !important; }
-.form-actions { display: grid; grid-template-columns: 1fr 84px; gap: 10px; margin-top: 22px; }
-.form-footnote { margin: 13px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.55; }
 
 .home-primary-action { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 0 17px; border-radius: 10px; font-size: 13px; font-weight: 800; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease; }
 .home-primary-action { background: var(--accent); color: #fff; box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 22%, transparent); }
