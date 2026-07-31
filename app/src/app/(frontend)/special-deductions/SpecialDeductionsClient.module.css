@@ -1,0 +1,59 @@
+.page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 310px; align-items: end; gap: 44px; padding-bottom: 48px; border-bottom: 1px solid var(--line); }
+.hero h1 { margin: 12px 0 16px; font-size: clamp(42px, 6vw, 68px); letter-spacing: -.05em; }
+.hero p { max-width: 760px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+.eyebrow { margin: 0; color: var(--accent); font-size: 13px; font-weight: 750; letter-spacing: .08em; }
+.totalCard { display: grid; gap: 7px; padding: 22px; border-left: 3px solid var(--accent); background: var(--accent-soft); }
+.totalCard span, .totalCard small { color: var(--muted); font-size: 12px; }
+.totalCard strong { color: var(--accent-deep); font-size: 34px; letter-spacing: -.04em; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; padding: 38px 0 46px; }
+.input, .result { padding: 22px; box-shadow: var(--shadow-strong); }
+.inputHeading { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.inputHeading h2 { margin: 0 0 6px; font-size: 22px; }
+.inputHeading p { max-width: 520px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.inputHeading :global(.text-button) { flex: 0 0 auto; margin-top: 4px; font-size: 12px; }
+.manual { display: grid; gap: 12px; margin-bottom: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
+.manual p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.field { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.field :global(.money-input) { min-height: 50px; }
+.field :global(.money-input) input { font-size: 20px; }
+.field :global(.money-input) em { font-style: normal; font-size: 12px; }
+.groups { display: grid; gap: 10px; }
+.deductionPageList { gap: 10px; overflow: visible; padding: 0; }
+.result { align-self: start; position: sticky; top: 88px; display: grid; gap: 18px; }
+.resultHeading { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 800; }
+.resultNumber { display: grid; gap: 7px; padding: 18px; border-left: 3px solid var(--accent); background: var(--surface-muted); }
+.resultNumber span { color: var(--muted); font-size: 12px; }
+.resultNumber strong { color: var(--accent-deep); font-size: 42px; line-height: 1; letter-spacing: -.04em; }
+.result dl { display: grid; gap: 0; margin: 0; }
+.result dl div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); }
+.result dt, .result dd { margin: 0; font-size: 12px; }
+.result dt { color: var(--muted); }
+.result dd { color: var(--ink); font-weight: 750; text-align: right; }
+.selectedList { display: grid; gap: 8px; }
+.selectedList div { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid var(--line); }
+.selectedList span { color: var(--muted); font-size: 11px; }
+.selectedList strong { color: var(--ink); font-size: 12px; line-height: 1.45; }
+.selectedList b { color: var(--accent); font-size: 11px; }
+.actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.actions a, .actions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; text-align: center; }
+.note { display: flex; align-items: start; gap: 7px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.note svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent); }
+.contentGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 30px 0 46px; border-top: 1px solid var(--line); }
+.contentGrid article { padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.contentGrid h2 { margin-bottom: 10px; font-size: 17px; }
+.contentGrid p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+
+@media (max-width: 680px) {
+  .page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
+  .hero h1 { font-size: 44px; }
+  .hero p { font-size: 14px; }
+  .totalCard { max-width: 360px; }
+  .workspace { grid-template-columns: 1fr; gap: 14px; padding: 28px 0 42px; }
+  .input, .result { padding: 20px; }
+  .inputHeading { display: grid; gap: 10px; }
+  .inputHeading :global(.text-button) { justify-self: start; margin-top: 0; }
+  .result { position: static; }
+  .contentGrid { grid-template-columns: 1fr; gap: 10px; padding: 26px 0 38px; }
+}
