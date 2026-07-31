@@ -1,4 +1,5 @@
 import type { ChangeEvent, FocusEvent, ReactNode } from 'react'
+import styles from './MoneyInput.module.css'
 
 const defaultMax = 99999999
 const rankTips: Record<number, string> = {
@@ -45,12 +46,20 @@ export default function MoneyInput({
     if (!readOnly && Number(event.target.value) === 0) event.target.select()
   }
 
-  return <div className={`money-input amount-input${readOnly ? ' is-readonly' : ''}${className ? ` ${className}` : ''}`}>
+  const rootClassName = [
+    styles.root,
+    'money-input',
+    'amount-input',
+    readOnly ? 'is-readonly' : '',
+    className,
+  ].filter(Boolean).join(' ')
+
+  return <div className={rootClassName}>
     <span>{prefix}</span>
-    <span className="amount-input-box">
+    <span className={`${styles.box} amount-input-box`}>
       <input id={id} type="number" min={min} max={max} step={step} value={value} readOnly={readOnly} onFocus={selectZero} onChange={updateValue} inputMode="decimal" />
-      {tip && <span className="amount-tip-track" aria-hidden="true"><span className="amount-tip-digits"><span className="amount-rank-tip">{tip}</span>{digits}</span></span>}
+      {tip && <span className={`${styles.tipTrack} amount-tip-track`} aria-hidden="true"><span className={styles.tipDigits}><span className={styles.rankTip}>{tip}</span>{digits}</span></span>}
     </span>
-    <span className="unit">{unit}</span>
+    <span className={`${styles.unit} unit`}>{unit}</span>
   </div>
 }

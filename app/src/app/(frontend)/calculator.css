@@ -126,22 +126,8 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .city-label-row { min-height: 18px; }
 .text-button, .link-button { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 0; }
 .text-button:hover, .link-button:hover { color: var(--accent-deep); }
-.money-input { position: relative; display: flex; align-items: center; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); padding: 0 14px; color: var(--muted); transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease; }
-.money-input:focus-within, .select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
-.money-input input { min-height: 42px; border: 0; outline: 0; background: transparent; color: var(--ink); padding: 0 8px; font-size: 18px; font-weight: 700; text-align: right; }
-.money-input .unit { font-size: 12px; }
-.money-input.is-readonly { border-color: var(--line); background: color-mix(in srgb, var(--surface-muted) 72%, var(--surface)); color: var(--subtle); cursor: not-allowed; }
-.money-input.is-readonly:focus-within { border-color: var(--line); box-shadow: none; }
-.money-input.is-readonly input { color: var(--muted); cursor: not-allowed; -webkit-text-fill-color: var(--muted); }
-.money-input.is-readonly .unit { color: var(--subtle); }
-.money-input.input-error, .select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
-.amount-input-box { position: relative; flex: 1; min-width: 0; }
-.amount-input input { display: block; font-variant-numeric: tabular-nums; }
-.amount-tip-track { position: absolute; inset: 0 8px; display: flex; justify-content: flex-end; align-items: center; color: transparent; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
-.amount-tip-digits { position: relative; white-space: pre; }
-.amount-rank-tip { position: absolute; left: 0.5ch; top: -25px; z-index: 1; display: none; transform: translateX(-50%); padding: 2px 6px; border-radius: 999px; background: #f1f4f2; color: #66736f; border: 1px solid #d8e0dc; font-size: 10px; font-weight: 750; line-height: 1.35; box-shadow: 0 6px 14px rgba(31, 49, 44, 0.08); pointer-events: none; white-space: nowrap; }
-.amount-rank-tip::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 7px; height: 7px; transform: translateX(-50%) rotate(45deg); background: #f1f4f2; border-right: 1px solid #d8e0dc; border-bottom: 1px solid #d8e0dc; }
-.amount-input:focus-within .amount-rank-tip { display: inline-flex; }
+.select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
+.select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
 .small-input input, .small-input .amount-tip-track { font-size: 15px; }
 .field-grid, .ratio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-grid .field-block, .ratio-grid .field-block { margin-bottom: 0; }
