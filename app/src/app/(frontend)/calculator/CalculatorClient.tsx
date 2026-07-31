@@ -396,7 +396,23 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
 }
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
-  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><div className="rate-table-wrap panel"><table className="rate-table"><thead><tr><th>级数</th><th>累计预扣预缴应纳税所得额</th><th>预扣率</th><th>速算扣除数</th></tr></thead><tbody>{taxBrackets.map((item, index) => <tr key={item.rate}><td>{index + 1}</td><td>{rateRanges[index]}</td><td>{Math.round(item.rate * 100)}%</td><td>{money(item.quick, 0).replace('¥', '')}</td></tr>)}</tbody></table><div className="source-line">本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></div></section>
+  const columns = [
+    { key: 'level', header: '级数' },
+    { key: 'range', header: '累计预扣预缴应纳税所得额' },
+    { key: 'rate', header: '预扣率', className: styles.alignRight },
+    { key: 'quick', header: '速算扣除数', className: styles.alignRight },
+  ]
+  const rows = taxBrackets.map((item, index) => ({
+    key: item.rate,
+    cells: {
+      level: index + 1,
+      range: rateRanges[index],
+      rate: `${Math.round(item.rate * 100)}%`,
+      quick: money(item.quick, 0).replace('¥', ''),
+    },
+  }))
+
+  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><div className={`${styles.rateTablePanel} panel`}><DataTable columns={columns} rows={rows} wrapperClassName={styles.rateTableWrap} tableClassName={styles.rateTable} /><div className={styles.sourceLine}>本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></div></section>
 }
 
 function Faq() {

@@ -847,36 +847,37 @@
   color: var(--muted);
 }
 
-.pageContent :global(.rate-table-wrap) {
+.rateTablePanel {
+  overflow: hidden;
+}
+
+.rateTableWrap {
   overflow-x: auto;
 }
 
-.pageContent :global(.rate-table th),
-.pageContent :global(.rate-table td) {
+.rateTable th,
+.rateTable td {
   padding: 14px 18px;
 }
 
-.pageContent :global(.rate-table th) {
+.rateTable th {
   background: var(--surface-muted);
   text-align: left;
 }
 
-.pageContent :global(.rate-table td) {
+.rateTable td {
   text-align: left;
 }
 
-.pageContent :global(.rate-table td:nth-child(3)),
-.pageContent :global(.rate-table td:nth-child(4)),
-.pageContent :global(.rate-table th:nth-child(3)),
-.pageContent :global(.rate-table th:nth-child(4)) {
+.alignRight {
   text-align: right;
 }
 
-.pageContent :global(.rate-table tbody tr:first-child td) {
+.rateTable tbody tr:first-child td {
   border-top: 0;
 }
 
-.pageContent :global(.source-line) {
+.sourceLine {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -887,7 +888,7 @@
   font-size: 11px;
 }
 
-.pageContent :global(.source-line a) {
+.sourceLine a {
   color: var(--accent);
   font-weight: 700;
 }
@@ -1053,15 +1054,15 @@
     justify-self: start;
   }
 
-  .pageContent :global(.rate-table-wrap) {
+  .rateTableWrap {
     overflow-x: auto;
   }
 
-  .pageContent :global(.rate-table) {
+  .rateTable {
     min-width: 640px;
   }
 
-  .pageContent :global(.source-line) {
+  .sourceLine {
     align-items: center;
     flex-direction: row;
     gap: 8px;
@@ -1070,7 +1071,7 @@
     white-space: nowrap;
   }
 
-  .pageContent :global(.source-line a) {
+  .sourceLine a {
     white-space: nowrap;
   }
 
