@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Award, Copy, Download, Gift, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { trackEvent } from '../analytics'
@@ -107,7 +108,7 @@ export default function BonusTaxClient() {
     <section className={styles.workspace} aria-label="年终奖个税计算器">
       <form className={`${styles.input} panel`} onSubmit={(event) => { event.preventDefault(); trackEvent('calculate_complete', { calculator: 'bonus_tax', better: result.better, hasThresholdTip: Boolean(result.separateOptimization) }) }}><h2>计算你的年终奖</h2><BonusInput id="bonus" label="年终奖税前金额" value={bonus} onChange={setBonus} />
         <div className={styles.formGrid}><BonusInput id="annualSalary" label="全年税前工资薪金" value={annualSalary} onChange={setAnnualSalary} /><BonusInput id="annualInsurance" label="全年个人社保公积金" value={annualInsurance} onChange={setAnnualInsurance} /><BonusInput id="annualDeductions" label="全年专项附加扣除" value={annualDeductions} onChange={setAnnualDeductions} /></div>
-        <p className={styles.formNote}>全年工资、个人缴费和专项附加扣除用于估算并入综合所得方案，不等同于年度汇算最终结果。实际情况以工资条和申报信息为准。</p><div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div></form>
+        <p className={styles.formNote}>全年工资、个人缴费和专项附加扣除用于估算并入综合所得方案，不等同于年度汇算最终结果。实际情况以工资条和申报信息为准。</p><div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div></form>
       <section className={`${styles.result} panel`} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 年终奖 {money(bonus)}</p></div><span className={styles.badge}>推荐方案</span></div><div className={styles.recommendation}><span>预计更划算</span><strong>{result.better === 'separate' ? '单独计税' : '并入综合所得'}</strong><p>预计多到手 {money(result.difference)}。你可以根据单位发放和年度申报情况进一步确认。</p></div>{result.separateOptimization && <ThresholdAlert optimization={result.separateOptimization} bonus={bonus} />}<div className={styles.comparison}><BonusResultCard title="单独计税" result={result.separate} active={result.better === 'separate'} note="年终奖除以 12 个月确定税率，再单独计算奖金税额。" /><BonusResultCard title="并入综合所得" result={result.combined} active={result.better === 'combined'} note="年终奖并入全年综合所得，按年度税率计算增量税额。" /></div><p className={styles.resultNote}>以上为居民个人全年一次性奖金测算，不适用于劳务报酬、股权激励等其他收入类型。</p><ResultActions><ResultActionLink href="/tax-rate">查看税率表 <span>→</span></ResultActionLink><ResultActionButton onClick={exportCsv}><Download size={14} />导出 CSV</ResultActionButton><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></section>
     </section>
     <BonusProcess result={result} bonus={bonus} annualSalary={annualSalary} annualInsurance={annualInsurance} annualDeductions={annualDeductions} />

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Copy, Download, ReceiptText, RotateCcw, TrendingUp } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -116,7 +117,7 @@ export default function PropertyTransferTaxClient() {
         <label className={styles.field} htmlFor="transferOriginal"><span>财产原值</span><MoneyInput id="transferOriginal" value={originalValue} onChange={setOriginalValue} /></label>
         <label className={styles.field} htmlFor="transferFees"><span>合理费用</span><MoneyInput id="transferFees" value={reasonableFees} onChange={setReasonableFees} /></label>
         <p className={styles.formNote}>这里适合做通用测算。房屋、股权等财产转让可能有更细的核定、免税或地方口径，正式申报前需要再核对凭证和政策。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

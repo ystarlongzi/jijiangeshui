@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Briefcase, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -129,7 +130,7 @@ export default function BusinessTaxClient() {
         <label className={styles.field} htmlFor="businessLosses"><span>经营损失</span><MoneyInput id="businessLosses" value={losses} onChange={setLosses} /></label>
         <label className={styles.field} htmlFor="businessOther"><span>其他可扣除金额</span><MoneyInput id="businessOther" value={otherDeductions} onChange={setOtherDeductions} /></label>
         <p className={styles.formNote}>适合个体工商户、个人独资企业投资人、合伙企业个人合伙人等做年度粗算。查账、核定征收和投资者扣除口径可能不同。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

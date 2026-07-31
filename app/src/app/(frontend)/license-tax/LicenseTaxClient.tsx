@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, BadgePercent, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -96,7 +97,7 @@ export default function LicenseTaxClient() {
         <h2>计算特许权使用费</h2>
         <label className={styles.field} htmlFor="licenseIncome"><span>特许权使用费税前收入</span><MoneyInput id="licenseIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>居民个人特许权使用费通常先扣除费用，再按 20% 比例预扣个人所得税。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

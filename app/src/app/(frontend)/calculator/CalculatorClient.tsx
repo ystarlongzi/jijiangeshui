@@ -9,6 +9,7 @@ import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionSelector from '../SpecialDeductionSelector'
@@ -244,7 +245,7 @@ export default function CalculatorClient() {
           <div className="ratio-grid"><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className="field-meta">比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
           <div className="deduction-block" id="deduction"><div className="label-with-action deduction-label-row"><label htmlFor="deductionAmount">专项附加扣除</label><button className="text-button" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</button></div><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /><p className="field-meta">{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : '可直接输入本月扣除总额，也可以按项目选择后自动回填。'}</p>{isDeductionInvalid && <p className="field-error">这里填写的是本月扣除额，不能高于税前月薪。</p>}</div>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
-          <div className="form-actions"><button className="primary-button" type="submit">开始计算</button><button className="secondary-button" type="button" onClick={reset}>清空</button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
+          <div className="form-actions"><Button variant="primary" type="submit">开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className="form-footnote">结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </form>
 
         <div className="results-column">

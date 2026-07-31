@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Copy, Dice5, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -92,7 +93,7 @@ export default function AccidentalTaxClient() {
         <h2>计算偶然所得</h2>
         <label className={styles.field} htmlFor="accidentalIncome"><span>本次税前收入</span><MoneyInput id="accidentalIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>偶然所得以每次取得该项收入为一次，通常直接按 20% 比例税率计算个人所得税。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

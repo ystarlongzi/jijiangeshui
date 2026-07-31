@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpenText, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -98,7 +99,7 @@ export default function AuthorTaxClient() {
         <h2>计算稿酬收入</h2>
         <label className={styles.field} htmlFor="authorIncome"><span>稿酬税前收入</span><MoneyInput id="authorIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>稿酬所得先按劳务类规则扣除费用，再将收入额减按 70% 计算，通常按 20% 比例预扣。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

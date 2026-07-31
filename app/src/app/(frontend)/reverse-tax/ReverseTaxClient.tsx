@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Copy, LocateFixed, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import MetricGrid from '../MetricGrid'
@@ -132,7 +133,7 @@ export default function ReverseTaxClient() {
           <MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} />
           <p>{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}</p>
         </div>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
       <section className={`${styles.result} panel`} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>反推结果</span><p>{rule.label} · {currentYear} 年 {month} 月</p></div><span className={styles.badge}>累计预扣</span></div><div className={styles.required}><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><MetricGrid items={[{ label: '预计到手', value: money(result.result.takeHome, 2) }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '个人五险一金', value: money(employeeInsurance, 2) }, { label: '适用预扣率', value: `${rate}%` }]} /><div className={styles.resultExplain}><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><ResultActions><ResultActionLink href="/calculator">进入工资计算器 <span>→</span></ResultActionLink><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></section>
     </section>

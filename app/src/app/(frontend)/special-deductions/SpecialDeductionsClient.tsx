@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { ArrowRight, ClipboardCheck, Info, RotateCcw } from 'lucide-react'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
+import { Button, ButtonLink } from '../Button'
 import MoneyInput from '../MoneyInput'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
@@ -95,9 +95,9 @@ export default function SpecialDeductionsClient() {
             {selectedItems.map((item) => item && <div key={item.id}><span>{item.group}</span><strong>{item.label}</strong><b>{money(item.amount)} / 月</b></div>)}
           </div>}
           <div className={styles.actions}>
-            <Link className="primary-button" href={createDeductionHref('/calculator', monthAmount, '#deduction')}>带入工资计算器 <ArrowRight size={16} /></Link>
-            <Link className="secondary-button" href={createDeductionHref('/reverse-tax', monthAmount)}>带入税后反推 <ArrowRight size={16} /></Link>
-            <button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button>
+            <ButtonLink variant="primary" href={createDeductionHref('/calculator', monthAmount, '#deduction')}>带入工资计算器 <ArrowRight size={16} /></ButtonLink>
+            <ButtonLink variant="secondary" href={createDeductionHref('/reverse-tax', monthAmount)}>带入税后反推 <ArrowRight size={16} /></ButtonLink>
+            <Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button>
           </div>
           <p className={styles.note}><Info size={14} />扣除资格、分摊比例和申报口径以官方规定和个税 APP 为准。</p>
         </aside>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Copy, Download, Home, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -143,7 +144,7 @@ export default function RentalTaxClient() {
         <label className={styles.field} htmlFor="rentalSublease"><span>转租支付租金</span><MoneyInput id="rentalSublease" value={subleaseRent} onChange={setSubleaseRent} /></label>
         <label className={styles.field} htmlFor="rentalRepair"><span>本次修缮费用</span><MoneyInput id="rentalRepair" value={repairExpense} onChange={setRepairExpense} /></label>
         <p className={styles.formNote}>修缮费用每次最多扣除 800 元；输入框仅做测算，实际应以有效凭证和当地税务口径为准。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

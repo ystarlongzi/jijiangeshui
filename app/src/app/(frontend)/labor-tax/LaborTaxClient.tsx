@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, BriefcaseBusiness, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import RuleSourcePanel from '../RuleSourcePanel'
@@ -99,7 +100,7 @@ export default function LaborTaxClient() {
         <h2>计算劳务报酬</h2>
         <label className={styles.field} htmlFor="laborIncome"><span>劳务报酬税前收入</span><MoneyInput id="laborIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>居民个人劳务报酬通常按次或按月预扣。每次收入不超过 4000 元，费用按 800 元扣除；超过 4000 元，费用按收入 20% 扣除。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">

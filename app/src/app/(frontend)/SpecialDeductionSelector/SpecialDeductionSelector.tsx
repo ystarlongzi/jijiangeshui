@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { Button } from '../Button'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import Modal from '../Modal'
 import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
@@ -73,10 +74,10 @@ export default function SpecialDeductionSelector({
         <strong>{money(draftAmount)}</strong>
       </div>
       <div className={styles.actions}>
-        <button className="secondary-button" type="button" onClick={clearSelections}>清空选择</button>
-        <button className="primary-button" type="button" onClick={saveSelections}>
+        <Button variant="secondary" type="button" onClick={clearSelections}>清空选择</Button>
+        <Button variant="primary" type="button" onClick={saveSelections}>
           保存并回填 <ArrowRight size={16} />
-        </button>
+        </Button>
       </div>
     </div>}
   >

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Coins, Copy, Download, ReceiptText, RotateCcw } from 'lucide-react'
 import SiteFooter from '../SiteFooter'
+import { Button } from '../Button'
 import SiteHeader from '../SiteHeader'
 import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
@@ -92,7 +93,7 @@ export default function DividendTaxClient() {
         <h2>计算利息股息红利</h2>
         <label className={styles.field} htmlFor="dividendIncome"><span>本次税前收入</span><MoneyInput id="dividendIncome" value={income} onChange={setIncome} /></label>
         <p className={styles.formNote}>利息、股息、红利所得通常以每次取得收入为一次，按 20% 比例税率计算，由扣缴义务人按规定代扣代缴。</p>
-        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </form>
 
       <section className={`${styles.result} panel`} aria-live="polite">
