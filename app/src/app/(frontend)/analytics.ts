@@ -1,6 +1,21 @@
 'use client'
 
-export type AnalyticsEventName = 'page_view' | 'calculate_complete' | 'result_expand' | 'share_link' | 'copy_result' | 'export_csv' | 'link_click'
+export type AnalyticsEventName =
+  | 'page_view'
+  | 'calculate_complete'
+  | 'result_expand'
+  | 'share_link'
+  | 'copy_result'
+  | 'export_csv'
+  | 'link_click'
+  | 'money_grouping_change'
+  | 'mobile_menu_toggle'
+  | 'tax_rate_tab_change'
+  | 'deduction_selector_open'
+  | 'deduction_selector_group_toggle'
+  | 'deduction_selector_option_toggle'
+  | 'deduction_selector_clear'
+  | 'deduction_selector_save'
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>
 
 type TrackedEvent = {

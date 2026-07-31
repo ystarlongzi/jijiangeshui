@@ -6,6 +6,7 @@ import { sumSpecialDeductions } from '@/lib/special-deductions'
 import { useMoneyFormat } from './MoneyFormatProvider'
 import Modal from './Modal'
 import SpecialDeductionGroupList from './SpecialDeductionGroupList'
+import { trackEvent } from './analytics'
 
 type SpecialDeductionSelectorProps = {
   open: boolean
@@ -33,19 +34,36 @@ export default function SpecialDeductionSelector({
     if (!open) return
     setDraftValue(value)
     setExpandedGroups([])
+    trackEvent('deduction_selector_open', { selectedGroups: Object.keys(value).length })
   }, [open, value])
 
   const toggleGroup = (group: string) => {
-    setExpandedGroups((current) => current.includes(group) ? current.filter((item) => item !== group) : [...current, group])
+    setExpandedGroups((current) => {
+      const expanded = !current.includes(group)
+      trackEvent('deduction_selector_group_toggle', { group, expanded })
+      return expanded ? [...current, group] : current.filter((item) => item !== group)
+    })
   }
 
   const selectOption = (group: string, option: string) => {
     setDraftValue((current) => {
       const next = { ...current }
-      if (next[group] === option) delete next[group]
-      else next[group] = option
+      const selected = next[group] !== option
+      if (selected) next[group] = option
+      else delete next[group]
+      trackEvent('deduction_selector_option_toggle', { group, option, selected })
       return next
     })
+  }
+
+  const clearSelections = () => {
+    setDraftValue({})
+    trackEvent('deduction_selector_clear', { amount: draftAmount })
+  }
+
+  const saveSelections = () => {
+    trackEvent('deduction_selector_save', { amount: draftAmount, selectedGroups: Object.keys(draftValue).length })
+    onSave(draftValue, draftAmount)
   }
 
   return <Modal
@@ -59,8 +77,8 @@ export default function SpecialDeductionSelector({
         <strong>{money(draftAmount)}</strong>
       </div>
       <div className="deduction-dialog-actions">
-        <button className="secondary-button" type="button" onClick={() => setDraftValue({})}>清空选择</button>
-        <button className="primary-button" type="button" onClick={() => onSave(draftValue, draftAmount)}>
+        <button className="secondary-button" type="button" onClick={clearSelections}>清空选择</button>
+        <button className="primary-button" type="button" onClick={saveSelections}>
           保存并回填 <ArrowRight size={16} />
         </button>
       </div>
