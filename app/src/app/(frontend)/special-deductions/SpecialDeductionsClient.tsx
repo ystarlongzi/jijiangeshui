@@ -72,6 +72,7 @@ export default function SpecialDeductionsClient() {
             <p>如果你已经在个税 APP 或工资条里看到扣除总额，可以直接填写这里。</p>
           </div> : <div className="special-groups">
             <SpecialDeductionGroupList
+              className="special-deduction-page-list"
               selections={selections}
               expandedGroups={expandedGroups}
               emptyText="大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资预扣计算。"

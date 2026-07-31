@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { useMoneyFormat } from './MoneyFormatProvider'
-import Modal from './Modal'
-import SpecialDeductionGroupList from './SpecialDeductionGroupList'
-import useSpecialDeductionSelection from './useSpecialDeductionSelection'
-import { trackEvent } from './analytics'
+import { useMoneyFormat } from '../MoneyFormatProvider'
+import Modal from '../Modal'
+import SpecialDeductionGroupList from '../SpecialDeductionGroupList'
+import useSpecialDeductionSelection from '../useSpecialDeductionSelection'
+import { trackEvent } from '../analytics'
+import styles from './SpecialDeductionSelector.module.css'
 
 type SpecialDeductionSelectorProps = {
   open: boolean
@@ -66,12 +67,12 @@ export default function SpecialDeductionSelector({
     title="选择专项附加扣除"
     description={description}
     onClose={onClose}
-    footer={<div className="deduction-dialog-footer">
-      <div className="deduction-dialog-summary">
+    footer={<div className={styles.footer}>
+      <div className={styles.summary}>
         <span>本月合计</span>
         <strong>{money(draftAmount)}</strong>
       </div>
-      <div className="deduction-dialog-actions">
+      <div className={styles.actions}>
         <button className="secondary-button" type="button" onClick={clearSelections}>清空选择</button>
         <button className="primary-button" type="button" onClick={saveSelections}>
           保存并回填 <ArrowRight size={16} />
