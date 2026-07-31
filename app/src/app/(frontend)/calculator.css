@@ -229,6 +229,20 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
 
 .annual-panel { margin-top: 24px; padding: 26px; }
 .annual-heading-actions { display: flex; align-items: center; gap: 14px; }
+.annual-tax-chart { display: grid; gap: 18px; margin: 22px 0 20px; padding: 18px 20px; border-radius: 12px; background: var(--surface-muted); }
+.annual-chart-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.annual-chart-summary div { display: grid; gap: 4px; min-width: 0; }
+.annual-chart-summary span { color: var(--muted); font-size: 11px; }
+.annual-chart-summary strong { overflow: hidden; color: var(--ink); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.annual-tax-bars { display: grid; grid-template-columns: repeat(12, minmax(34px, 1fr)); align-items: end; gap: 8px; min-height: 166px; }
+.annual-tax-bar { display: grid; grid-template-rows: 18px 96px 16px; gap: 7px; min-width: 0; color: var(--muted); text-align: center; }
+.annual-tax-bar .bar-value { overflow: hidden; color: var(--subtle); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.annual-tax-bar .bar-track { display: flex; align-items: end; justify-content: center; height: 96px; border-bottom: 1px solid var(--line-strong); }
+.annual-tax-bar .bar-fill { width: min(100%, 18px); height: var(--tax-height); min-height: 0; border-radius: 999px 999px 4px 4px; background: color-mix(in srgb, var(--accent) 72%, var(--surface)); transition: height 180ms ease; }
+.annual-tax-bar.current .bar-fill { background: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
+.annual-tax-bar.current .bar-value, .annual-tax-bar.current .bar-month { color: var(--ink); font-weight: 800; }
+.annual-tax-bar.inactive .bar-fill { background: transparent; }
+.annual-tax-bar .bar-month { color: var(--muted); font-size: 10px; font-weight: 700; }
 .trend-heading { align-items: center; }
 .view-switch { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
 .view-tab { border: 0; border-radius: 7px; background: transparent; color: var(--muted); padding: 8px 13px; font-size: 12px; font-weight: 700; }
@@ -746,6 +760,10 @@ td { border-top: 1px dashed var(--line); color: var(--ink); font-size: 12px; tex
   .result-actions { align-items: start; flex-direction: column; }
   .detail-table-wrap { margin-inline: -8px; }
   .insurance-table { min-width: 630px; }
+  .annual-heading-actions { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .annual-tax-chart { margin: 18px -4px 18px; padding: 16px 12px; overflow-x: auto; }
+  .annual-chart-summary { grid-template-columns: 1fr; }
+  .annual-tax-bars { min-width: 610px; }
   .annual-table-wrap { margin-inline: -8px; }
   .annual-table { min-width: 690px; }
   .content-section { margin-top: 48px; }

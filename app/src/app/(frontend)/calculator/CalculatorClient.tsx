@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
 import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
@@ -325,6 +325,13 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
     const item = calculateMonthFromSeries(salaries, currentMonth, startMonth, deduction, insurance)
     return { currentMonth, inactive, salary, item }
   })
+  const activeRows = rows.filter((row) => !row.inactive)
+  const annualTaxTotal = activeRows.reduce((sum, row) => sum + row.item.currentTax, 0)
+  const maxTax = Math.max(1, ...activeRows.map((row) => row.item.currentTax))
+  const peakTaxRow = activeRows.reduce<(typeof activeRows)[number] | null>((peak, row) => !peak || row.item.currentTax > peak.item.currentTax ? row : peak, null)
+  const firstRate = activeRows[0]?.item.bracket.rate ?? 0
+  const firstRateStep = activeRows.find((row) => row.item.bracket.rate > firstRate)
+  const rateStepText = firstRateStep ? `${firstRateStep.currentMonth} 月进入 ${Math.round(firstRateStep.item.bracket.rate * 100)}% 档` : '全年未跨档'
   const exportCsv = () => {
     const header = ['月份', '税前收入', '到手工资', '个人五险一金', '累计应纳税所得额', '预扣率', '本月个税']
     const csvRows = [header, ...rows.map(({ currentMonth, inactive, salary, item }) => [
@@ -340,7 +347,11 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
     downloadCsv(`工资薪金逐月明细-${currentYear}.csv`, csvRows)
   }
 
-  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年预扣逐月明细</h2><div className="annual-heading-actions"><span className="subtle-label">当前月份会高亮显示</span><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{rows.map(({ currentMonth, inactive, salary, item }) => <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr>)}</tbody></table></div><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
+  return <section className="annual-panel panel"><div className="section-heading-row"><h2>全年预扣逐月明细</h2><div className="annual-heading-actions"><span className="subtle-label">当前月份会高亮显示</span><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div></div><div className="annual-tax-chart" aria-label="全年个税走势"><div className="annual-chart-summary"><div><span>全年预扣合计</span><strong>{money(annualTaxTotal, 0)}</strong></div><div><span>最高月个税</span><strong>{peakTaxRow ? `${peakTaxRow.currentMonth} 月 ${money(peakTaxRow.item.currentTax, 0)}` : '-'}</strong></div><div><span>税率变化</span><strong>{rateStepText}</strong></div></div><div className="annual-tax-bars">{rows.map(({ currentMonth, inactive, item }) => {
+    const height = inactive ? 0 : Math.max(6, item.currentTax / maxTax * 100)
+    const style = { '--tax-height': `${height}%` } as CSSProperties
+    return <div className={`annual-tax-bar ${currentMonth === month ? 'current' : ''} ${inactive ? 'inactive' : ''}`} key={currentMonth}><span className="bar-value">{inactive ? '-' : money(item.currentTax, 0)}</span><span className="bar-track"><span className="bar-fill" style={style} /></span><span className="bar-month">{currentMonth}月</span></div>
+  })}</div></div><div className="annual-table-wrap"><table className="annual-table"><thead><tr><th>月份</th><th>到手 / 税前</th><th>个人五险一金</th><th>累计应纳税所得额</th><th>预扣率</th><th>本月个税</th></tr></thead><tbody>{rows.map(({ currentMonth, inactive, salary, item }) => <tr className={currentMonth === month ? 'current-month' : ''} key={currentMonth}><td>{currentMonth} 月</td><td><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</td><td>{inactive ? '-' : money(item.employeeInsurance, 0)}</td><td>{inactive ? '-' : money(item.taxable, 0)}</td><td>{inactive ? '-' : `${Math.round(item.bracket.rate * 100)}%`}</td><td>{inactive ? '-' : money(item.currentTax, 0)}</td></tr>)}</tbody></table></div><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></section>
 }
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
