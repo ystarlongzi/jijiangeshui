@@ -10,11 +10,12 @@
 .input h2 { margin: 0 0 28px; font-size: 24px; }
 .textButton { gap: 4px; font-size: 11px; }
 .compactField { margin-bottom: 0; }
+.fieldGrid, .ratioGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field :global(.money-input) { min-height: 50px; }
 .field :global(.money-input) input { font-size: 20px; }
 .field :global(.money-input) em { font-style: normal; font-size: 12px; }
-.deductions { display: grid; gap: 9px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.deductions { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
 .deductions p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
 .formActions { display: grid; grid-template-columns: 1fr 92px; gap: 10px; margin-top: 24px; }
 .formActions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }

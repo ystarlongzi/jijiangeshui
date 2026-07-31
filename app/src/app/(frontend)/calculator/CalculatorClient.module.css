@@ -89,7 +89,7 @@
   gap: 12px;
 }
 
-.pageContent :global(.salary-mode-row span) {
+.salaryModeRow {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -112,6 +112,36 @@
   margin-bottom: 0;
 }
 
+.fieldGrid,
+.ratioGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.fieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -1px 0 0;
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.fieldError {
+  margin: 7px 0 0;
+  color: var(--orange);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sectionDivider {
+  height: 1px;
+  margin: 24px 0;
+  background: var(--line);
+}
+
 .pageContent :global(.base-editor) {
   display: grid;
   gap: 12px;
@@ -122,7 +152,7 @@
   background: var(--surface-muted);
 }
 
-.pageContent :global(.base-editor .field-block) {
+.baseField {
   margin: 0;
 }
 
@@ -139,7 +169,7 @@
   border-color: var(--accent);
 }
 
-.pageContent :global(.base-editor .field-meta) {
+.baseField p {
   display: block;
 }
 
@@ -192,20 +222,17 @@
   background: var(--accent-soft);
 }
 
-.pageContent :global(.deduction-block) {
+.deductionBlock {
   margin-top: 22px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 
-.pageContent :global(.deduction-label-row) {
-  padding: 16px 0 9px;
-}
-
-.pageContent :global(.deduction-block .money-input) {
+.deductionBlock :global(.money-input) {
   width: 100%;
 }
 
-.pageContent :global(.deduction-block .field-meta) {
+.deductionBlock p {
   display: block;
   margin-top: 8px;
 }
