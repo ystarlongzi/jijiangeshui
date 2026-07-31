@@ -394,18 +394,7 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
 .reading-links a svg:last-child { color: var(--muted); }
 .home-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 11px; }
 .city-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
-.info-page { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
 .topic-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 56px 0 42px; }
-.info-hero { padding-bottom: 54px; border-bottom: 1px solid var(--line); }
-.info-hero h1 { max-width: 760px; margin: 18px 0 16px; font-size: clamp(40px, 6vw, 66px); }
-.info-lead { max-width: 720px; margin: 0 0 28px; color: var(--muted); font-size: 17px; line-height: 1.75; }
-.info-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 42px; padding: 38px 0 10px; }
-.info-section { padding: 28px 0; border-bottom: 1px solid var(--line); }
-.info-section h2 { margin-bottom: 10px; font-size: 20px; }
-.info-section p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
-.info-section ul { display: grid; gap: 8px; margin: 16px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.7; }
-.info-bottom-action { padding: 22px 0 28px; }
-.info-bottom-action a { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font-size: 13px; font-weight: 750; }
 .bonus-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 64px 0 42px; }
 .bonus-hero { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: end; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
 .bonus-eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 750; }
@@ -757,7 +746,6 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
   .home-reading-section { padding: 54px 0 34px; }
   .home-footer { display: grid; gap: 6px; }
   .city-page { width: min(100% - 28px, 600px); padding-top: 34px; }
-  .info-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .topic-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .special-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .special-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
@@ -815,10 +803,6 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
   .topic-grid { grid-template-columns: 1fr; padding: 28px 0; }
   .topic-card, .topic-card:first-child, .topic-card:nth-child(2), .topic-card:nth-child(n + 3) { grid-column: auto; min-height: auto; }
   .topic-income-section { grid-template-columns: 1fr; gap: 14px; }
-  .info-hero { padding-bottom: 36px; }
-  .info-hero h1 { font-size: 44px; }
-  .info-lead { font-size: 14px; }
-  .info-sections { grid-template-columns: 1fr; gap: 0; padding-top: 24px; }
   .rate-page { width: min(100% - 28px, 600px); padding-top: 34px; }
   .rate-page-header { display: grid; align-items: start; gap: 24px; padding-bottom: 32px; }
   .rate-page-header h1 { font-size: 44px; }
