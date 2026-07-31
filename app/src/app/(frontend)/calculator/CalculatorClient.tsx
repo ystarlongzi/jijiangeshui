@@ -202,6 +202,30 @@ export default function CalculatorClient() {
       notify('当前浏览器无法自动复制，请复制地址栏链接')
     }
   }
+  const copyPayslip = async () => {
+    const lines = [
+      `工资薪金测算：${rule.label} · ${currentYear} 年 ${month} 月`,
+      `税前收入：${money(activeSalary, 2)}`,
+      `到手工资：${money(result.takeHome, 2)}`,
+      `本月个税：${money(result.currentTax, 2)}`,
+      `个人社保：${money(socialEmployee, 2)}`,
+      `个人公积金：${money(housingEmployee, 2)}`,
+      `单位社保：${money(socialEmployer, 2)}`,
+      `单位公积金：${money(housingEmployer, 2)}`,
+      `累计应纳税所得额：${money(result.taxable, 2)}`,
+      `适用预扣率：${rate}%`,
+      `规则核对日期：${ruleCheckedDate}`,
+      '结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。',
+    ].join('\n')
+
+    try {
+      await navigator.clipboard.writeText(lines)
+      trackEvent('copy_result', { calculator: 'salary', city, month, type: 'payslip' })
+      notify('已复制工资条测算结果')
+    } catch {
+      notify('当前浏览器无法自动复制，请手动选择结果')
+    }
+  }
   const formatTaxMessage = hasValidationMessages ? '当前输入存在需要确认的地方，先修正提示项后再查看计算结果。' : result.taxable <= 0 ? '累计扣除后应纳税所得额未超过 0，本月暂不需要预扣个税。' : rate > 3 ? `你在 ${month} 月累计应纳税所得额进入 ${rate}% 档位，所以本月个税比上月增加。` : '当前累计应纳税所得额仍在 3% 预扣率档位，个税随累计收入平稳变化。'
 
   return <div className="app-shell">
@@ -232,7 +256,7 @@ export default function CalculatorClient() {
         <div className="results-column">
           <section className="result-panel panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
-            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
+            <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><div className="result-actions"><button className="link-button" type="button" onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></button><button className="link-button icon-link-button" type="button" onClick={copyPayslip}><Copy size={14} />复制工资条</button><button className="link-button icon-link-button" type="button" onClick={copyShareLink}><Copy size={14} />复制链接</button></div>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</section>
           <InsuranceTable insurance={insurance} month={month} money={money} />
         </div>
       </section>
@@ -288,7 +312,18 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
   const housing = insurance.filter((item) => item.housing)
   const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
   const row = (item: InsuranceItem) => <tr className={item.housing ? 'housing-row' : ''} key={item.name}><td>{item.name}</td><td>{money(item.employee, 2)}<span className="formula">{item.employeeFormula}</span></td><td>{money(item.employer, 2)}<span className="formula">{item.employerFormula}</span></td><td>{money(item.subtotal, 2)}</td></tr>
-  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
+  const exportCsv = () => {
+    const header = ['缴纳项目', '个人缴纳', '个人公式', '企业缴纳', '企业公式', '小计']
+    const lines = [
+      ...insurance.map((item) => [item.name, item.employee.toFixed(2), item.employeeFormula, item.employer.toFixed(2), item.employerFormula, item.subtotal.toFixed(2)]),
+      ['社保合计', sum(social, 'employee').toFixed(2), '', sum(social, 'employer').toFixed(2), '', sum(social, 'subtotal').toFixed(2)],
+      ['社保、公积金合计', sum(insurance, 'employee').toFixed(2), '', sum(insurance, 'employer').toFixed(2), '', sum(insurance, 'subtotal').toFixed(2)],
+    ].map((items) => items.map(csvCell).join(','))
+    trackEvent('export_csv', { calculator: 'salary', type: 'insurance_detail', rows: insurance.length })
+    downloadTextFile(`五险一金汇缴明细-${currentYear}-${month}月.csv`, `\uFEFF${header.map(csvCell).join(',')}\n${lines.join('\n')}`)
+  }
+
+  return <section className="detail-panel panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className="link-button icon-link-button" type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="detail-table-wrap"><table className="insurance-table"><thead><tr><th>缴纳项目</th><th>个人缴纳</th><th>企业缴纳</th><th>小计</th></tr></thead><tbody>{social.map(row)}<tr className="subtotal social-subtotal"><td>社保合计</td><td>{money(sum(social, 'employee'), 2)}</td><td>{money(sum(social, 'employer'), 2)}</td><td>{money(sum(social, 'subtotal'), 2)}</td></tr>{housing.map(row)}<tr className="subtotal total-subtotal"><td>社保、公积金合计</td><td>{money(sum(insurance, 'employee'), 2)}</td><td>{money(sum(insurance, 'employer'), 2)}</td><td>{money(sum(insurance, 'subtotal'), 2)}</td></tr></tbody></table></div><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></section>
 }
 
 function AnnualTable({ salaries, month, startMonth, deduction, insurance, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
