@@ -89,10 +89,6 @@
   gap: 12px;
 }
 
-.pageContent :global(.city-label-row) {
-  min-height: 18px;
-}
-
 .pageContent :global(.salary-mode-row span) {
   display: inline-flex;
   align-items: center;
@@ -110,6 +106,10 @@
 
 .editBaseButton {
   font-size: 11px;
+}
+
+.compactField {
+  margin-bottom: 0;
 }
 
 .pageContent :global(.base-editor) {

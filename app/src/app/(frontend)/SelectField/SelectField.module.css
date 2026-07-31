@@ -1,0 +1,42 @@
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labelRow label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.control {
+  position: relative;
+}
+
+.control::after {
+  content: "⌄";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  color: var(--muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.control:focus-within select {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.invalid select {
+  border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong));
+  background: var(--orange-soft);
+}

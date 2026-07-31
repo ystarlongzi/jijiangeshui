@@ -11,6 +11,7 @@ import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
 import MoneyInput from '../MoneyInput'
+import SelectField from '../SelectField'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import SpecialDeductionSelector from '../SpecialDeductionSelector'
 import RuleSourcePanel from '../RuleSourcePanel'
@@ -232,9 +233,9 @@ export default function CalculatorClient() {
       <section className="workspace-grid" aria-label="个税计算器">
         <form className="input-panel panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
-          <div className="field-block city-field"><div className="label-with-action city-label-row"><label htmlFor="city">缴费城市</label><span className="city-actions"><Button variant="text" type="button" onClick={locate}>自动定位</Button><Button variant="text" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</Button></span></div><div className="select-wrap"><select id="city" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
+          <SelectField id="city" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<span className="city-actions"><Button variant="text" type="button" onClick={locate}>自动定位</Button><Button variant="text" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</Button></span>} />
           <div className="field-block"><div className="label-with-action salary-mode-row"><label htmlFor="salary">{salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`}</label><span><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</Button><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</Button></span></div><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{isSalaryInvalid && <p className="field-error">税前收入需要大于 0。</p>}{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</div>
-          <div className="field-grid"><div className="field-block"><label htmlFor="month">计算月份</label><div className={`select-wrap${isMonthInvalid ? ' input-error' : ''}`}><select id="month" value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div><div className="field-block"><label htmlFor="startMonth">入职月份</label><div className={`select-wrap${isMonthInvalid ? ' input-error' : ''}`}><select id="startMonth" value={startMonth} onChange={(event) => setStartMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} 月</option>)}</select></div></div></div>
+          <div className="field-grid"><SelectField className={styles.compactField} id="month" label="计算月份" value={month} onChange={setMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="startMonth" label="入职月份" value={startMonth} onChange={setStartMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
           {isMonthInvalid && <p className="field-error">计算月份不能早于入职月份。</p>}
           <div className="section-divider" />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
@@ -287,7 +288,7 @@ function BaseField({ label, value, min, max, invalid, editing, onEdit, onChange 
 }
 
 function RateSelect({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return <div className="field-block"><label>{label}</label><div className="select-wrap"><select value={value} onChange={(event) => onChange(Number(event.target.value))}>{housingRateOptions.map((rate) => <option key={rate} value={rate}>{rate}%</option>)}</select></div></div>
+  return <SelectField className={styles.compactField} label={label} value={value} onChange={onChange} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} />
 }
 
 function FlowLegend({ className, label, value, money }: { className: string; label: string; value: number; money: (value: number, decimals?: number) => string }) {

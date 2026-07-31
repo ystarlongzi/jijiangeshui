@@ -9,6 +9,7 @@
 .input, .result { padding: 26px; box-shadow: var(--shadow-strong); }
 .input h2 { margin: 0 0 28px; font-size: 24px; }
 .textButton { gap: 4px; font-size: 11px; }
+.compactField { margin-bottom: 0; }
 .field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field :global(.money-input) { min-height: 50px; }
 .field :global(.money-input) input { font-size: 20px; }

@@ -86,14 +86,11 @@ h3 { margin-bottom: 0; font-size: 15px; }
 .panel { border: 1px solid color-mix(in srgb, var(--line) 88%, var(--surface)); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 96%, var(--surface-muted)); box-shadow: var(--shadow); }
 .field-block { display: grid; gap: 7px; margin-bottom: 18px; }
 .field-block label { color: var(--ink); font-size: 12px; font-weight: 700; }
-.select-wrap { position: relative; }
-.select-wrap::after { content: "⌄"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
 select, input[type="number"] { width: 100%; min-height: 44px; border: 1px solid var(--line-strong); border-radius: var(--radius-small); background: var(--surface); color: var(--ink); padding: 0 14px; appearance: none; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
 input[type="number"] { appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
 .field-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -1px 0 0; color: var(--subtle); font-size: 11px; }
-.select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
-.select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
+input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
 .small-input input, .small-input .amount-tip-track { font-size: 15px; }
 .field-grid, .ratio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-grid .field-block, .ratio-grid .field-block { margin-bottom: 0; }

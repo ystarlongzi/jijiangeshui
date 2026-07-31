@@ -6,6 +6,7 @@ import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import { Button } from '../Button'
 import MoneyInput from '../MoneyInput'
+import SelectField from '../SelectField'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import MetricGrid from '../MetricGrid'
 import styles from './ReverseTaxClient.module.css'
@@ -122,9 +123,9 @@ export default function ReverseTaxClient() {
       <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>反推条件</h2>
         <label className={styles.field} htmlFor="targetTakeHome"><span>期望到手工资</span><MoneyInput id="targetTakeHome" value={targetTakeHome} onChange={setTargetTakeHome} /></label>
-        <div className="field-block"><div className="label-with-action"><label htmlFor="reverseCity">缴费城市</label><Button className={styles.textButton} variant="text" type="button"><LocateFixed size={13} /> 自动定位</Button></div><div className="select-wrap"><select id="reverseCity" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
-        <div className="field-grid"><SelectField id="reverseMonth" label="计算月份" value={month} onChange={setMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField id="reverseStartMonth" label="入职月份" value={startMonth} onChange={setStartMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
-        <div className="ratio-grid"><SelectField id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
+        <SelectField id="reverseCity" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<Button className={styles.textButton} variant="text" type="button"><LocateFixed size={13} /> 自动定位</Button>} />
+        <div className="field-grid"><SelectField className={styles.compactField} id="reverseMonth" label="计算月份" value={month} onChange={setMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="reverseStartMonth" label="入职月份" value={startMonth} onChange={setStartMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
+        <div className="ratio-grid"><SelectField className={styles.compactField} id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField className={styles.compactField} id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
         <div className={styles.deductions}>
           <div className="label-with-action">
             <label htmlFor="reverseDeduction">专项附加扣除</label>
@@ -157,8 +158,4 @@ function ReverseProcess({ result, targetTakeHome, employeeInsurance }: { result:
   const rate = Math.round(result.result.bracket.rate * 100)
 
   return <section className={styles.processPanel}><div className={styles.processHeading}><h2>计算过程</h2><p>先用二分法找到接近期望到手的税前工资，再套用工资薪金累计预扣法核算本月结果。</p></div><div className={styles.processSection}><h3>反推条件</h3><dl><div><dt>期望到手</dt><dd>{money(targetTakeHome)}</dd></div><div><dt>税前月薪</dt><dd>约 {money(result.salary)}</dd></div><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div></dl></div><div className={styles.processSection}><h3>本月核算</h3><dl><div><dt>累计应纳税所得额</dt><dd>{money(result.result.taxable)}</dd></div><div><dt>适用预扣率</dt><dd>{rate}%</dd></div><div><dt>本月个税</dt><dd>{money(result.result.currentTax, 2)}</dd></div><div><dt>到手工资</dt><dd>{money(result.salary)} - {money(employeeInsurance, 2)} - {money(result.result.currentTax, 2)} = {money(result.result.takeHome, 2)}</dd></div></dl></div></section>
-}
-
-function SelectField({ id, label, value, onChange, options }: { id: string; label: string; value: number; onChange: (value: number) => void; options: { value: number; label: string }[] }) {
-  return <div className="field-block"><label htmlFor={id}>{label}</label><div className="select-wrap"><select id={id} value={value} onChange={(event) => onChange(Number(event.target.value))}>{options.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div></div>
 }
