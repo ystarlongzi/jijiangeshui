@@ -5,6 +5,7 @@ import SiteHeader from '../SiteHeader'
 import JsonLd from '../JsonLd'
 import TrackedLink from '../TrackedLink'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
+import styles from './TopicsPage.module.css'
 
 export const metadata: Metadata = {
   title: `${currentYear}年个税专题｜年中入职、年底个税、城市工资到手｜${siteName}`,
@@ -64,7 +65,7 @@ const incomeLinks = [
 export default function TopicsPage() {
   return <div className="app-shell">
     <SiteHeader active="home" />
-    <main className="topic-page">
+    <main className={styles.page}>
       <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
@@ -82,16 +83,16 @@ export default function TopicsPage() {
           })),
         },
       }} />
-      <section className="topic-hero">
+      <section className={styles.hero}>
         <div>
-          <div className="city-title-line"><BookOpen size={20} /><span>{currentYear} 年个税专题</span></div>
+          <div className={styles.titleLine}><BookOpen size={20} /><span>{currentYear} 年个税专题</span></div>
           <h1>按场景找到该用的计算器</h1>
           <p>把常见搜索问题整理成入口：年中入职、年底个税、工资档位、城市工资到手和不同所得类型。</p>
         </div>
       </section>
 
-      <section className="topic-grid" aria-label="个税专题入口">
-        {topics.map(({ title, description, href, action, icon: Icon }) => <TrackedLink className="topic-card" href={href} eventPayload={{ module: 'topics_grid', label: title }} key={title}>
+      <section className={styles.grid} aria-label="个税专题入口">
+        {topics.map(({ title, description, href, action, icon: Icon }) => <TrackedLink className={styles.card} href={href} eventPayload={{ module: 'topics_grid', label: title }} key={title}>
           <Icon size={22} strokeWidth={1.8} />
           <span>{title}</span>
           <p>{description}</p>
@@ -99,12 +100,12 @@ export default function TopicsPage() {
         </TrackedLink>)}
       </section>
 
-      <section className="topic-income-section">
+      <section className={styles.incomeSection}>
         <div>
           <h2>不同所得类型入口</h2>
           <p>如果不是工资薪金收入，可以从这里进入对应的长尾计算器。</p>
         </div>
-        <div className="topic-income-links">
+        <div className={styles.incomeLinks}>
           {incomeLinks.map((item) => <TrackedLink href={item.href} eventPayload={{ module: 'topics_income', label: item.label }} key={item.href}>{item.label}<ArrowRight size={14} /></TrackedLink>)}
         </div>
       </section>
