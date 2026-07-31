@@ -261,7 +261,9 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .personal-housing { background: #63b6a1; }
 .employer-social { background: #d9a14f; }
 .employer-housing { background: var(--orange); }
-.detail-table-wrap, .annual-table-wrap { overflow-x: auto; }
+.data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 38%, transparent) transparent; }
+.data-table-wrap::-webkit-scrollbar { height: 8px; }
+.data-table-wrap::-webkit-scrollbar-thumb { border-radius: 999px; background: color-mix(in srgb, var(--accent) 34%, transparent); }
 table { width: 100%; border-collapse: collapse; }
 th { color: var(--muted); font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
@@ -336,7 +338,7 @@ tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 62%, var(-
 .content-heading-note { color: var(--muted); font-size: 11px; }
 .stacked-heading { display: grid; justify-content: start; gap: 8px; }
 .stacked-heading p { max-width: 600px; margin: 0; color: var(--muted); }
-.rate-table-wrap { overflow: hidden; }
+.rate-table-wrap { overflow-x: auto; }
 .rate-table th, .rate-table td { padding: 14px 18px; }
 .rate-table th { background: var(--surface-muted); text-align: left; }
 .rate-table td { text-align: left; }
