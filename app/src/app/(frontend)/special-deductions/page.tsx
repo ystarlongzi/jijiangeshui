@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { currentYear, siteName } from '@/lib/site'
-import SpecialDeductionsClient from './SpecialDeductionsClient'
+import SpecialDeductionsClient from '../_features/special-deductions/SpecialDeductionsClient'
 
 export const metadata: Metadata = {
   title: `专项附加扣除计算器｜${currentYear}年子女教育、住房租金、赡养老人扣除标准｜${siteName}`,
