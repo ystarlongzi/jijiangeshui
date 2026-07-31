@@ -35,7 +35,7 @@
   line-height: 1.7;
 }
 
-.header :global(.home-primary-action) {
+.headerAction {
   flex: 0 0 auto;
   justify-content: center;
   white-space: nowrap;

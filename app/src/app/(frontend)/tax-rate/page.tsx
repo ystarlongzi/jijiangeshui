@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { ArrowRight, BookOpen, Calculator } from 'lucide-react'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 import TaxRateTabs from './TaxRateTabs'
@@ -7,6 +6,8 @@ import styles from './page.module.css'
 import SiteHeader from '../SiteHeader'
 import SiteFooter from '../SiteFooter'
 import JsonLd from '../JsonLd'
+import PrimaryActionLink from '../PrimaryActionLink'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: `税率表｜${currentYear}年个人所得税预扣规则｜${siteName}`,
@@ -69,7 +70,7 @@ export default function TaxRatePage() {
       })),
     },
   ]} /><div className="app-shell"><SiteHeader active="tax-rate" /><main className={styles.page}>
-    <header className={styles.header}><div><div className={styles.titleLine}><BookOpen size={20} /><span>{currentYear} 年个人所得税规则</span></div><h1>税率表</h1><p>工资薪金、劳务报酬、稿酬及其他所得，分别适用不同的税率和计税规则。</p></div><Link className="home-primary-action" href="/calculator">用税率表算工资 <Calculator size={16} /></Link></header>
+    <header className={styles.header}><div><div className={styles.titleLine}><BookOpen size={20} /><span>{currentYear} 年个人所得税规则</span></div><h1>税率表</h1><p>工资薪金、劳务报酬、稿酬及其他所得，分别适用不同的税率和计税规则。</p></div><PrimaryActionLink className={styles.headerAction} href="/calculator">用税率表算工资 <Calculator size={16} /></PrimaryActionLink></header>
     <TaxRateTabs />
     <section className={styles.explanation}><div><h2>看完税率表，下一步做什么？</h2><p>先确认自己的所得类型，再进入对应计算器。工资薪金用户可以输入城市、工资和五险一金，查看本月到手与全年预扣逐月变化；专项扣除也会影响最终结果。</p></div><div className={styles.nextActions}><Link href="/calculator">算工资到手 <ArrowRight size={15} /></Link><Link href="/calculator#deduction">看专项扣除 <ArrowRight size={15} /></Link></div></section>
     <section className={styles.faq}><h2>常见问题</h2>{taxRateFaq.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>

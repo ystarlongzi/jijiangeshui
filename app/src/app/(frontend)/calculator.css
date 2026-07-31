@@ -90,9 +90,6 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
 .hidden { display: none !important; }
 
-.home-primary-action { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 0 17px; border-radius: 10px; font-size: 13px; font-weight: 800; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease; }
-.home-primary-action { background: var(--accent); color: #fff; box-shadow: 0 16px 30px color-mix(in srgb, var(--accent) 22%, transparent); }
-.home-primary-action:hover { background: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 20px 38px color-mix(in srgb, var(--accent) 28%, transparent); }
 @media (max-width: 680px) {
   h1 { font-size: 37px; }
 }

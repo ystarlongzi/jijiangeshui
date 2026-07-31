@@ -6,6 +6,7 @@ import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../SiteHeader'
 import SiteFooter from '../../SiteFooter'
+import PrimaryActionLink from '../../PrimaryActionLink'
 import RuleSourcePanel from '../../RuleSourcePanel'
 import styles from '../CityPages.module.css'
 
@@ -24,14 +25,14 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
 export default async function CityPage({ params }: CityPageProps) {
   const { city } = await params
   const rule = cityRules[city]
-  if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><Link className="home-primary-action" href="/calculator">打开计算器 <ArrowRight size={16} /></Link></main>
+  if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
   const exampleSalary = 20000
   const exampleInsurance = calculateInsurance(rule, Math.min(Math.max(exampleSalary, rule.socialMin), rule.socialMax), Math.min(Math.max(exampleSalary, rule.housingMin), rule.housingMax), 12, 12)
   const exampleResult = calculateMonth(exampleSalary, 8, 1, 0, exampleInsurance)
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
-    <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><Link className="home-primary-action" href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></Link></div><div className={styles.status}><ShieldCheck size={20} /><span>当前规则生效</span><strong>{rule.effective}</strong></div></section>
+    <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={styles.status}><ShieldCheck size={20} /><span>当前规则生效</span><strong>{rule.effective}</strong></div></section>
     <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>社保缴费基数</dt><dd>{formatMoney(rule.socialMin)} - {formatMoney(rule.socialMax)}</dd></div><div><dt>公积金缴费基数</dt><dd>{formatMoney(rule.housingMin)} - {formatMoney(rule.housingMax)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl><div><dt>养老保险</dt><dd>个人 {rule.socialEmployee}% / 单位 {rule.socialEmployer}%</dd></div><div><dt>医疗保险</dt><dd>个人 {rule.medicalEmployee}% / 单位 {rule.medicalEmployer}%</dd></div><div><dt>公积金</dt><dd>个人和单位可在计算器中分别选择</dd></div></dl></article></section>
     <section className={`${styles.exampleCard} panel`}>
       <div>

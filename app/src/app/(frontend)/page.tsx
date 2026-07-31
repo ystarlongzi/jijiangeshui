@@ -23,6 +23,7 @@ import {
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
 import SectionHeading from './SectionHeading'
+import PrimaryActionLink from './PrimaryActionLink'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 
 export const metadata = {
@@ -63,7 +64,7 @@ export default function HomePage() {
       <div className={styles.heroCopy}>
         <h1>先看懂，<br />再算清。</h1>
         <p className={styles.lead}>从工资到手、社保公积金，到全年预扣变化，把每个数字讲明白。</p>
-        <div className={styles.actions}><TrackedLink className="home-primary-action" href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></TrackedLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
+        <div className={styles.actions}><PrimaryActionLink href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></PrimaryActionLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
       </div>
       <div className={styles.snapshot} aria-label="工资去向概览">
         <div className={styles.snapshotTop}><span>工资去向概览</span><strong>{currentYear}</strong></div>
