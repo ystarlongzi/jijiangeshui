@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -109,32 +110,32 @@ export default function BusinessTaxClient() {
   }
 
   return <>
-  <div className="app-shell"><SiteHeader /><main className="labor-page">
-    <header className="labor-hero">
+  <div className="app-shell"><SiteHeader /><main className={styles.page}>
+    <header className={styles.hero}>
       <div>
-        <div className="bonus-eyebrow"><Briefcase size={18} />{currentYear} 年经营所得个税计算器</div>
+        <div className={styles.eyebrow}><Briefcase size={18} />{currentYear} 年经营所得个税计算器</div>
         <h1>经营收入，<br />个税多少？</h1>
         <p>输入年度收入总额、成本费用和损失，按经营所得五级超额累进税率估算年度个人所得税。</p>
       </div>
-      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+      <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
-    <section className="labor-workspace" aria-label="经营所得个税计算器">
-      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+    <section className={styles.workspace} aria-label="经营所得个税计算器">
+      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>计算经营所得</h2>
-        <label className="bonus-field" htmlFor="businessRevenue"><span>年度收入总额</span><MoneyInput id="businessRevenue" value={revenue} onChange={setRevenue} /></label>
-        <label className="bonus-field" htmlFor="businessCosts"><span>成本、费用</span><MoneyInput id="businessCosts" value={costsAndExpenses} onChange={setCostsAndExpenses} /></label>
-        <label className="bonus-field" htmlFor="businessLosses"><span>经营损失</span><MoneyInput id="businessLosses" value={losses} onChange={setLosses} /></label>
-        <label className="bonus-field" htmlFor="businessOther"><span>其他可扣除金额</span><MoneyInput id="businessOther" value={otherDeductions} onChange={setOtherDeductions} /></label>
-        <p className="bonus-form-note">适合个体工商户、个人独资企业投资人、合伙企业个人合伙人等做年度粗算。查账、核定征收和投资者扣除口径可能不同。</p>
-        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <label className={styles.field} htmlFor="businessRevenue"><span>年度收入总额</span><MoneyInput id="businessRevenue" value={revenue} onChange={setRevenue} /></label>
+        <label className={styles.field} htmlFor="businessCosts"><span>成本、费用</span><MoneyInput id="businessCosts" value={costsAndExpenses} onChange={setCostsAndExpenses} /></label>
+        <label className={styles.field} htmlFor="businessLosses"><span>经营损失</span><MoneyInput id="businessLosses" value={losses} onChange={setLosses} /></label>
+        <label className={styles.field} htmlFor="businessOther"><span>其他可扣除金额</span><MoneyInput id="businessOther" value={otherDeductions} onChange={setOtherDeductions} /></label>
+        <p className={styles.formNote}>适合个体工商户、个人独资企业投资人、合伙企业个人合伙人等做年度粗算。查账、核定征收和投资者扣除口径可能不同。</p>
+        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
 
-      <section className="labor-result panel" aria-live="polite">
-        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 经营收入 {money(revenue)}</p></div><span className="bonus-badge">{rate}% 档</span></div>
-        <div className="labor-takehome"><span>预计税后经营收入</span><strong>{money(result.afterTax)}</strong><p>应缴个税 {money(result.tax)}，适用税率 {rate}%。</p></div>
+      <section className={`${styles.result} panel`} aria-live="polite">
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 经营收入 {money(revenue)}</p></div><span className={styles.badge}>{rate}% 档</span></div>
+        <div className={styles.takeHome}><span>预计税后经营收入</span><strong>{money(result.afterTax)}</strong><p>应缴个税 {money(result.tax)}，适用税率 {rate}%。</p></div>
         <MetricGrid items={[{ label: '总扣除', value: money(result.totalDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '税率', value: `${rate}%` }, { label: '速算扣除数', value: money(result.bracket.quick) }]} />
-        <div className="labor-process">
+        <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>应纳税所得额</dt><dd>{money(revenue)} - {money(result.totalDeduction)} = {money(result.taxable)}</dd></div>
@@ -146,7 +147,7 @@ export default function BusinessTaxClient() {
       </section>
     </section>
 
-    <section className="bonus-explain"><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="business" />
     <RuleSourcePanel />
     <SiteFooter />

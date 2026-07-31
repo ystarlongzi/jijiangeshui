@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -120,35 +121,35 @@ export default function RentalTaxClient() {
   }
 
   return <>
-  <div className="app-shell"><SiteHeader /><main className="labor-page">
-    <header className="labor-hero">
+  <div className="app-shell"><SiteHeader /><main className={styles.page}>
+    <header className={styles.hero}>
       <div>
-        <div className="bonus-eyebrow"><Home size={18} />{currentYear} 年财产租赁个税计算器</div>
+        <div className={styles.eyebrow}><Home size={18} />{currentYear} 年财产租赁个税计算器</div>
         <h1>出租收入，<br />个税多少？</h1>
         <p>输入每月租金收入、可扣税费、转租租金和修缮费用，估算财产租赁所得个税与税后收入。</p>
       </div>
-      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+      <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
-    <section className="labor-workspace" aria-label="财产租赁个税计算器">
-      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+    <section className={styles.workspace} aria-label="财产租赁个税计算器">
+      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产租赁</h2>
-        <div className="rental-mode-list" aria-label="租赁类型">
-          {modes.map((item) => <button className={`rental-mode${mode === item.value ? ' active' : ''}`} type="button" key={item.value} onClick={() => setMode(item.value)}><strong>{item.label}</strong><span>{item.hint}</span></button>)}
+        <div className={styles.rentalModeList} aria-label="租赁类型">
+          {modes.map((item) => <button className={`${styles.rentalMode}${mode === item.value ? ` ${styles.active}` : ''}`} type="button" key={item.value} onClick={() => setMode(item.value)}><strong>{item.label}</strong><span>{item.hint}</span></button>)}
         </div>
-        <label className="bonus-field" htmlFor="rentalIncome"><span>每月租赁税前收入</span><MoneyInput id="rentalIncome" value={income} onChange={setIncome} /></label>
-        <label className="bonus-field" htmlFor="rentalTaxes"><span>出租过程中已缴税费</span><MoneyInput id="rentalTaxes" value={taxesAndFees} onChange={setTaxesAndFees} /></label>
-        <label className="bonus-field" htmlFor="rentalSublease"><span>转租支付租金</span><MoneyInput id="rentalSublease" value={subleaseRent} onChange={setSubleaseRent} /></label>
-        <label className="bonus-field" htmlFor="rentalRepair"><span>本次修缮费用</span><MoneyInput id="rentalRepair" value={repairExpense} onChange={setRepairExpense} /></label>
-        <p className="bonus-form-note">修缮费用每次最多扣除 800 元；输入框仅做测算，实际应以有效凭证和当地税务口径为准。</p>
-        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <label className={styles.field} htmlFor="rentalIncome"><span>每月租赁税前收入</span><MoneyInput id="rentalIncome" value={income} onChange={setIncome} /></label>
+        <label className={styles.field} htmlFor="rentalTaxes"><span>出租过程中已缴税费</span><MoneyInput id="rentalTaxes" value={taxesAndFees} onChange={setTaxesAndFees} /></label>
+        <label className={styles.field} htmlFor="rentalSublease"><span>转租支付租金</span><MoneyInput id="rentalSublease" value={subleaseRent} onChange={setSubleaseRent} /></label>
+        <label className={styles.field} htmlFor="rentalRepair"><span>本次修缮费用</span><MoneyInput id="rentalRepair" value={repairExpense} onChange={setRepairExpense} /></label>
+        <p className={styles.formNote}>修缮费用每次最多扣除 800 元；输入框仅做测算，实际应以有效凭证和当地税务口径为准。</p>
+        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
 
-      <section className="labor-result panel" aria-live="polite">
-        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 财产租赁 {money(income)}</p></div><span className="bonus-badge">{mode === 'housing' ? '出租住房' : '其他财产'}</span></div>
-        <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，适用 {rate}% 税率。</p></div>
+      <section className={`${styles.result} panel`} aria-live="polite">
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产租赁 {money(income)}</p></div><span className={styles.badge}>{mode === 'housing' ? '出租住房' : '其他财产'}</span></div>
+        <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，适用 {rate}% 税率。</p></div>
         <MetricGrid items={[{ label: '可扣税费和成本', value: money(result.deductibleCosts) }, { label: '法定费用扣除', value: money(result.statutoryDeduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '个税税率', value: `${rate}%` }]} />
-        <div className="labor-process">
+        <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>先扣税费成本</dt><dd>{money(income)} - {money(taxesAndFees)} - {money(subleaseRent)} - {money(result.repairDeduction)} = {money(result.incomeAfterCosts)}</dd></div>
@@ -162,7 +163,7 @@ export default function RentalTaxClient() {
       </section>
     </section>
 
-    <section className="bonus-explain"><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 20% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 20% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="rental" />
     <RuleSourcePanel />
     <SiteFooter />

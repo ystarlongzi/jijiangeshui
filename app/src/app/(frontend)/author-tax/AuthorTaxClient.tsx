@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -81,29 +82,29 @@ export default function AuthorTaxClient() {
   }
 
   return <>
-  <div className="app-shell"><SiteHeader /><main className="labor-page">
-    <header className="labor-hero">
+  <div className="app-shell"><SiteHeader /><main className={styles.page}>
+    <header className={styles.hero}>
       <div>
-        <div className="bonus-eyebrow"><BookOpenText size={18} />{currentYear} 年稿酬个税计算器</div>
+        <div className={styles.eyebrow}><BookOpenText size={18} />{currentYear} 年稿酬个税计算器</div>
         <h1>稿酬收入，<br />扣多少税？</h1>
         <p>输入稿酬税前收入，按居民个人稿酬所得预扣规则估算费用扣除、减按 70%、预扣个税和税后到手金额。</p>
       </div>
-      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+      <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
-    <section className="labor-workspace" aria-label="稿酬个税计算器">
-      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+    <section className={styles.workspace} aria-label="稿酬个税计算器">
+      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>计算稿酬收入</h2>
-        <label className="bonus-field" htmlFor="authorIncome"><span>稿酬税前收入</span><MoneyInput id="authorIncome" value={income} onChange={setIncome} /></label>
-        <p className="bonus-form-note">稿酬所得先按劳务类规则扣除费用，再将收入额减按 70% 计算，通常按 20% 比例预扣。</p>
-        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <label className={styles.field} htmlFor="authorIncome"><span>稿酬税前收入</span><MoneyInput id="authorIncome" value={income} onChange={setIncome} /></label>
+        <p className={styles.formNote}>稿酬所得先按劳务类规则扣除费用，再将收入额减按 70% 计算，通常按 20% 比例预扣。</p>
+        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
 
-      <section className="labor-result panel" aria-live="polite">
-        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 稿酬 {money(income)}</p></div><span className="bonus-badge">居民个人</span></div>
-        <div className="labor-takehome"><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
+      <section className={`${styles.result} panel`} aria-live="polite">
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 稿酬 {money(income)}</p></div><span className={styles.badge}>居民个人</span></div>
+        <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
         <MetricGrid items={[{ label: '费用扣除', value: money(result.expenseDeduction) }, { label: '减按 70% 后', value: money(result.taxable) }, { label: '预扣率', value: '20%' }, { label: '预扣个税', value: money(result.tax) }]} />
-        <div className="labor-process">
+        <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>费用扣除</dt><dd>{income <= 4000 ? `${money(income)} 中扣除 ${money(result.expenseDeduction)}` : `${money(income)} × 20% = ${money(result.expenseDeduction)}`}</dd></div>
@@ -117,7 +118,7 @@ export default function AuthorTaxClient() {
       </section>
     </section>
 
-    <section className="bonus-explain"><div><h2>稿酬和劳务报酬有什么不同？</h2><p>稿酬所得通常指作品出版、发表取得的收入。和一般劳务报酬相比，稿酬所得收入额按规定减按 70% 计算。</p></div><Link href="/labor-tax">算劳务报酬 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>稿酬和劳务报酬有什么不同？</h2><p>稿酬所得通常指作品出版、发表取得的收入。和一般劳务报酬相比，稿酬所得收入额按规定减按 70% 计算。</p></div><Link href="/labor-tax">算劳务报酬 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="author" />
     <RuleSourcePanel />
     <SiteFooter />

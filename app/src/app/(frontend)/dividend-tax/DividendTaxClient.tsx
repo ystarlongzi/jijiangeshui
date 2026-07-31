@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -75,29 +76,29 @@ export default function DividendTaxClient() {
   }
 
   return <>
-  <div className="app-shell"><SiteHeader /><main className="labor-page">
-    <header className="labor-hero">
+  <div className="app-shell"><SiteHeader /><main className={styles.page}>
+    <header className={styles.hero}>
       <div>
-        <div className="bonus-eyebrow"><Coins size={18} />{currentYear} 年利息股息红利个税计算器</div>
+        <div className={styles.eyebrow}><Coins size={18} />{currentYear} 年利息股息红利个税计算器</div>
         <h1>分红利息，<br />扣多少税？</h1>
         <p>输入利息、股息或红利收入，按 20% 比例税率估算应缴个人所得税和税后收入。</p>
       </div>
-      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+      <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
-    <section className="labor-workspace" aria-label="利息股息红利个税计算器">
-      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+    <section className={styles.workspace} aria-label="利息股息红利个税计算器">
+      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>计算利息股息红利</h2>
-        <label className="bonus-field" htmlFor="dividendIncome"><span>本次税前收入</span><MoneyInput id="dividendIncome" value={income} onChange={setIncome} /></label>
-        <p className="bonus-form-note">利息、股息、红利所得通常以每次取得收入为一次，按 20% 比例税率计算，由扣缴义务人按规定代扣代缴。</p>
-        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <label className={styles.field} htmlFor="dividendIncome"><span>本次税前收入</span><MoneyInput id="dividendIncome" value={income} onChange={setIncome} /></label>
+        <p className={styles.formNote}>利息、股息、红利所得通常以每次取得收入为一次，按 20% 比例税率计算，由扣缴义务人按规定代扣代缴。</p>
+        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
 
-      <section className="labor-result panel" aria-live="polite">
-        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 税前收入 {money(income)}</p></div><span className="bonus-badge">20% 税率</span></div>
-        <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}。</p></div>
+      <section className={`${styles.result} panel`} aria-live="polite">
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 税前收入 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
+        <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}。</p></div>
         <MetricGrid items={[{ label: '税前收入', value: money(result.income) }, { label: '税率', value: '20%' }, { label: '应缴个税', value: money(result.tax) }, { label: '税后收入', value: money(result.takeHome) }]} />
-        <div className="labor-process">
+        <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>应缴个税</dt><dd>{money(income)} × 20% = {money(result.tax)}</dd></div>
@@ -108,7 +109,7 @@ export default function DividendTaxClient() {
       </section>
     </section>
 
-    <section className="bonus-explain"><div><h2>这类所得有什么特点？</h2><p>利息、股息、红利所得不并入综合所得，通常按次用 20% 比例税率计算。不同金融产品可能存在免税或特殊口径，需要结合具体收入性质核对。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>这类所得有什么特点？</h2><p>利息、股息、红利所得不并入综合所得，通常按次用 20% 比例税率计算。不同金融产品可能存在免税或特殊口径，需要结合具体收入性质核对。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="dividend" />
     <RuleSourcePanel />
     <SiteFooter />

@@ -9,6 +9,7 @@ import MoneyInput from '../MoneyInput'
 import MetricGrid from '../MetricGrid'
 import RuleSourcePanel from '../RuleSourcePanel'
 import LongTailInfo from '../LongTailInfo'
+import styles from '../IncomeTaxTool/IncomeTaxTool.module.css'
 import { copyText, resultLines } from '../clipboard'
 import { downloadCsv } from '../csv'
 import { useMoneyFormat } from '../MoneyFormatProvider'
@@ -97,31 +98,31 @@ export default function PropertyTransferTaxClient() {
   }
 
   return <>
-  <div className="app-shell"><SiteHeader /><main className="labor-page">
-    <header className="labor-hero">
+  <div className="app-shell"><SiteHeader /><main className={styles.page}>
+    <header className={styles.hero}>
       <div>
-        <div className="bonus-eyebrow"><TrendingUp size={18} />{currentYear} 年财产转让个税计算器</div>
+        <div className={styles.eyebrow}><TrendingUp size={18} />{currentYear} 年财产转让个税计算器</div>
         <h1>卖出资产，<br />个税多少？</h1>
         <p>输入转让收入、财产原值和合理费用，按财产转让所得 20% 比例税率估算个税和税后收入。</p>
       </div>
-      <div className="labor-hero-note"><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
+      <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
-    <section className="labor-workspace" aria-label="财产转让个税计算器">
-      <form className="labor-input panel" onSubmit={(event) => event.preventDefault()}>
+    <section className={styles.workspace} aria-label="财产转让个税计算器">
+      <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产转让</h2>
-        <label className="bonus-field" htmlFor="transferIncome"><span>转让收入</span><MoneyInput id="transferIncome" value={income} onChange={setIncome} /></label>
-        <label className="bonus-field" htmlFor="transferOriginal"><span>财产原值</span><MoneyInput id="transferOriginal" value={originalValue} onChange={setOriginalValue} /></label>
-        <label className="bonus-field" htmlFor="transferFees"><span>合理费用</span><MoneyInput id="transferFees" value={reasonableFees} onChange={setReasonableFees} /></label>
-        <p className="bonus-form-note">这里适合做通用测算。房屋、股权等财产转让可能有更细的核定、免税或地方口径，正式申报前需要再核对凭证和政策。</p>
-        <div className="bonus-form-actions"><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
+        <label className={styles.field} htmlFor="transferIncome"><span>转让收入</span><MoneyInput id="transferIncome" value={income} onChange={setIncome} /></label>
+        <label className={styles.field} htmlFor="transferOriginal"><span>财产原值</span><MoneyInput id="transferOriginal" value={originalValue} onChange={setOriginalValue} /></label>
+        <label className={styles.field} htmlFor="transferFees"><span>合理费用</span><MoneyInput id="transferFees" value={reasonableFees} onChange={setReasonableFees} /></label>
+        <p className={styles.formNote}>这里适合做通用测算。房屋、股权等财产转让可能有更细的核定、免税或地方口径，正式申报前需要再核对凭证和政策。</p>
+        <div className={styles.formActions}><button className="primary-button" type="submit">更新计算结果 <ArrowRight size={16} /></button><button className="secondary-button" type="button" onClick={reset}><RotateCcw size={15} />重置</button></div>
       </form>
 
-      <section className="labor-result panel" aria-live="polite">
-        <div className="bonus-result-heading"><div><span className="bonus-section-title">计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className="bonus-badge">20% 税率</span></div>
-        <div className="labor-takehome"><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，应纳税所得额 {money(result.taxable)}。</p></div>
+      <section className={`${styles.result} panel`} aria-live="polite">
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
+        <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，应纳税所得额 {money(result.taxable)}。</p></div>
         <MetricGrid items={[{ label: '转让收入', value: money(result.income) }, { label: '财产原值', value: money(result.originalValue) }, { label: '合理费用', value: money(result.reasonableFees) }, { label: '应纳税所得额', value: money(result.taxable) }]} />
-        <div className="labor-process">
+        <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>应纳税所得额</dt><dd>{money(income)} - {money(originalValue)} - {money(reasonableFees)} = {money(result.taxable)}</dd></div>
@@ -133,7 +134,7 @@ export default function PropertyTransferTaxClient() {
       </section>
     </section>
 
-    <section className="bonus-explain"><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="transfer" />
     <RuleSourcePanel />
     <SiteFooter />
