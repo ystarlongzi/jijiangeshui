@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react'
-import TrackedLink from './TrackedLink'
+import TrackedLink from '../TrackedLink'
+import styles from './LongTailInfo.module.css'
 
 type LongTailType = 'labor' | 'author' | 'license' | 'rental' | 'transfer' | 'business' | 'dividend' | 'accidental'
 
@@ -143,8 +144,8 @@ const infoMap: Record<LongTailType, InfoItem> = {
 export default function LongTailInfo({ type }: { type: LongTailType }) {
   const info = infoMap[type]
 
-  return <section className="longtail-info-section">
-    <div className="longtail-info-grid">
+  return <section className={styles.section}>
+    <div className={styles.grid}>
       <article>
         <span>适用范围</span>
         <h2>{info.title}</h2>
@@ -156,12 +157,12 @@ export default function LongTailInfo({ type }: { type: LongTailType }) {
         <p>{info.basis}</p>
       </article>
     </div>
-    <div className="longtail-related">
+    <div className={styles.related}>
       <div>
         <span>相关工具</span>
         <h2>还可以继续算什么？</h2>
       </div>
-      <div className="longtail-related-links">
+      <div className={styles.links}>
         {info.related.map((item) => <TrackedLink key={item.href} href={item.href} eventPayload={{ module: 'longtail_related', label: item.label, source: type }}>
           <strong>{item.label}</strong>
           <small>{item.note}</small>
@@ -169,9 +170,9 @@ export default function LongTailInfo({ type }: { type: LongTailType }) {
         </TrackedLink>)}
       </div>
     </div>
-    <div className="longtail-faq">
+    <div className={styles.faq}>
       <h2>常见问题</h2>
-      <div className="faq-list">
+      <div className={styles.faqList}>
         {info.faq.map((item) => <details key={item.question}>
           <summary>{item.question}</summary>
           <p>{item.answer}</p>
