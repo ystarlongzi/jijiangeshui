@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import CalculatorClient from './CalculatorClient'
+import CalculatorClient from '../_features/salary/CalculatorClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd from '../_components/JsonLd'
 
