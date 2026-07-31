@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import DividendTaxClient from './DividendTaxClient'
+import DividendTaxClient from '../_features/income-tax-tools/dividend/DividendTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

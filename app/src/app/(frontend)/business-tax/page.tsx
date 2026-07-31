@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import BusinessTaxClient from './BusinessTaxClient'
+import BusinessTaxClient from '../_features/income-tax-tools/business/BusinessTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

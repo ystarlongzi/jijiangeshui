@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import PropertyTransferTaxClient from './PropertyTransferTaxClient'
+import PropertyTransferTaxClient from '../_features/income-tax-tools/property-transfer/PropertyTransferTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

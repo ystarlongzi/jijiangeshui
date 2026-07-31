@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import LicenseTaxClient from './LicenseTaxClient'
+import LicenseTaxClient from '../_features/income-tax-tools/license/LicenseTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

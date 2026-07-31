@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import RentalTaxClient from './RentalTaxClient'
+import RentalTaxClient from '../_features/income-tax-tools/rental/RentalTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

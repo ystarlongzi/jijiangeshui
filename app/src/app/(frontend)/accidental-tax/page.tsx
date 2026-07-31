@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import AccidentalTaxClient from './AccidentalTaxClient'
+import AccidentalTaxClient from '../_features/income-tax-tools/accidental/AccidentalTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 

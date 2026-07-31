@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import LaborTaxClient from './LaborTaxClient'
+import LaborTaxClient from '../_features/income-tax-tools/labor/LaborTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
