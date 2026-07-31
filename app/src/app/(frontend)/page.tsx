@@ -1,4 +1,5 @@
 import TrackedLink from './TrackedLink'
+import styles from './page.module.css'
 import {
   ArrowRight,
   BadgePercent,
@@ -56,33 +57,33 @@ export default function HomePage() {
   const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年预扣个税。` }
   return <div className="app-shell">
     <SiteHeader active="home" />
-    <main className="home-page" id="top">
-    <section className="home-hero">
-      <div className="home-hero-copy">
+    <main className={styles.page} id="top">
+    <section className={styles.hero}>
+      <div className={styles.heroCopy}>
         <h1>先看懂，<br />再算清。</h1>
-        <p className="home-lead">从工资到手、社保公积金，到全年预扣变化，把每个数字讲明白。</p>
-        <div className="home-actions"><TrackedLink className="home-primary-action" href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></TrackedLink><TrackedLink className="home-secondary-action" href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
+        <p className={styles.lead}>从工资到手、社保公积金，到全年预扣变化，把每个数字讲明白。</p>
+        <div className={styles.actions}><TrackedLink className="home-primary-action" href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></TrackedLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
       </div>
-      <div className="hero-snapshot" aria-label="工资去向概览">
-        <div className="hero-snapshot-top"><span>工资去向概览</span><strong>{currentYear}</strong></div>
-        <div className="hero-snapshot-total"><span>税前月薪</span><strong>¥20,000</strong></div>
-        <div className="hero-snapshot-bar"><span className="bar-take-home" /><span className="bar-insurance" /><span className="bar-tax" /></div>
-        <div className="hero-snapshot-legend"><span><i className="legend-dot take-home" />到手工资 <b>¥15,710</b></span><span><i className="legend-dot insurance" />五险一金 <b>¥3,100</b></span><span><i className="legend-dot tax" />个人所得税 <b>¥1,190</b></span></div>
+      <div className={styles.snapshot} aria-label="工资去向概览">
+        <div className={styles.snapshotTop}><span>工资去向概览</span><strong>{currentYear}</strong></div>
+        <div className={styles.snapshotTotal}><span>税前月薪</span><strong>¥20,000</strong></div>
+        <div className={styles.snapshotBar}><span className={styles.barTakeHome} /><span className={styles.barInsurance} /><span className={styles.barTax} /></div>
+        <div className={styles.snapshotLegend}><span><i className={`${styles.legendDot} ${styles.takeHome}`} />到手工资 <b>¥15,710</b></span><span><i className={`${styles.legendDot} ${styles.insurance}`} />五险一金 <b>¥3,100</b></span><span><i className={`${styles.legendDot} ${styles.tax}`} />个人所得税 <b>¥1,190</b></span></div>
         <p>按北京市规则估算 · 8 月</p>
       </div>
-      <div className="home-hero-note"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
+      <div className={styles.heroNote}><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
     </section>
 
-    <section className="home-tool-section" aria-labelledby="home-tools-title">
+    <section className={styles.toolSection} aria-labelledby="home-tools-title">
       <div className="home-section-heading"><h2 id="home-tools-title">你想算什么？</h2><p>从最常用的工资计算开始，也可以直接进入对应的政策工具。</p></div>
-      <div className="tool-grid">{tools.map(({ href, icon: Icon, title, description, label, featured }) => <TrackedLink className={`tool-entry${featured ? ' featured' : ''}`} href={href} eventPayload={{ module: 'home_tools', label: title }} key={title}><span className="tool-icon"><Icon size={21} strokeWidth={1.8} /></span><span className="tool-entry-body"><strong>{title}</strong><span>{description}</span></span><span className="tool-entry-action">{label}<ArrowRight size={15} /></span></TrackedLink>)}</div>
+      <div className={styles.toolGrid}>{tools.map(({ href, icon: Icon, title, description, label, featured }) => <TrackedLink className={`${styles.toolEntry}${featured ? ` ${styles.featured}` : ''}`} href={href} eventPayload={{ module: 'home_tools', label: title }} key={title}><span className={styles.toolIcon}><Icon size={21} strokeWidth={1.8} /></span><span className={styles.toolEntryBody}><strong>{title}</strong><span>{description}</span></span><span className={styles.toolEntryAction}>{label}<ArrowRight size={15} /></span></TrackedLink>)}</div>
     </section>
 
-    <section className="home-highlight-section" aria-label="产品特点"><div className="highlight-grid">{highlights.map(({ icon: Icon, title, text }) => <div className="highlight-item" key={title}><Icon className="highlight-icon" size={20} strokeWidth={1.8} /><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></section>
+    <section className={styles.highlightSection} aria-label="产品特点"><div className={styles.highlightGrid}>{highlights.map(({ icon: Icon, title, text }) => <div className={styles.highlightItem} key={title}><Icon className={styles.highlightIcon} size={20} strokeWidth={1.8} /><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></section>
 
-    <section className="home-reading-section"><div className="home-section-heading"><h2>常用规则与内容</h2><TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '查看专题' }}>查看专题 <ArrowRight size={15} /></TrackedLink></div><div className="reading-links"><TrackedLink href="/tax-rate" eventPayload={{ module: 'home_reading', label: '个人所得税预扣率表' }}><Percent size={18} /><span>个人所得税预扣率表</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/special-deductions" eventPayload={{ module: 'home_reading', label: '专项附加扣除计算器' }}><BookOpen size={18} /><span>专项附加扣除计算器</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '个税专题入口' }}><Sparkles size={18} /><span>个税专题入口</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/faq" eventPayload={{ module: 'home_reading', label: '工资个税常见问题' }}><CircleHelp size={18} /><span>工资个税常见问题</span><ArrowRight size={15} /></TrackedLink></div></section>
+    <section className={styles.readingSection}><div className="home-section-heading"><h2>常用规则与内容</h2><TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '查看专题' }}>查看专题 <ArrowRight size={15} /></TrackedLink></div><div className={styles.readingLinks}><TrackedLink href="/tax-rate" eventPayload={{ module: 'home_reading', label: '个人所得税预扣率表' }}><Percent size={18} /><span>个人所得税预扣率表</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/special-deductions" eventPayload={{ module: 'home_reading', label: '专项附加扣除计算器' }}><BookOpen size={18} /><span>专项附加扣除计算器</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '个税专题入口' }}><Sparkles size={18} /><span>个税专题入口</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/faq" eventPayload={{ module: 'home_reading', label: '工资个税常见问题' }}><CircleHelp size={18} /><span>工资个税常见问题</span><ArrowRight size={15} /></TrackedLink></div></section>
 
-    <section className="home-city-section"><div className="home-section-heading"><h2>热门城市</h2><TrackedLink href="/city" eventPayload={{ module: 'home_cities', label: '全部城市' }}>全部城市 <ArrowRight size={15} /></TrackedLink></div><p className="home-section-copy">查看城市社保、公积金基数范围和缴费比例。</p><div className="city-links"><TrackedLink href="/city/beijing" eventPayload={{ module: 'home_cities', label: '北京市' }}><MapPin size={16} />北京市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/shanghai" eventPayload={{ module: 'home_cities', label: '上海市' }}><MapPin size={16} />上海市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/shenzhen" eventPayload={{ module: 'home_cities', label: '深圳市' }}><MapPin size={16} />深圳市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/guangzhou" eventPayload={{ module: 'home_cities', label: '广州市' }}><MapPin size={16} />广州市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/hangzhou" eventPayload={{ module: 'home_cities', label: '杭州市' }}><MapPin size={16} />杭州市 <ArrowRight size={14} /></TrackedLink></div></section>
+    <section className={styles.citySection}><div className="home-section-heading"><h2>热门城市</h2><TrackedLink href="/city" eventPayload={{ module: 'home_cities', label: '全部城市' }}>全部城市 <ArrowRight size={15} /></TrackedLink></div><p className="home-section-copy">查看城市社保、公积金基数范围和缴费比例。</p><div className={styles.cityLinks}><TrackedLink href="/city/beijing" eventPayload={{ module: 'home_cities', label: '北京市' }}><MapPin size={16} />北京市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/shanghai" eventPayload={{ module: 'home_cities', label: '上海市' }}><MapPin size={16} />上海市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/shenzhen" eventPayload={{ module: 'home_cities', label: '深圳市' }}><MapPin size={16} />深圳市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/guangzhou" eventPayload={{ module: 'home_cities', label: '广州市' }}><MapPin size={16} />广州市 <ArrowRight size={14} /></TrackedLink><TrackedLink href="/city/hangzhou" eventPayload={{ module: 'home_cities', label: '杭州市' }}><MapPin size={16} />杭州市 <ArrowRight size={14} /></TrackedLink></div></section>
 
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData) }} />
     <SiteFooter />
