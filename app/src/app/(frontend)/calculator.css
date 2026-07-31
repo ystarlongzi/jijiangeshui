@@ -92,8 +92,6 @@ select, input[type="number"] { width: 100%; min-height: 44px; border: 1px solid 
 input[type="number"] { appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
 .field-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -1px 0 0; color: var(--subtle); font-size: 11px; }
-.text-button { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 0; }
-.text-button:hover { color: var(--accent-deep); }
 .select-wrap:focus-within select, input[type="number"]:focus { border-color: var(--accent); box-shadow: none; }
 .select-wrap.input-error { border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong)); background: var(--orange-soft); }
 .small-input input, .small-input .amount-tip-track { font-size: 15px; }

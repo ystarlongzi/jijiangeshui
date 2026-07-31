@@ -65,7 +65,7 @@ export default function SpecialDeductionsClient() {
               <h2>按项目选择</h2>
               <p>每个项目只选一种扣除方式，再由系统自动汇总月度金额。</p>
             </div>
-            <button className="text-button" type="button" onClick={() => setManualOpen(!manualOpen)}>{manualOpen ? '收起总额输入' : '已有总额？直接输入'}</button>
+            <Button className={styles.manualToggle} variant="text" type="button" onClick={() => setManualOpen(!manualOpen)}>{manualOpen ? '收起总额输入' : '已有总额？直接输入'}</Button>
           </div>
 
           {manualOpen ? <div className={styles.manual}>

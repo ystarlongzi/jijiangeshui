@@ -122,13 +122,13 @@ export default function ReverseTaxClient() {
       <form className={`${styles.input} panel`} onSubmit={(event) => event.preventDefault()}>
         <h2>反推条件</h2>
         <label className={styles.field} htmlFor="targetTakeHome"><span>期望到手工资</span><MoneyInput id="targetTakeHome" value={targetTakeHome} onChange={setTargetTakeHome} /></label>
-        <div className="field-block"><div className="label-with-action"><label htmlFor="reverseCity">缴费城市</label><button className="text-button" type="button"><LocateFixed size={13} /> 自动定位</button></div><div className="select-wrap"><select id="reverseCity" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
+        <div className="field-block"><div className="label-with-action"><label htmlFor="reverseCity">缴费城市</label><Button className={styles.textButton} variant="text" type="button"><LocateFixed size={13} /> 自动定位</Button></div><div className="select-wrap"><select id="reverseCity" value={city} onChange={(event) => setCity(event.target.value)}>{Object.entries(cityRules).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}</select></div></div>
         <div className="field-grid"><SelectField id="reverseMonth" label="计算月份" value={month} onChange={setMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField id="reverseStartMonth" label="入职月份" value={startMonth} onChange={setStartMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
         <div className="ratio-grid"><SelectField id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
         <div className={styles.deductions}>
           <div className="label-with-action">
             <label htmlFor="reverseDeduction">专项附加扣除</label>
-            <button className="text-button" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</button>
+            <Button className={styles.textButton} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>
           </div>
           <MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} />
           <p>{selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}</p>

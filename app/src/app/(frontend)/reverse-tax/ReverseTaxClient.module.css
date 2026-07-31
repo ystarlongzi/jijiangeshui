@@ -8,7 +8,7 @@
 .workspace { display: grid; grid-template-columns: minmax(320px, 390px) minmax(0, 1fr); gap: 20px; padding: 42px 0 58px; }
 .input, .result { padding: 26px; box-shadow: var(--shadow-strong); }
 .input h2 { margin: 0 0 28px; font-size: 24px; }
-.input :global(.text-button) { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; }
+.textButton { gap: 4px; font-size: 11px; }
 .field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field :global(.money-input) { min-height: 50px; }
 .field :global(.money-input) input { font-size: 20px; }

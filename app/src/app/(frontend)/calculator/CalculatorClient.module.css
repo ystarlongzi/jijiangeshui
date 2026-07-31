@@ -99,16 +99,16 @@
   gap: 10px;
 }
 
-.pageContent :global(.salary-mode-row .text-button) {
+.salaryModeButton {
   color: var(--muted);
   font-size: 11px;
 }
 
-.pageContent :global(.salary-mode-row .text-button[aria-pressed="true"]) {
+.salaryModeButton[aria-pressed="true"] {
   color: var(--accent);
 }
 
-.pageContent :global(.edit-base-button) {
+.editBaseButton {
   font-size: 11px;
 }
 

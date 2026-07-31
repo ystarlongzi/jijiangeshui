@@ -34,6 +34,24 @@
   color: var(--accent);
 }
 
+.text {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.text:hover {
+  color: var(--accent-deep);
+}
+
 .button:active {
   transform: translateY(1px);
+}
+
+.text:active {
+  transform: none;
 }
