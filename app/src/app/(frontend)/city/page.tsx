@@ -5,6 +5,7 @@ import SiteFooter from '../SiteFooter'
 import SiteHeader from '../SiteHeader'
 import { cityRules } from '@/lib/tax-rules'
 import { currentYear, siteName } from '@/lib/site'
+import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
   title: `${currentYear}年城市个税计算器｜社保公积金基数范围｜${siteName}`,
@@ -19,13 +20,13 @@ export default function CityIndexPage() {
     groups[province] = [...(groups[province] || []), city]
     return groups
   }, {})
-  return <div className="app-shell"><SiteHeader active="calculator" /><main className="city-page">
-    <section className="city-hero city-index-hero">
-      <div><div className="city-title-line"><MapPin size={20} /><span>{currentYear} 年城市规则</span></div><h1>城市个税计算器</h1><p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p></div>
+  return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
+    <section className={`${styles.hero} ${styles.indexHero}`}>
+      <div><div className={styles.titleLine}><MapPin size={20} /><span>{currentYear} 年城市规则</span></div><h1>城市个税计算器</h1><p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p></div>
     </section>
 
-    <section className="city-index-grid" aria-label="已收录城市">
-      {cities.map(([key, rule]) => <Link className="city-index-card" href={`/city/${key}`} key={key}>
+    <section className={styles.indexGrid} aria-label="已收录城市">
+      {cities.map(([key, rule]) => <Link className={styles.indexCard} href={`/city/${key}`} key={key}>
         <span>{rule.label}</span><small>{rule.province} · {rule.pinyin}</small>
         <dl>
           <div><dt>社保基数</dt><dd>{formatMoney(rule.socialMin)} - {formatMoney(rule.socialMax)}</dd></div>
@@ -35,17 +36,17 @@ export default function CityIndexPage() {
       </Link>)}
     </section>
 
-    <section className="city-province-section" aria-label="按地区浏览城市">
+    <section className={styles.provinceSection} aria-label="按地区浏览城市">
       <div className="home-section-heading"><h2>按地区浏览</h2><p>先覆盖高频城市，后续接入规则后台后会扩展更多省市。</p></div>
-      <div className="city-province-list">
-        {Object.entries(cityGroups).map(([province, group]) => <div className="city-province-card" key={province}>
+      <div className={styles.provinceList}>
+        {Object.entries(cityGroups).map(([province, group]) => <div className={styles.provinceCard} key={province}>
           <strong>{province}</strong>
           <div>{group.map(([key, rule]) => <Link href={`/city/${key}`} key={key}>{rule.name}</Link>)}</div>
         </div>)}
       </div>
     </section>
 
-    <section className="city-next-step"><div><MapPin size={20} /><div><h2>城市规则会影响到手工资</h2><p>同样的税前工资，在不同城市可能因为社保、公积金基数上下限和单位比例不同，得到不同结果。</p></div></div><Link href="/calculator">进入工资计算器 <ArrowRight size={16} /></Link></section>
+    <section className={styles.nextStep}><div><MapPin size={20} /><div><h2>城市规则会影响到手工资</h2><p>同样的税前工资，在不同城市可能因为社保、公积金基数上下限和单位比例不同，得到不同结果。</p></div></div><Link href="/calculator">进入工资计算器 <ArrowRight size={16} /></Link></section>
     <SiteFooter />
   </main></div>
 }
