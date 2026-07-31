@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import BonusTaxClient from './BonusTaxClient'
+import BonusTaxClient from '../_features/bonus-tax/BonusTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd from '../_components/JsonLd'
 
