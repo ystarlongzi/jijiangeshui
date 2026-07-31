@@ -25,7 +25,7 @@ export default function Modal({ open, title, description, children, footer, onCl
           <h2 id={titleId}>{title}</h2>
           {description && <p>{description}</p>}
         </div>
-        <button className="icon-button" type="button" aria-label="关闭" onClick={onClose}>
+        <button className={styles.closeButton} type="button" aria-label="关闭" onClick={onClose}>
           <X size={17} />
         </button>
       </div>
