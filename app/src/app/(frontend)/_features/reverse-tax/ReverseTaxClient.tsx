@@ -82,6 +82,11 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
     setToast(message)
     window.setTimeout(() => setToast(''), 2400)
   }
+  const locate = () => {
+    if (!navigator.geolocation) return notify('当前浏览器不支持自动定位，请手动选择城市')
+    notify('正在获取位置，请允许浏览器访问定位权限')
+    navigator.geolocation.getCurrentPosition(() => notify('已获取位置，正式版将匹配对应城市规则'), () => notify('暂时无法获取位置，请手动选择城市'))
+  }
   const copyShareLink = async () => {
     const url = new URL(window.location.href)
     url.pathname = '/reverse-tax'
@@ -138,7 +143,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>反推条件</h2>
         <label className={styles.field} htmlFor="targetTakeHome"><span>期望到手工资</span><MoneyInput id="targetTakeHome" value={targetTakeHome} onChange={setTargetTakeHome} /></label>
-        <SelectField id="reverseCity" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<span className={styles.cityActions}><Button className={styles.textButton} variant="text" type="button"><LocateFixed size={13} /> 自动定位</Button><TrackedLink className={styles.textButton} href={`/city/${city}`} eventPayload={{ module: 'reverse_tax_form', label: '查看城市规则', city }}>查看规则</TrackedLink></span>} />
+        <SelectField id="reverseCity" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<span className={styles.cityActions}><Button className={styles.textButton} variant="text" type="button" onClick={locate}><LocateFixed size={13} /> 自动定位</Button><TrackedLink className={styles.textButton} href={`/city/${city}`} eventPayload={{ module: 'reverse_tax_form', label: '查看城市规则', city }}>查看规则</TrackedLink></span>} />
         <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="reverseMonth" label="计算月份" value={month} onChange={setMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="reverseStartMonth" label="入职月份" value={startMonth} onChange={setStartMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
         <div className={styles.ratioGrid}><SelectField className={styles.compactField} id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={cityHousingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField className={styles.compactField} id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={cityHousingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
         <FormField className={styles.deductions} htmlFor="reverseDeduction" label="专项附加扣除" action={<Button className={styles.textButton} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}><MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} /></FormField>
