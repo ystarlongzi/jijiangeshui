@@ -25,6 +25,7 @@ const importSourceTypes = ['fallback', 'manual', 'official', 'hrwork'] as const
 type ImportTriggerType = (typeof importTriggerTypes)[number]
 type ImportSourceType = (typeof importSourceTypes)[number]
 type PayloadInstance = Awaited<ReturnType<typeof import('payload').getPayload>>
+type ModuleWithDefault<T> = T | { default?: T }
 
 const inputPath = process.argv[2]
 const dryRun = process.argv.includes('--dry-run')
@@ -90,8 +91,67 @@ async function createPayloadClient(): Promise<PayloadInstance> {
     throw new Error('缺少 DATABASE_URI。请先复制 app/.env.example 为 app/.env，并确认 PostgreSQL 已启动。')
   }
 
-  const [{ getPayload }, { default: config }] = await Promise.all([import('payload'), import('../src/payload.config')])
-  return getPayload({ config })
+  console.log('正在初始化 Payload 本地 API...')
+  const [
+    { postgresAdapter },
+    { lexicalEditor },
+    { buildConfig, getPayload },
+    { default: sharp },
+    articlesModule,
+    citiesModule,
+    faqsModule,
+    importJobsModule,
+    socialInsurancePoliciesModule,
+    specialDeductionRulesModule,
+    taxRateRulesModule,
+    usersModule,
+  ] = await Promise.all([
+    import('@payloadcms/db-postgres'),
+    import('@payloadcms/richtext-lexical'),
+    import('payload'),
+    import('sharp'),
+    import('../src/collections/Articles'),
+    import('../src/collections/Cities'),
+    import('../src/collections/FAQs'),
+    import('../src/collections/ImportJobs'),
+    import('../src/collections/SocialInsurancePolicies'),
+    import('../src/collections/SpecialDeductionRules'),
+    import('../src/collections/TaxRateRules'),
+    import('../src/collections/Users'),
+  ])
+  console.log('Payload 依赖加载完成，正在构建导入配置...')
+
+  const getExport = <T extends Record<string, unknown>, K extends keyof T>(moduleValue: ModuleWithDefault<T>, key: K) => {
+    return (moduleValue as T)[key] || (moduleValue as { default?: T }).default?.[key]
+  }
+
+  const config = await buildConfig({
+    admin: { user: 'admins' },
+    collections: [
+      getExport(usersModule, 'Users'),
+      getExport(citiesModule, 'Cities'),
+      getExport(socialInsurancePoliciesModule, 'SocialInsurancePolicies'),
+      getExport(taxRateRulesModule, 'TaxRateRules'),
+      getExport(specialDeductionRulesModule, 'SpecialDeductionRules'),
+      getExport(articlesModule, 'Articles'),
+      getExport(faqsModule, 'FAQs'),
+      getExport(importJobsModule, 'ImportJobs'),
+    ],
+    cors: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
+    csrf: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
+    editor: lexicalEditor(),
+    secret: process.env.PAYLOAD_SECRET || 'replace-this-secret-before-production',
+    db: postgresAdapter({
+      pool: {
+        connectionString: process.env.DATABASE_URI,
+      },
+    }),
+    sharp,
+  })
+
+  const payload = await getPayload({ config })
+  console.log('Payload 本地 API 已连接。')
+  return payload
 }
 
 async function main() {
@@ -99,6 +159,7 @@ async function main() {
   const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
   const cities = source.cityInfo?.list || []
   const policies = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry)
+  const cityByAreaId = new Map(cities.map((city) => [city.areaId ? String(city.areaId) : '', city]).filter(([areaId]) => areaId))
   const importSource = normalizeImportSource(source.crawlJob?.source)
   const payload = dryRun ? null : await createPayloadClient()
   let createdCities = 0
@@ -134,12 +195,16 @@ async function main() {
         })
       }
     }
+    if (payload && createdCities > 0 && createdCities % 50 === 0) {
+      console.log(`城市已创建 ${createdCities} 个...`)
+    }
   }
 
   for (const policy of policies) {
     if (!policy?.areaName || policy.policyYear === undefined) continue
 
-    const citySlug = slugifyRuleEntity(policy)
+    const matchedCity = policy.areaId ? cityByAreaId.get(String(policy.areaId)) : undefined
+    const citySlug = matchedCity ? slugifyRuleEntity(matchedCity) : slugifyRuleEntity(policy)
     const cityResult = payload
       ? await payload.find({ collection: 'cities', limit: 1, where: { slug: { equals: citySlug } } })
       : { docs: [{ id: `dry-run-city-${citySlug}` }] }
@@ -205,6 +270,10 @@ async function main() {
     } else {
       await cms.create({ collection: 'social-insurance-policies', data, draft: true })
     }
+
+    if (payload && createdPolicies > 0 && createdPolicies % 50 === 0) {
+      console.log(`政策草稿已处理 ${createdPolicies} 条...`)
+    }
   }
 
   if (payload) {
@@ -228,9 +297,14 @@ async function main() {
   }
 
   console.log(`完成：${createdCities} 个城市，${createdPolicies} 个政策草稿${dryRun ? '（仅预览，未写入数据库）' : ''}。`)
+  await payload?.destroy()
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+main()
+  .then(() => {
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
