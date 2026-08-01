@@ -21,6 +21,8 @@ export type CityRuleStats = {
   warnings: number
 }
 
+// 同一个城市可能有多个来源。前台展示和审计摘要优先使用带 checkedAt 的来源，
+// 因为它能说明“这条规则最近一次被核对到什么时候”。
 export function getPrimaryRuleSource(rule: CityRule) {
   return rule.sources.find((source) => source.checkedAt) || rule.sources[0]
 }
@@ -35,6 +37,9 @@ export function getRuleQualityStatus(issues: RuleQualityIssue[]): RuleQualitySta
   return 'ok'
 }
 
+// 质量审计分为 error 和 warning：
+// - error：会影响计算是否可信，例如缺基数、缺缴费项目、缺核对日期
+// - warning：不一定阻断计算，但需要后续补齐，例如来源没有 URL
 export function auditCityRule(code: string, rule: CityRule): RuleQualityIssue[] {
   const issues: RuleQualityIssue[] = []
   const source = getPrimaryRuleSource(rule)

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+// 采集源可能来自不同网站或脚本版本，同一个字段有时是字符串，有时是数字。
+// 这里先用宽松 schema 接住原始数据，具体业务兜底放在 import/validate 脚本里处理。
 const idSchema = z.union([z.string(), z.number()])
 const rawRecordSchema = z.record(z.string(), z.unknown())
 const policySourceSchema = z
@@ -38,6 +40,9 @@ export const crawlPolicySchema = z
   .passthrough()
 
 export const wrappedPolicySchema = z.object({ policy: crawlPolicySchema }).passthrough()
+// 兼容两种政策列表格式：
+// 1. 直接返回 policy 对象
+// 2. 返回 { policy, ...meta } 包裹对象
 export const crawlPolicyEntrySchema = z.union([wrappedPolicySchema, crawlPolicySchema])
 
 export const crawlResultSchema = z
