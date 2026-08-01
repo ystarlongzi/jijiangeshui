@@ -18,7 +18,7 @@ import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSele
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
-import { cityRules, housingRateOptions } from '@/lib/tax-rules'
+import { cityRules, getHousingRateOptions } from '@/lib/tax-rules'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 
@@ -49,8 +49,10 @@ export default function ReverseTaxClient() {
     if (requestedTarget > 0) setTargetTakeHome(requestedTarget)
     if (requestedMonth) setMonth(requestedMonth)
     if (requestedStartMonth) setStartMonth(requestedStartMonth)
-    if (requestedEmployeeHousingRate && housingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
-    if (requestedEmployerHousingRate && housingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
+    const requestedRule = requestedCity && cityRules[requestedCity] ? cityRules[requestedCity] : cityRules.beijing
+    const cityHousingRateOptions = getHousingRateOptions(requestedRule)
+    if (requestedEmployeeHousingRate && cityHousingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
+    if (requestedEmployerHousingRate && cityHousingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
     if (requestedDeduction > 0) {
       setDeductionAmount(requestedDeduction)
       setDeductions({})
@@ -59,6 +61,7 @@ export default function ReverseTaxClient() {
   }, [])
 
   const rule = cityRules[city]
+  const cityHousingRateOptions = getHousingRateOptions(rule)
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate])
   const employeeInsurance = result.insurance.reduce((sum, item) => sum + item.employee, 0)
@@ -129,7 +132,7 @@ export default function ReverseTaxClient() {
         <label className={styles.field} htmlFor="targetTakeHome"><span>期望到手工资</span><MoneyInput id="targetTakeHome" value={targetTakeHome} onChange={setTargetTakeHome} /></label>
         <SelectField id="reverseCity" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<Button className={styles.textButton} variant="text" type="button"><LocateFixed size={13} /> 自动定位</Button>} />
         <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="reverseMonth" label="计算月份" value={month} onChange={setMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="reverseStartMonth" label="入职月份" value={startMonth} onChange={setStartMonth} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
-        <div className={styles.ratioGrid}><SelectField className={styles.compactField} id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField className={styles.compactField} id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
+        <div className={styles.ratioGrid}><SelectField className={styles.compactField} id="employeeHousingRate" label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} options={cityHousingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /><SelectField className={styles.compactField} id="employerHousingRate" label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} options={cityHousingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} /></div>
         <FormField className={styles.deductions} htmlFor="reverseDeduction" label="专项附加扣除" action={<Button className={styles.textButton} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}><MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} /></FormField>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>

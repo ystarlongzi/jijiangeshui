@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
-import { cityRules } from '@/lib/tax-rules'
+import { cityRules, getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../_components/SiteHeader'
@@ -28,13 +28,17 @@ export default async function CityPage({ params }: CityPageProps) {
   const rule = cityRules[city]
   if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
   const exampleSalary = 20000
-  const exampleInsurance = calculateInsurance(rule, Math.min(Math.max(exampleSalary, rule.socialMin), rule.socialMax), Math.min(Math.max(exampleSalary, rule.housingMin), rule.housingMax), 12, 12)
+  const socialBaseRule = getContributionBaseRule(rule, 'social')
+  const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
+  const cityHousingRateOptions = getHousingRateOptions(rule)
+  const defaultHousingRate = cityHousingRateOptions[cityHousingRateOptions.length - 1] || 12
+  const exampleInsurance = calculateInsurance(rule, Math.min(Math.max(exampleSalary, socialBaseRule.min), socialBaseRule.max), Math.min(Math.max(exampleSalary, housingBaseRule.min), housingBaseRule.max), defaultHousingRate, defaultHousingRate)
   const exampleResult = calculateMonth(exampleSalary, 8, 1, 0, exampleInsurance)
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
     <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={styles.status}><ShieldCheck size={20} /><span>当前规则生效</span><strong>{rule.effective}</strong></div></section>
-    <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>社保缴费基数</dt><dd>{formatMoney(rule.socialMin)} - {formatMoney(rule.socialMax)}</dd></div><div><dt>公积金缴费基数</dt><dd>{formatMoney(rule.housingMin)} - {formatMoney(rule.housingMax)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl><div><dt>养老保险</dt><dd>个人 {rule.socialEmployee}% / 单位 {rule.socialEmployer}%</dd></div><div><dt>医疗保险</dt><dd>个人 {rule.medicalEmployee}% / 单位 {rule.medicalEmployer}%</dd></div><div><dt>公积金</dt><dd>个人和单位可在计算器中分别选择</dd></div></dl></article></section>
+    <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>{socialBaseRule.label}</dt><dd>{formatMoney(socialBaseRule.min)} - {formatMoney(socialBaseRule.max)}</dd></div><div><dt>{housingBaseRule.label}</dt><dd>{formatMoney(housingBaseRule.min)} - {formatMoney(housingBaseRule.max)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl>{rule.contributionItems.filter((item) => item.systemType === 'social').slice(0, 3).map((item) => <div key={item.code}><dt>{item.name}</dt><dd>{formatSideRule(item.employee)} / {formatSideRule(item.employer)}</dd></div>)}<div><dt>公积金</dt><dd>个人和单位可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%</dd></div></dl></article></section>
     <Panel as="section" className={styles.exampleCard}>
       <div>
         <span>{rule.label}工资案例</span>
@@ -63,4 +67,11 @@ export default async function CityPage({ params }: CityPageProps) {
 
 function formatMoney(value: number) {
   return `¥${value.toLocaleString('zh-CN')}`
+}
+
+function formatSideRule(rule: { method: string; rate?: number; fixedAmount?: number }) {
+  if (rule.method === 'none') return '不缴'
+  if (rule.method === 'fixed') return `${formatMoney(rule.fixedAmount || 0)}`
+  if (rule.method === 'rate') return `${rule.rate || 0}%`
+  return `${rule.rate || 0}% + ${formatMoney(rule.fixedAmount || 0)}`
 }

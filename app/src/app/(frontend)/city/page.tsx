@@ -4,7 +4,7 @@ import { ArrowRight, MapPin } from 'lucide-react'
 import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
-import { cityRules } from '@/lib/tax-rules'
+import { cityRules, getContributionBaseRule } from '@/lib/tax-rules'
 import { currentYear, siteName } from '@/lib/site'
 import styles from './CityPages.module.css'
 
@@ -30,8 +30,8 @@ export default function CityIndexPage() {
       {cities.map(([key, rule]) => <Link className={styles.indexCard} href={`/city/${key}`} key={key}>
         <span>{rule.label}</span><small>{rule.province} · {rule.pinyin}</small>
         <dl>
-          <div><dt>社保基数</dt><dd>{formatMoney(rule.socialMin)} - {formatMoney(rule.socialMax)}</dd></div>
-          <div><dt>公积金基数</dt><dd>{formatMoney(rule.housingMin)} - {formatMoney(rule.housingMax)}</dd></div>
+          <div><dt>社保基数</dt><dd>{formatBaseRange(rule, 'social')}</dd></div>
+          <div><dt>公积金基数</dt><dd>{formatBaseRange(rule, 'housingFund')}</dd></div>
         </dl>
         <strong>查看城市规则 <ArrowRight size={14} /></strong>
       </Link>)}
@@ -54,4 +54,9 @@ export default function CityIndexPage() {
 
 function formatMoney(value: number) {
   return `¥${value.toLocaleString('zh-CN')}`
+}
+
+function formatBaseRange(rule: (typeof cityRules)[string], type: 'social' | 'housingFund') {
+  const baseRule = getContributionBaseRule(rule, type)
+  return `${formatMoney(baseRule.min)} - ${formatMoney(baseRule.max)}`
 }

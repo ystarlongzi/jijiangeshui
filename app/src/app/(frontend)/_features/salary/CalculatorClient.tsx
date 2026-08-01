@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
-import { cityRules, housingRateOptions, taxBrackets } from '@/lib/tax-rules'
+import { cityRules, getContributionBaseRule, getHousingRateOptions, taxBrackets } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
@@ -48,6 +48,9 @@ export default function CalculatorClient() {
   const [toast, setToast] = useState('')
 
   const rule = cityRules[city]
+  const socialBaseRule = getContributionBaseRule(rule, 'social')
+  const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
+  const cityHousingRateOptions = getHousingRateOptions(rule)
   const deduction = deductionAmount
   const selectedDeductionItems = Object.values(deductionSelections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const activeSalary = salaryMode === 'fixed' ? salary : monthlySalaries[month - 1] || 0
@@ -55,8 +58,8 @@ export default function CalculatorClient() {
   const salariesForCalculation = useMemo(() => salaryMode === 'fixed' ? Array.from({ length: 12 }, () => salary) : monthlySalaries, [salaryMode, salary, monthlySalaries])
 
   useEffect(() => {
-    if (!editingSocial) setSocialBase(clamp(salaryForBase, rule.socialMin, rule.socialMax))
-    if (!editingHousing) setHousingBase(clamp(salaryForBase, rule.housingMin, rule.housingMax))
+    if (!editingSocial) setSocialBase(clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max))
+    if (!editingHousing) setHousingBase(clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max))
   }, [city, salaryForBase, rule, editingSocial, editingHousing])
 
   const insurance = useMemo(() => calculateInsurance(rule, socialBase, housingBase, employeeHousingRate, employerHousingRate), [rule, socialBase, housingBase, employeeHousingRate, employerHousingRate])
@@ -74,14 +77,14 @@ export default function CalculatorClient() {
   const ladderPosition = Math.max(0, taxBrackets.findIndex((item) => item.rate === result.bracket.rate)) / (taxBrackets.length - 1) * 100
   const isSalaryInvalid = activeSalary <= 0
   const isMonthInvalid = month < startMonth
-  const isSocialBaseInvalid = socialBase < rule.socialMin || socialBase > rule.socialMax
-  const isHousingBaseInvalid = housingBase < rule.housingMin || housingBase > rule.housingMax
+  const isSocialBaseInvalid = socialBase < socialBaseRule.min || socialBase > socialBaseRule.max
+  const isHousingBaseInvalid = housingBase < housingBaseRule.min || housingBase > housingBaseRule.max
   const isDeductionInvalid = deductionAmount > activeSalary
   const validationMessages = [
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
-    isSocialBaseInvalid ? `社保缴费基数需要在 ${wholeMoney(rule.socialMin)} - ${wholeMoney(rule.socialMax)} 之间。` : '',
-    isHousingBaseInvalid ? `公积金缴费基数需要在 ${wholeMoney(rule.housingMin)} - ${wholeMoney(rule.housingMax)} 之间。` : '',
+    isSocialBaseInvalid ? `社保缴费基数需要在 ${wholeMoney(socialBaseRule.min)} - ${wholeMoney(socialBaseRule.max)} 之间。` : '',
+    isHousingBaseInvalid ? `公积金缴费基数需要在 ${wholeMoney(housingBaseRule.min)} - ${wholeMoney(housingBaseRule.max)} 之间。` : '',
     isDeductionInvalid ? '专项附加扣除已超过税前月薪，请确认是否填入了月度扣除额。' : '',
   ].filter(Boolean)
   const hasValidationMessages = validationMessages.length > 0
@@ -122,8 +125,8 @@ export default function CalculatorClient() {
     }
     if (requestedMonth) setMonth(requestedMonth)
     if (requestedStartMonth) setStartMonth(requestedStartMonth)
-    if (requestedEmployeeHousingRate && housingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
-    if (requestedEmployerHousingRate && housingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
+    if (requestedEmployeeHousingRate && cityHousingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
+    if (requestedEmployerHousingRate && cityHousingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
     if (requestedDeduction > 0) {
       setDeductionAmount(requestedDeduction)
       setDeductionSelections({})
@@ -243,10 +246,10 @@ export default function CalculatorClient() {
           <div className={styles.sectionDivider} />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
           <div className="base-editor">
-            <BaseField label="社保缴费基数" value={socialBase} min={rule.socialMin} max={rule.socialMax} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
-            <BaseField label="公积金缴费基数" value={housingBase} min={rule.housingMin} max={rule.housingMax} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
+            <BaseField label={socialBaseRule.label} value={socialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
+            <BaseField label={housingBaseRule.label} value={housingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
           </div>
-          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} onChange={setEmployerHousingRate} /></div><p className={styles.fieldMeta}>比例可选范围：3% - 12%，最终以城市规则和单位实际缴纳情况为准。</p>
+          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} options={cityHousingRateOptions} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} options={cityHousingRateOptions} onChange={setEmployerHousingRate} /></div><p className={styles.fieldMeta}>比例可选范围：{Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%，最终以城市规则和单位实际缴纳情况为准。</p>
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button className={styles.formTextAction} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : ''} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
           <div className={styles.formActions}><Button variant="primary" type="submit">开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className={styles.formFootnote}>结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
@@ -290,8 +293,8 @@ function BaseField({ label, value, min, max, invalid, editing, onEdit, onChange 
   return <FormField className={styles.baseField} label={label} action={<Button className={styles.editBaseButton} variant="text" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</Button>} meta={`允许范围：${range(min, max)}`} error={invalid ? `${label}需要在允许范围内。` : ''}><MoneyInput className={[styles.smallInput, invalid ? 'input-error' : ''].filter(Boolean).join(' ')} value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /></FormField>
 }
 
-function RateSelect({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return <SelectField className={styles.compactField} label={label} value={value} onChange={onChange} options={housingRateOptions.map((rate) => ({ value: rate, label: `${rate}%` }))} />
+function RateSelect({ label, value, options, onChange }: { label: string; value: number; options: number[]; onChange: (value: number) => void }) {
+  return <SelectField className={styles.compactField} label={label} value={value} onChange={onChange} options={options.map((rate) => ({ value: rate, label: `${rate}%` }))} />
 }
 
 function FlowLegend({ className, label, value, money }: { className: string; label: string; value: number; money: (value: number, decimals?: number) => string }) {
