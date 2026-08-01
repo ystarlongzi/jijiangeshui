@@ -81,12 +81,13 @@ export function normalizeContributionItemRule(item: Record<string, unknown>, ind
   // 把采集端的扁平字段转换成 Payload collection 里的 employee/employer 嵌套结构。
   // systemType 会影响默认基数类型：公积金使用 housingFund，企业成本不参与个人基数计算。
   const systemType = stringOrUndefined(item.systemType)
+  const explicitBaseType = stringOrUndefined(item.baseType)
 
   return {
     systemType: systemType || 'social',
     itemCode: stringOrUndefined(item.itemCode) || `unknown-${index + 1}`,
     itemName: stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`,
-    baseType: systemType === 'housingFund' ? 'housingFund' : systemType === 'employerCost' ? 'none' : 'social',
+    baseType: explicitBaseType || (systemType === 'housingFund' ? 'housingFund' : systemType === 'employerCost' ? 'none' : 'social'),
     employee: {
       calcMethod: stringOrUndefined(item.employeeCalcMethod) || 'none',
       rate: numberOrNull(item.employeeRate),

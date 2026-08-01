@@ -78,6 +78,26 @@ test('社保和公积金基数可以不同，分别影响对应项目', () => {
   assert.equal(result.takeHome, 15530)
 })
 
+test('社保险种可以使用各自的缴费基数上下限', () => {
+  const rule = {
+    ...cityRules.beijing,
+    baseRules: {
+      ...cityRules.beijing.baseRules,
+      medical: { type: 'medical', label: '医疗保险缴费基数', min: 5000, max: 10000 },
+    },
+    contributionItems: cityRules.beijing.contributionItems.map((item) =>
+      item.code === 'medical' ? { ...item, baseType: 'medical' } : item,
+    ),
+  }
+  const insurance = calculateInsurance(rule, 20000, 20000, 12, 12)
+  const pension = insurance.find((item) => item.name === '养老保险')
+  const medical = insurance.find((item) => item.name === '医疗保险')
+
+  assert.equal(pension?.employeeFormula, '20000 × 8%')
+  assert.equal(medical?.employeeFormula, '10000 × 2%')
+  assert.equal(medical?.employerFormula, '10000 × 9.5%')
+})
+
 test('缴费基数超出城市范围时可以按规则上下限估算', () => {
   const rule = cityRules.beijing
   const socialBase = clamp(1000, rule.socialMin, rule.socialMax)

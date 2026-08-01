@@ -1,5 +1,5 @@
 import type { CityRule, ContributionSideRule } from './tax-rules'
-import { taxBrackets } from './tax-rules'
+import { getContributionBaseRule, taxBrackets } from './tax-rules'
 
 export type InsuranceItem = {
   name: string
@@ -32,7 +32,9 @@ export const getBracket = (taxable: number) => taxBrackets.find((bracket) => tax
 
 export function calculateInsurance(rule: CityRule, socialBase: number, housingBase: number, employeeHousingRate: number, employerHousingRate: number): InsuranceItem[] {
   return rule.contributionItems.map((item) => {
-    const base = item.baseType === 'housingFund' ? housingBase : socialBase
+    const sourceBase = item.baseType === 'housingFund' ? housingBase : socialBase
+    const baseRule = getContributionBaseRule(rule, item.baseType)
+    const base = clamp(sourceBase, baseRule.min, baseRule.max)
     const employeeRule = item.housing ? { method: 'rate' as const, rate: employeeHousingRate } : item.employee
     const employerRule = item.housing ? { method: 'rate' as const, rate: employerHousingRate } : item.employer
     const employee = calculateContributionSide(employeeRule, base)

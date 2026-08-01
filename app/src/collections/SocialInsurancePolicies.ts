@@ -125,6 +125,11 @@ export const SocialInsurancePolicies: CollectionConfig = {
           options: [
             { label: '社保', value: 'social' },
             { label: '公积金', value: 'housingFund' },
+            { label: '养老保险', value: 'pension' },
+            { label: '医疗保险', value: 'medical' },
+            { label: '失业保险', value: 'unemployment' },
+            { label: '工伤保险', value: 'injury' },
+            { label: '生育保险', value: 'maternity' },
           ],
           required: true,
         },
@@ -158,6 +163,11 @@ export const SocialInsurancePolicies: CollectionConfig = {
           options: [
             { label: '社保', value: 'social' },
             { label: '公积金', value: 'housingFund' },
+            { label: '养老保险', value: 'pension' },
+            { label: '医疗保险', value: 'medical' },
+            { label: '失业保险', value: 'unemployment' },
+            { label: '工伤保险', value: 'injury' },
+            { label: '生育保险', value: 'maternity' },
             { label: '不关联', value: 'none' },
           ],
           defaultValue: 'social',

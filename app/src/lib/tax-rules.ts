@@ -1,6 +1,15 @@
 import { defaultHousingRateOptions, fallbackCityRuleConfigs, type CityRuleConfig } from './city-rule-data'
 
-export type ContributionBaseType = 'social' | 'housingFund'
+export type KnownContributionBaseType =
+  | 'social'
+  | 'housingFund'
+  | 'pension'
+  | 'medical'
+  | 'unemployment'
+  | 'injury'
+  | 'maternity'
+
+export type ContributionBaseType = KnownContributionBaseType | (string & {})
 
 export type ContributionSystemType = 'social' | 'housingFund'
 
@@ -43,7 +52,7 @@ export type CityRule = {
   pinyin: string
   effective: string
   effectiveTo?: string
-  baseRules: Record<ContributionBaseType, ContributionBaseRule>
+  baseRules: Record<string, ContributionBaseRule>
   contributionItems: ContributionItemRule[]
   housingRateOptions: number[]
   sources: ContributionSource[]
@@ -66,11 +75,21 @@ function none(): ContributionSideRule {
   return { method: 'none' }
 }
 
+export const contributionBaseLabels: Record<KnownContributionBaseType, string> = {
+  social: '社保缴费基数',
+  housingFund: '公积金缴费基数',
+  pension: '养老保险缴费基数',
+  medical: '医疗保险缴费基数',
+  unemployment: '失业保险缴费基数',
+  injury: '工伤保险缴费基数',
+  maternity: '生育保险缴费基数',
+}
+
 function createCityRule(config: CityRuleConfig): CityRule {
   const defaultHousingRate = defaultHousingRateOptions[defaultHousingRateOptions.length - 1] || 12
   const baseRules: CityRule['baseRules'] = {
-    social: { type: 'social', label: '社保缴费基数', min: config.socialMin, max: config.socialMax },
-    housingFund: { type: 'housingFund', label: '公积金缴费基数', min: config.housingMin, max: config.housingMax },
+    social: { type: 'social', label: contributionBaseLabels.social, min: config.socialMin, max: config.socialMax },
+    housingFund: { type: 'housingFund', label: contributionBaseLabels.housingFund, min: config.housingMin, max: config.housingMax },
   }
 
   return {
@@ -96,7 +115,8 @@ export const cityRules: Record<string, CityRule> = Object.fromEntries(
 export const housingRateOptions = defaultHousingRateOptions
 
 export function getContributionBaseRule(rule: CityRule, type: ContributionBaseType) {
-  return rule.baseRules[type]
+  if (rule.baseRules[type]) return rule.baseRules[type]
+  return type === 'housingFund' ? rule.baseRules.housingFund : rule.baseRules.social
 }
 
 export function getHousingRateOptions(rule: CityRule) {

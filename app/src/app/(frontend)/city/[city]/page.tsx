@@ -48,7 +48,7 @@ export default async function CityPage({ params }: CityPageProps) {
     key: item.code,
     cells: {
       item: item.name,
-      base: item.baseType === 'housingFund' ? housingBaseRule.label : item.baseType === 'social' ? socialBaseRule.label : '不关联基数',
+      base: getContributionBaseRule(rule, item.baseType).label,
       employee: formatSideRule(item.employee),
       employer: formatSideRule(item.employer),
     },

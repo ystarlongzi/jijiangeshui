@@ -8,7 +8,7 @@ import type {
   ContributionSource,
   ContributionSystemType,
 } from './tax-rules'
-import { housingRateOptions } from './tax-rules'
+import { contributionBaseLabels, housingRateOptions } from './tax-rules'
 
 type CmsCity = {
   name?: string | null
@@ -58,7 +58,7 @@ type CmsSocialInsurancePolicy = {
 const contributionCalcMethods: ContributionCalcMethod[] = ['none', 'rate', 'fixed', 'ratePlusFixed']
 
 function isBaseType(value: unknown): value is ContributionBaseType {
-  return value === 'social' || value === 'housingFund'
+  return typeof value === 'string' && value.trim() !== '' && value !== 'none'
 }
 
 function isSystemType(value: unknown): value is ContributionSystemType {
@@ -97,14 +97,14 @@ function normalizeSource(source: CmsContributionSource | null | undefined, effec
 function createFallbackBaseRule(type: ContributionBaseType): ContributionBaseRule {
   return {
     type,
-    label: type === 'social' ? '社保缴费基数' : '公积金缴费基数',
+    label: contributionBaseLabels[type as keyof typeof contributionBaseLabels] || `${type}缴费基数`,
     min: 0,
     max: 0,
   }
 }
 
 function normalizeBaseRules(baseRules: CmsContributionBaseRule[] | null | undefined) {
-  const normalized = {
+  const normalized: Record<string, ContributionBaseRule> = {
     social: createFallbackBaseRule('social'),
     housingFund: createFallbackBaseRule('housingFund'),
   }
@@ -113,7 +113,7 @@ function normalizeBaseRules(baseRules: CmsContributionBaseRule[] | null | undefi
     if (!isBaseType(rule.baseType)) continue
     normalized[rule.baseType] = {
       type: rule.baseType,
-      label: rule.baseType === 'social' ? '社保缴费基数' : '公积金缴费基数',
+      label: contributionBaseLabels[rule.baseType as keyof typeof contributionBaseLabels] || `${rule.baseType}缴费基数`,
       min: normalizeMoney(rule.baseMin) ?? 0,
       max: normalizeMoney(rule.baseMax) ?? 0,
     }
