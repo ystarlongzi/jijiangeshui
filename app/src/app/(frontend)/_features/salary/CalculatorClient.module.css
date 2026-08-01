@@ -628,7 +628,6 @@
 .pageContent :global(.contribution-item-main) {
   display: flex;
   align-items: baseline;
-  gap: 8px;
   min-width: 0;
 }
 
@@ -642,6 +641,12 @@
   color: var(--ink);
   font-size: 12px;
   white-space: nowrap;
+}
+
+.pageContent :global(.contribution-item-value) {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .pageContent :global(.contribution-item em) {

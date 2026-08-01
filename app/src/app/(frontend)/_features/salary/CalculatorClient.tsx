@@ -306,9 +306,11 @@ function ContributionSegment({ className, label, value, total, money }: { classN
       <span className="contribution-item-body">
         <span className="contribution-item-main">
           <span>{label}</span>
-          <strong>{money(value, 0)}</strong>
         </span>
-        <em>{Math.round(percent)}%</em>
+        <span className="contribution-item-value">
+          <strong>{money(value, 0)}</strong>
+          <em>{Math.round(percent)}%</em>
+        </span>
       </span>
     </div>
   )
