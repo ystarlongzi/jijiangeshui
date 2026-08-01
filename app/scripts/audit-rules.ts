@@ -1,4 +1,11 @@
 import { cityRules, type CityRule } from '../src/lib/tax-rules'
+import {
+  auditCityRule,
+  getPrimaryRuleSource,
+  getRuleQualityStatus,
+  type RuleQualityCategory,
+  type RuleQualityIssue,
+} from '../src/lib/city-rule-quality'
 
 /**
  * 审计前台兜底城市规则。
@@ -10,16 +17,6 @@ import { cityRules, type CityRule } from '../src/lib/tax-rules'
  * - 是否包含社保项目和公积金项目
  * - 公积金比例选项是否覆盖常见 3%-12%
  */
-type Severity = 'error' | 'warning'
-type IssueCategory = 'source' | 'baseRule' | 'itemRule' | 'housingRate'
-
-type AuditIssue = {
-  city: string
-  category: IssueCategory
-  severity: Severity
-  message: string
-}
-
 type AuditRow = {
   code: string
   city: string
@@ -39,50 +36,8 @@ function formatRange(min: number, max: number) {
   return `${min}-${max}`
 }
 
-function createIssue(city: string, category: IssueCategory, severity: Severity, message: string): AuditIssue {
-  return { city, category, severity, message }
-}
-
-function getRuleIssues(code: string, rule: CityRule): AuditIssue[] {
-  const issues: AuditIssue[] = []
-  // checkedAt 是我们向用户展示“规则核对日期”的依据，优先选带 checkedAt 的来源。
-  const source = rule.sources.find((item) => item.checkedAt) || rule.sources[0]
-  const housingItem = rule.contributionItems.find((item) => item.housing || item.systemType === 'housingFund')
-  const socialItems = rule.contributionItems.filter((item) => item.systemType === 'social')
-
-  if (!rule.effective) issues.push(createIssue(code, 'source', 'error', '缺少规则生效日期'))
-  if (!rule.sources.length) issues.push(createIssue(code, 'source', 'error', '缺少规则来源'))
-  if (!source?.checkedAt) issues.push(createIssue(code, 'source', 'error', '缺少规则核对日期'))
-  if (rule.sources.some((item) => !item.url)) issues.push(createIssue(code, 'source', 'warning', '存在未配置 URL 的规则来源'))
-
-  for (const baseRule of Object.values(rule.baseRules)) {
-    // 基数范围错误会直接导致工资计算错误，所以这里按 error 处理。
-    if (baseRule.min <= 0 || baseRule.max <= 0) {
-      issues.push(createIssue(code, 'baseRule', 'error', `${baseRule.label}范围必须大于 0`))
-    }
-    if (baseRule.min > baseRule.max) {
-      issues.push(createIssue(code, 'baseRule', 'error', `${baseRule.label}下限不能大于上限`))
-    }
-  }
-
-  if (!socialItems.length) issues.push(createIssue(code, 'itemRule', 'error', '缺少社保缴费项目'))
-  if (!housingItem) issues.push(createIssue(code, 'itemRule', 'error', '缺少公积金缴费项目'))
-  // 公积金比例在产品里允许用户选择，缺少边界选项会让表单能力不完整。
-  if (!rule.housingRateOptions.includes(3) || !rule.housingRateOptions.includes(12)) {
-    issues.push(createIssue(code, 'housingRate', 'warning', '公积金比例选项未覆盖 3%-12%'))
-  }
-
-  return issues
-}
-
-function getStatus(issues: AuditIssue[]): AuditRow['status'] {
-  if (issues.some((issue) => issue.severity === 'error')) return 'error'
-  if (issues.some((issue) => issue.severity === 'warning')) return 'warning'
-  return 'ok'
-}
-
-function createRow(code: string, rule: CityRule, issues: AuditIssue[]): AuditRow {
-  const checkedAt = rule.sources.find((source) => source.checkedAt)?.checkedAt || ''
+function createRow(code: string, rule: CityRule, issues: RuleQualityIssue[]): AuditRow {
+  const checkedAt = getPrimaryRuleSource(rule)?.checkedAt || ''
 
   return {
     code,
@@ -93,12 +48,12 @@ function createRow(code: string, rule: CityRule, issues: AuditIssue[]): AuditRow
     housingBase: formatRange(rule.baseRules.housingFund.min, rule.baseRules.housingFund.max),
     housingRates: rule.housingRateOptions.map((rate) => `${rate}%`).join('/'),
     sources: rule.sources.length,
-    status: getStatus(issues),
+    status: getRuleQualityStatus(issues),
   }
 }
 
 const entries = Object.entries(cityRules)
-const issues = entries.flatMap(([code, rule]) => getRuleIssues(code, rule))
+const issues = entries.flatMap(([code, rule]) => auditCityRule(code, rule))
 const rows = entries.map(([code, rule]) => createRow(code, rule, issues.filter((issue) => issue.city === code)))
 const errorCount = issues.filter((issue) => issue.severity === 'error').length
 const warningCount = issues.filter((issue) => issue.severity === 'warning').length
@@ -107,10 +62,10 @@ const categorySummary = issues.reduce(
     summary[issue.category] += 1
     return summary
   },
-  { source: 0, baseRule: 0, itemRule: 0, housingRate: 0 } satisfies Record<IssueCategory, number>,
+  { source: 0, baseRule: 0, itemRule: 0, housingRate: 0 } satisfies Record<RuleQualityCategory, number>,
 )
 
-function printIssueGroup(category: IssueCategory, label: string) {
+function printIssueGroup(category: RuleQualityCategory, label: string) {
   const group = issues.filter((issue) => issue.category === category)
   if (!group.length) return
 

@@ -6,6 +6,7 @@ import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
 import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
 import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import styles from './CityPages.module.css'
 
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default async function CityIndexPage() {
   const cityRules = await getAvailableCityRules()
   const cities = Object.entries(cityRules)
-  const cityStats = getCityRuleStats(cities)
+  const cityStats = getCityRuleStats(cities, currentYear)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
@@ -45,7 +46,7 @@ export default async function CityIndexPage() {
         </dl>
         <div className={styles.ruleMeta}>
           <span>生效 {rule.effective}</span>
-          <span className={hasSourceUrl(rule) ? styles.okStatus : styles.warnStatus}>{hasSourceUrl(rule) ? '已配置来源' : '来源待补'}</span>
+          <span className={hasRuleSourceUrl(rule) ? styles.okStatus : styles.warnStatus}>{hasRuleSourceUrl(rule) ? '已配置来源' : '来源待补'}</span>
         </div>
         <strong>查看城市规则 <ArrowRight size={14} /></strong>
       </Link>)}
@@ -73,18 +74,4 @@ function formatMoney(value: number) {
 function formatBaseRange(rule: CityRule, type: 'social' | 'housingFund') {
   const baseRule = getContributionBaseRule(rule, type)
   return `${formatMoney(baseRule.min)} - ${formatMoney(baseRule.max)}`
-}
-
-function hasSourceUrl(rule: CityRule) {
-  return rule.sources.some((source) => Boolean(source.url))
-}
-
-function getCityRuleStats(cities: Array<[string, CityRule]>) {
-  const withSourceUrl = cities.filter(([, rule]) => hasSourceUrl(rule)).length
-  return {
-    total: cities.length,
-    currentYearRules: cities.filter(([, rule]) => rule.effective.startsWith(String(currentYear))).length,
-    withSourceUrl,
-    missingSourceUrl: cities.length - withSourceUrl,
-  }
 }
