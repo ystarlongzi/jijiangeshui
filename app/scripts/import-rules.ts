@@ -41,8 +41,47 @@ function normalizeImportSource(value: unknown): ImportSourceType {
   return importSourceTypes.includes(value as ImportSourceType) ? (value as ImportSourceType) : 'manual'
 }
 
+function parseEnvValue(value: string) {
+  const trimmed = value.trim()
+  const quote = trimmed[0]
+
+  if ((quote === '"' || quote === "'") && trimmed.endsWith(quote)) {
+    return trimmed.slice(1, -1)
+  }
+
+  return trimmed
+}
+
+async function loadLocalEnv() {
+  // Next.js dev server 会自动加载 .env；独立 tsx 脚本不会，所以导入前补一层轻量加载。
+  for (const fileName of ['.env', '.env.local']) {
+    const envPath = path.resolve(process.cwd(), fileName)
+
+    try {
+      const content = await fs.readFile(envPath, 'utf8')
+      for (const line of content.split(/\r?\n/)) {
+        const trimmed = line.trim()
+        if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue
+
+        const key = trimmed.slice(0, trimmed.indexOf('=')).trim()
+        const value = trimmed.slice(trimmed.indexOf('=') + 1)
+        if (key && process.env[key] === undefined) {
+          process.env[key] = parseEnvValue(value)
+        }
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    }
+  }
+}
+
 async function createPayloadClient(): Promise<PayloadInstance> {
   // dry-run 不需要数据库；只有真正导入时才加载 Payload，避免本地预览被后台环境依赖卡住。
+  await loadLocalEnv()
+  if (!process.env.DATABASE_URI) {
+    throw new Error('缺少 DATABASE_URI。请先复制 app/.env.example 为 app/.env，并确认 PostgreSQL 已启动。')
+  }
+
   const [{ getPayload }, { default: config }] = await Promise.all([import('payload'), import('../src/payload.config')])
   return getPayload({ config })
 }
