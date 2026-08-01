@@ -42,13 +42,43 @@ npm run rules:audit
 
 ## Hrwork 批量采集接入
 
-`../scripts/hrwork-social-insurance-console-crawler.js` 是浏览器控制台脚本，用来从 Hrwork 的社保公积金接口批量生成采集 JSON。
+默认先用本地脚本采集，不需要手动打开浏览器控制台。只有 Hrwork 接口限制服务端请求、脚本无法访问时，再退回 `../scripts/hrwork-social-insurance-console-crawler.js` 的浏览器控制台方案。
 
-推荐流程：
+采集指定城市：
+
+```bash
+npm run rules:crawl-hrwork -- --city 北京 --policy-year 2026 --effective-from 2026-01-01 --output ./data/hrwork-beijing-2026.json
+```
+
+先采样 5 个城市：
+
+```bash
+npm run rules:crawl-hrwork -- --limit 5 --policy-year 2026 --effective-from 2026-01-01 --output ./data/hrwork-sample-2026.json
+```
+
+全量采集：
+
+```bash
+npm run rules:crawl-hrwork -- --all --policy-year 2026 --effective-from 2026-01-01 --concurrency 3 --delay-ms 500
+```
+
+拿到 JSON 后，一条命令跑完整导入流水线：
+
+```bash
+npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json
+```
+
+默认只执行 `validate -> audit -> import --dry-run`，确认无误后追加 `--write` 写入 Payload CMS 草稿：
+
+```bash
+npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json --write
+```
+
+如果本地脚本被 Hrwork 限制，再使用浏览器控制台备用方案：
 
 1. 在浏览器打开 `https://web.hrwork.com`。
 2. 打开开发者工具 Console，把 `scripts/hrwork-social-insurance-console-crawler.js` 完整粘贴进去。
-3. 先小范围试跑，再全量采集：
+3. 执行小范围采集或全量采集：
 
 ```js
 const result = await crawlHrworkSocialInsuranceRules({
@@ -60,8 +90,6 @@ const result = await crawlHrworkSocialInsuranceRules({
 })
 ```
 
-全量采集：
-
 ```js
 const result = await crawlAllHrworkSocialInsuranceRules({
   policyYear: '2026',
@@ -69,15 +97,6 @@ const result = await crawlAllHrworkSocialInsuranceRules({
   concurrency: 3,
   delayMs: 500,
 })
-```
-
-脚本默认会下载 `hrwork-social-insurance-YYYY-MM-DD.json`。把文件放到 `app/data/` 后，按顺序执行：
-
-```bash
-npm run rules:validate -- ./data/hrwork-social-insurance-2026-08-01.json
-npm run rules:audit -- ./data/hrwork-social-insurance-2026-08-01.json
-npm run rules:import -- ./data/hrwork-social-insurance-2026-08-01.json --dry-run
-npm run rules:import -- ./data/hrwork-social-insurance-2026-08-01.json
 ```
 
 导入到 Payload 后会创建或更新 `社保公积金政策` 草稿，业务状态默认为 `pendingReview`。因为 Hrwork 是第三方聚合来源，导入脚本会自动给这些政策写入审核警告；人工确认城市官方口径后，再清理 warning 并发布为 `active`。

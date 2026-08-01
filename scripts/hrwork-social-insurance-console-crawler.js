@@ -172,6 +172,8 @@
   }
 
   function normalizeArea(area) {
+    // getArea 返回省份/城市树，带 children 的节点通常是省份，不应该作为缴费城市采集。
+    if (Array.isArray(area.children) && area.children.length) return null;
     const areaId = area.areaId ?? area.id ?? area.value;
     const areaCode = area.areaCode ?? area.code ?? area.pinyin ?? area.key;
     const name = area.areaName ?? area.name ?? area.label ?? area.text;
