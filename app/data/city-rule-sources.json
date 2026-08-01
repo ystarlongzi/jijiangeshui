@@ -11,7 +11,15 @@
           "title": "北京住房公积金管理中心 2025 住房公积金年度政策解读",
           "url": "https://gjj.beijing.gov.cn/web/zwgk61/2024zcjd/743765478/index.html",
           "status": "verifiedPartial",
-          "notes": "已定位公积金缴存年度、比例和基数上下限线索；仍需转换成 2026 页面使用的规则版本。"
+          "notes": "已定位公积金缴存年度、比例和基数上下限线索；仍需转换成 2026 页面使用的规则版本。",
+          "facts": [
+            { "key": "periodStart", "value": "2025-07-01", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
+            { "key": "periodEnd", "value": "2026-06-30", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
+            { "key": "housingRateMin", "value": 5, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
+            { "key": "housingRateMax", "value": 12, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
+            { "key": "housingBaseMin", "value": 2540, "unit": "CNY/month", "evidence": "自2025年9月1日起，住房公积金月缴存基数下限调整为2540元。" },
+            { "key": "housingBaseMax", "value": 35811, "unit": "CNY/month", "evidence": "2025住房公积金年度住房公积金月缴存基数上限为35811元。" }
+          ]
         },
         {
           "scope": "social",
@@ -32,7 +40,13 @@
           "title": "上海住房公积金 2025 年度基数调整提示",
           "url": "https://zjw.sh.gov.cn/bmtishi/20250704/7961083f6a9d4c648577e6576a596466.html",
           "status": "verifiedPartial",
-          "notes": "已定位公积金调整线索；社保基数和各险种比例仍需官方来源补齐。"
+          "notes": "已定位公积金调整线索；社保基数和各险种比例仍需官方来源补齐。",
+          "facts": [
+            { "key": "periodStart", "value": "2025-07-01", "unit": "date", "evidence": "2025年度（2025年7月～2026年6月）住房公积金基数调整工作。" },
+            { "key": "periodEnd", "value": "2026-06-30", "unit": "date", "evidence": "2025年度（2025年7月～2026年6月）住房公积金基数调整工作。" },
+            { "key": "housingBaseMin", "value": 2690, "unit": "CNY/month", "evidence": "2025年度缴存基数下限为2690元。" },
+            { "key": "housingBaseMaxTemporary", "value": 36921, "unit": "CNY/month", "evidence": "缴存基数上限按2024年度上限（36921元）执行。" }
+          ]
         }
       ]
     },
@@ -60,7 +74,12 @@
           "title": "广州市人民政府转发广东省企业职工养老保险缴费基数上下限说明",
           "url": "https://www.gz.gov.cn/zwfw/zxfw/sbfw/content/post_10510453.html",
           "status": "verifiedPartial",
-          "notes": "养老保险基数线索已定位；医保、失业、工伤、生育、公积金仍需补齐。"
+          "notes": "养老保险基数线索已定位；医保、失业、工伤、生育、公积金仍需补齐。",
+          "facts": [
+            { "key": "pensionBaseEffectiveFrom", "value": "2025-07-01", "unit": "date", "evidence": "自2025年7月1日起，全省企业职工基本养老保险缴费基数上限调整为27549元。" },
+            { "key": "pensionBaseMin", "value": 5510, "unit": "CNY/month", "evidence": "广州市、省直缴费基数下限调整为5510元。" },
+            { "key": "pensionBaseMax", "value": 27549, "unit": "CNY/month", "evidence": "企业职工基本养老保险缴费基数上限调整为27549元。" }
+          ]
         }
       ]
     },

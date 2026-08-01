@@ -11,6 +11,16 @@ const sourceItemSchema = z.object({
   url: z.string().url(),
   status: sourceStatusSchema,
   notes: z.string().optional(),
+  facts: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.union([z.string(), z.number()]),
+        unit: z.string().optional(),
+        evidence: z.string().optional(),
+      }),
+    )
+    .optional(),
 })
 
 const sourceCatalogSchema = z.object({
@@ -69,6 +79,7 @@ async function main() {
         year: city.policyYear,
         scope: source.scope,
         status: source.status,
+        facts: source.facts?.length || 0,
         network: await checkUrl(source.url),
         title: source.title,
       })
@@ -80,6 +91,7 @@ async function main() {
     updatedAt: catalog.updatedAt,
     cities: catalog.cities.length,
     sources: rows.length,
+    facts: rows.reduce((total, row) => total + row.facts, 0),
     summary,
     rows,
   }
@@ -92,6 +104,7 @@ async function main() {
   console.table(rows)
   console.log(
     `\n完成：${result.cities} 个城市，${result.sources} 条来源。` +
+      ` 已提取 ${result.facts} 条事实。` +
       ` 完整 ${summary.verifiedComplete}，部分核验 ${summary.verifiedPartial}，待解析 ${summary.needsParsing}，待官方来源 ${summary.needsOfficialSource}。`,
   )
   if (!checkNetwork) {
