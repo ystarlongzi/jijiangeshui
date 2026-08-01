@@ -66,6 +66,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
   }, [])
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
+  const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const cityHousingRateOptions = getHousingRateOptions(rule)
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate])
@@ -106,6 +107,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
       `缴费城市：${rule.label}`,
       `计算月份：${month} 月`,
       `入职月份：${startMonth} 月`,
+      `规则核对日期：${ruleSourceDate}`,
       `期望到手工资：${money(targetTakeHome)}`,
       `专项附加扣除：${money(deductionAmount)} / 月`,
       '',
@@ -130,7 +132,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
 
   return <>
   <div className="app-shell"><SiteHeader active="reverse-tax" /><main className={styles.page}>
-    <header className={styles.hero}><div><p className={styles.eyebrow}>{currentYear} 年税后反推计算器</p><h1>税后工资，反推税前。</h1><p>输入期望到手工资，结合城市缴费规则、专项扣除和累计预扣，估算需要的税前月薪。</p></div><div className={styles.heroCard}><span>反推结果会受月份影响</span><strong>{rule.label} · {currentYear} 年 {month} 月</strong></div></header>
+    <header className={styles.hero}><div><p className={styles.eyebrow}>{currentYear} 年税后反推计算器</p><h1>税后工资，反推税前。</h1><p>输入期望到手工资，结合城市缴费规则、专项扣除和累计预扣，估算需要的税前月薪。</p></div><div className={styles.heroCard}><span>反推结果会受月份影响</span><strong>{rule.label} · {currentYear} 年 {month} 月</strong><small>规则核对日期：{ruleSourceDate}</small></div></header>
     <section className={styles.workspace} aria-label="税后反推税前工资">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>反推条件</h2>
