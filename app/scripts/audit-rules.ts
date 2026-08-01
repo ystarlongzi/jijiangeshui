@@ -1,5 +1,15 @@
 import { cityRules, type CityRule } from '../src/lib/tax-rules'
 
+/**
+ * 审计前台兜底城市规则。
+ *
+ * 这个脚本检查的是写在代码里的 fallback cityRules，不访问数据库。
+ * 它适合在修改城市基数、比例、来源信息后快速跑一遍，确认：
+ * - 生效日期、核对日期、来源是否完整
+ * - 社保/公积金基数范围是否合法
+ * - 是否包含社保项目和公积金项目
+ * - 公积金比例选项是否覆盖常见 3%-12%
+ */
 type Severity = 'error' | 'warning'
 
 type AuditIssue = {
@@ -29,6 +39,7 @@ function formatRange(min: number, max: number) {
 
 function getRuleIssues(code: string, rule: CityRule): AuditIssue[] {
   const issues: AuditIssue[] = []
+  // checkedAt 是我们向用户展示“规则核对日期”的依据，优先选带 checkedAt 的来源。
   const source = rule.sources.find((item) => item.checkedAt) || rule.sources[0]
   const housingItem = rule.contributionItems.find((item) => item.housing || item.systemType === 'housingFund')
   const socialItems = rule.contributionItems.filter((item) => item.systemType === 'social')
@@ -39,6 +50,7 @@ function getRuleIssues(code: string, rule: CityRule): AuditIssue[] {
   if (rule.sources.some((item) => !item.url)) issues.push({ city: code, severity: 'warning', message: '存在未配置 URL 的规则来源' })
 
   for (const baseRule of Object.values(rule.baseRules)) {
+    // 基数范围错误会直接导致工资计算错误，所以这里按 error 处理。
     if (baseRule.min <= 0 || baseRule.max <= 0) {
       issues.push({ city: code, severity: 'error', message: `${baseRule.label}范围必须大于 0` })
     }
@@ -49,6 +61,7 @@ function getRuleIssues(code: string, rule: CityRule): AuditIssue[] {
 
   if (!socialItems.length) issues.push({ city: code, severity: 'error', message: '缺少社保缴费项目' })
   if (!housingItem) issues.push({ city: code, severity: 'error', message: '缺少公积金缴费项目' })
+  // 公积金比例在产品里允许用户选择，缺少边界选项会让表单能力不完整。
   if (!rule.housingRateOptions.includes(3) || !rule.housingRateOptions.includes(12)) {
     issues.push({ city: code, severity: 'warning', message: '公积金比例选项未覆盖 3%-12%' })
   }
@@ -85,6 +98,7 @@ const errorCount = issues.filter((issue) => issue.severity === 'error').length
 const warningCount = issues.filter((issue) => issue.severity === 'warning').length
 
 if (useJson) {
+  // JSON 输出方便后续接入 CI、报表或后台任务。
   console.log(JSON.stringify({ rows, issues, summary: { cities: rows.length, errors: errorCount, warnings: warningCount } }, null, 2))
 } else {
   console.table(rows)
@@ -98,5 +112,6 @@ if (useJson) {
 }
 
 if (errorCount > 0 || (strict && warningCount > 0)) {
+  // 默认只有 error 让脚本失败；--strict 会把 warning 也当成失败。
   process.exitCode = 1
 }

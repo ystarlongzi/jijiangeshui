@@ -12,6 +12,18 @@ import {
   type WrappedPolicy,
 } from '../src/lib/city-rule-import-schema'
 
+/**
+ * 将采集或导出的城市社保公积金 JSON 写入 Payload CMS。
+ *
+ * 用法：
+ * - npm run rules:import -- ./data/hrwork.json --dry-run  只预览，不写数据库
+ * - npm run rules:import -- ./data/hrwork.json            创建/更新城市和政策草稿
+ *
+ * 这个脚本只负责把外部数据转成后台可审核的草稿：
+ * - 城市不存在时先创建城市
+ * - 同一城市 + 年度 + 生效日期的政策存在时更新草稿
+ * - 新政策默认进入 pendingReview，避免采集数据直接影响前台计算
+ */
 const importTriggerTypes = ['manual', 'scheduled', 'retry'] as const
 type ImportTriggerType = (typeof importTriggerTypes)[number]
 
@@ -23,6 +35,8 @@ if (!inputPath) {
 }
 
 function slugify(city: CrawlCity | CrawlPolicy) {
+  // 优先使用 areaCode/areaId 这类稳定标识；没有时才退回城市名。
+  // 这里生成的 slug 需要和城市集合中的 slug 保持一致，后面政策导入会靠它关联城市。
   const source = ('areaCode' in city ? city.areaCode : undefined) || city.areaId || city.areaName || 'unknown-city'
   return String(source)
     .trim()
@@ -32,10 +46,13 @@ function slugify(city: CrawlCity | CrawlPolicy) {
 }
 
 function numberOrNull(value: unknown) {
+  // 外部采集数据可能出现空字符串、null 或缺字段；统一转成后台字段可接受的 number/null。
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
 function normalizeItemRule(item: Record<string, unknown>, index: number) {
+  // 把采集端的扁平字段转换成 Payload collection 里的 employee/employer 嵌套结构。
+  // systemType 会影响默认基数类型：公积金使用 housingFund，企业成本不参与个人基数计算。
   return {
     systemType: item.systemType || 'social',
     itemCode: item.itemCode || `unknown-${index + 1}`,
@@ -56,6 +73,7 @@ function normalizeItemRule(item: Record<string, unknown>, index: number) {
 }
 
 function isWrappedPolicyEntry(entry: CrawlPolicyEntry): entry is WrappedPolicy {
+  // 兼容两种输入：直接 policy 对象，或 { policy, ...meta } 包裹对象。
   return wrappedPolicySchema.safeParse(entry).success
 }
 
@@ -79,6 +97,7 @@ async function main() {
   const importWarnings: Array<{ message: string }> = []
 
   for (const city of cities) {
+    // 先确保城市维表存在。政策表只存 city id，不直接存城市文本。
     const name = city.areaName?.trim()
     if (!name) continue
     const slug = slugify(city)
@@ -125,6 +144,7 @@ async function main() {
 
     const baseRules = policy.baseRulesInfo?.list || []
     const itemRules = policy.itemRulesInfo?.list || []
+    // 采集失败或部分失败不阻断导入，但会写入 warnings，方便后台审核时看到风险。
     const warningMessages = [
       ...(policy.status && policy.status !== 'success' ? [`采集状态：${policy.status}`] : []),
       ...(policy.errorMessage ? [policy.errorMessage] : []),
@@ -152,6 +172,7 @@ async function main() {
 
     createdPolicies += 1
     if (dryRun) {
+      // dry-run 用于检查映射结果，不连接数据库，也不会创建 Payload 文档。
       console.log(`[dry-run] ${data.policyTitle}：${data.baseRules.length} 个基数规则，${data.itemRules.length} 个缴费项目`)
       continue
     }
@@ -172,6 +193,7 @@ async function main() {
     })
 
     if (existingPolicy.docs[0]) {
+      // 同一政策版本重复导入时更新草稿，避免后台出现多条同版本规则。
       await cms.update({
         collection: 'social-insurance-policies',
         id: existingPolicy.docs[0].id,
