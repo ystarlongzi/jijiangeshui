@@ -875,7 +875,7 @@
 .pageContent :global(.annual-table tr.current-month td) {
   background: var(--accent-soft);
   border-top-color: transparent;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .pageContent :global(.annual-table td:first-child) {
@@ -887,7 +887,7 @@
   display: block;
   color: var(--ink);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .pageContent :global(.annual-table .before-tax-value) {
