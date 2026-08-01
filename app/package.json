@@ -13,6 +13,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "rules:import": "tsx scripts/import-rules.ts",
+    "rules:export-fallback": "tsx scripts/export-fallback-rules.ts",
     "rules:validate": "tsx scripts/validate-rule-import.ts",
     "rules:audit": "tsx scripts/audit-rules.ts"
   },
