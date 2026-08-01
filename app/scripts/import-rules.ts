@@ -1,33 +1,64 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getPayload } from 'payload'
+import { z } from 'zod'
 
 import config from '../src/payload.config'
 
-type CrawlCity = {
-  areaId?: string | number
-  areaName?: string
-  shortName?: string
-  areaCode?: string
-  parentAreaId?: string | number
-}
+const idSchema = z.union([z.string(), z.number()])
+const rawRecordSchema = z.record(z.string(), z.unknown())
 
-type CrawlPolicy = {
-  areaId?: string | number
-  areaName?: string
-  policyYear?: string | number
-  effectiveFrom?: string
-  baseRulesInfo?: { list?: Array<Record<string, unknown>> }
-  itemRulesInfo?: { list?: Array<Record<string, unknown>> }
-  externalCodes?: Record<string, unknown>
-  status?: string
-  errorMessage?: string | null
-}
+const crawlCitySchema = z
+  .object({
+    areaId: idSchema.optional(),
+    areaName: z.string().optional(),
+    shortName: z.string().optional(),
+    areaCode: z.string().optional(),
+    parentAreaId: idSchema.optional(),
+    parentAreaName: z.string().optional(),
+  })
+  .passthrough()
 
-type CrawlResult = {
-  cityInfo?: { list?: CrawlCity[] }
-  socialInsurancePolicy?: { list?: Array<{ policy?: CrawlPolicy }> }
-}
+const crawlPolicySchema = z
+  .object({
+    areaId: idSchema.optional(),
+    areaName: z.string().optional(),
+    policyYear: idSchema.optional(),
+    effectiveFrom: z.string().optional(),
+    baseRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
+    itemRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
+    externalCodes: rawRecordSchema.optional(),
+    status: z.string().optional(),
+    errorMessage: z.string().nullable().optional(),
+  })
+  .passthrough()
+
+const wrappedPolicySchema = z.object({ policy: crawlPolicySchema }).passthrough()
+const crawlPolicyEntrySchema = z.union([wrappedPolicySchema, crawlPolicySchema])
+
+const crawlResultSchema = z
+  .object({
+    cityInfo: z.object({ list: z.array(crawlCitySchema).optional() }).optional(),
+    socialInsurancePolicy: z.object({ list: z.array(crawlPolicyEntrySchema).optional() }).optional(),
+    crawlJob: z
+      .object({
+        status: z.string().optional(),
+        triggerType: z.string().optional(),
+        startedAt: z.string().optional(),
+        finishedAt: z.string().optional(),
+        errorMessage: z.string().nullable().optional(),
+      })
+      .optional(),
+  })
+  .passthrough()
+
+type CrawlCity = z.infer<typeof crawlCitySchema>
+type CrawlPolicy = z.infer<typeof crawlPolicySchema>
+type CrawlPolicyEntry = z.infer<typeof crawlPolicyEntrySchema>
+type WrappedPolicy = z.infer<typeof wrappedPolicySchema>
+
+const importTriggerTypes = ['manual', 'scheduled', 'retry'] as const
+type ImportTriggerType = (typeof importTriggerTypes)[number]
 
 const inputPath = process.argv[2]
 const dryRun = process.argv.includes('--dry-run')
@@ -69,14 +100,28 @@ function normalizeItemRule(item: Record<string, unknown>, index: number) {
   }
 }
 
+function isWrappedPolicyEntry(entry: CrawlPolicyEntry): entry is WrappedPolicy {
+  return wrappedPolicySchema.safeParse(entry).success
+}
+
+function normalizePolicyEntry(entry: CrawlPolicyEntry): CrawlPolicy {
+  return isWrappedPolicyEntry(entry) ? entry.policy : entry
+}
+
+function normalizeTriggerType(value: unknown): ImportTriggerType {
+  return importTriggerTypes.includes(value as ImportTriggerType) ? (value as ImportTriggerType) : 'manual'
+}
+
 async function main() {
   const absolutePath = path.resolve(process.cwd(), inputPath)
-  const source = JSON.parse(await fs.readFile(absolutePath, 'utf8')) as CrawlResult
+  const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
   const cities = source.cityInfo?.list || []
-  const policies = source.socialInsurancePolicy?.list || []
+  const policies = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry)
   const payload = dryRun ? null : await getPayload({ config })
   let createdCities = 0
   let createdPolicies = 0
+  let failedPolicies = 0
+  const importWarnings: Array<{ message: string }> = []
 
   for (const city of cities) {
     const name = city.areaName?.trim()
@@ -94,7 +139,7 @@ async function main() {
           data: {
             name,
             slug,
-            provinceName: name,
+            provinceName: city.parentAreaName || name,
             level: 'city',
             areaId: city.areaId ? String(city.areaId) : undefined,
             parentAreaId: city.parentAreaId ? String(city.parentAreaId) : undefined,
@@ -107,8 +152,7 @@ async function main() {
     }
   }
 
-  for (const entry of policies) {
-    const policy = entry.policy
+  for (const policy of policies) {
     if (!policy?.areaName || policy.policyYear === undefined) continue
 
     const citySlug = slugify(policy)
@@ -117,7 +161,10 @@ async function main() {
       : { docs: [{ id: `dry-run-city-${citySlug}` }] }
     const cityDoc = cityResult.docs[0]
     if (!cityDoc) {
-      console.warn(`跳过 ${policy.areaName}：找不到对应城市。`)
+      const message = `跳过 ${policy.areaName}：找不到对应城市。`
+      failedPolicies += 1
+      importWarnings.push({ message })
+      console.warn(message)
       continue
     }
 
@@ -179,6 +226,26 @@ async function main() {
     } else {
       await cms.create({ collection: 'social-insurance-policies', data, draft: true })
     }
+  }
+
+  if (payload) {
+    await payload.create({
+      collection: 'import-jobs',
+      data: {
+        jobTitle: `社保公积金规则导入 ${new Date().toISOString().slice(0, 10)}`,
+        source: 'hrwork',
+        status: failedPolicies > 0 ? 'partialSuccess' : 'success',
+        triggerType: normalizeTriggerType(source.crawlJob?.triggerType),
+        startedAt: source.crawlJob?.startedAt,
+        finishedAt: new Date().toISOString(),
+        totalCities: policies.length,
+        successCities: createdPolicies,
+        failedCities: failedPolicies,
+        sourceFile: absolutePath,
+        warnings: importWarnings,
+        errorMessage: failedPolicies > 0 ? `${failedPolicies} 个政策未导入。` : undefined,
+      },
+    })
   }
 
   console.log(`完成：${createdCities} 个城市，${createdPolicies} 个政策草稿${dryRun ? '（仅预览，未写入数据库）' : ''}。`)
