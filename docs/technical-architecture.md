@@ -87,7 +87,9 @@ policyStatus = active
 
 ## 5. 规则采集与审核流程
 
-采集脚本放在 `app/scripts/`，由 `npm run rules:import` 触发。采集结果只写入 Payload 草稿和 `import-jobs` 记录，不直接修改前端兜底规则，也不直接覆盖线上有效规则。
+采集脚本放在 `app/scripts/`。采集文件先用 `npm run rules:validate -- <json>` 做离线校验，确认 JSON 结构、城市、政策年度、生效日期、基数范围和缴费项目完整；通过后再用 `npm run rules:import -- <json>` 写入 Payload 草稿。采集结果只写入 Payload 草稿和 `import-jobs` 记录，不直接修改前端兜底规则，也不直接覆盖线上有效规则。
+
+`app/data/rule-import-example.json` 是采集结果示例，只用于说明数据结构，不代表真实城市规则。
 
 一次采集任务至少记录：
 
@@ -99,11 +101,15 @@ policyStatus = active
 
 审核流程：
 
-1. 采集脚本生成城市和政策草稿。
-2. 后台查看导入任务，优先处理失败和警告城市。
-3. 人工核对来源、生效日期、社保基数、公积金基数、个人和单位缴费项目。
-4. 无警告且规则完整后，标记为有效。
-5. 前端按城市、月份和政策生效区间读取有效规则。
+1. 采集或人工整理 JSON。
+2. 运行 `npm run rules:validate -- <json>`，先处理格式和关键字段问题。
+3. 运行 `npm run rules:import -- <json>`，生成城市和政策草稿。
+4. 后台查看导入任务，优先处理失败和警告城市。
+5. 人工核对来源、生效日期、社保基数、公积金基数、个人和单位缴费项目。
+6. 无警告且规则完整后，标记为有效。
+7. 前端按城市、月份和政策生效区间读取有效规则。
+
+本地兜底规则发布前运行 `npm run rules:audit`。若要把“来源链接缺失”等警告作为发布阻断，可使用 `npm run rules:audit -- --strict`。
 
 ## 6. 前端读取策略
 
