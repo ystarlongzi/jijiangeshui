@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, getHousingRateOptions, taxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
+import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
 import { currentYear } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
@@ -60,6 +61,9 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
   const cityHousingRateOptions = getHousingRateOptions(rule)
+  const ruleQualityIssues = useMemo(() => auditCityRule(city, rule), [city, rule])
+  const ruleQualityErrors = ruleQualityIssues.filter((issue) => issue.severity === 'error')
+  const hasRuleQualityErrors = getRuleQualityStatus(ruleQualityIssues) === 'error'
   const deduction = deductionAmount
   const selectedDeductionItems = Object.values(deductionSelections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const activeSalary = salaryMode === 'fixed' ? salary : monthlySalaries[month - 1] || 0
@@ -90,6 +94,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const isHousingBaseInvalid = housingBase < housingBaseRule.min || housingBase > housingBaseRule.max
   const isDeductionInvalid = deductionAmount > activeSalary
   const validationMessages = [
+    hasRuleQualityErrors ? `${rule.label} 当前规则不完整：${ruleQualityErrors.map((issue) => issue.message).join('；')}。请先核对城市规则后再使用结果。` : '',
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
     isSocialBaseInvalid ? `社保缴费基数需要在 ${wholeMoney(socialBaseRule.min)} - ${wholeMoney(socialBaseRule.max)} 之间。` : '',
@@ -184,7 +189,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
     setMonthlySalaries((current) => current.map((item, index) => index === targetMonth - 1 ? value : item))
   }
   const calculate = () => {
-    trackEvent('calculate_complete', { calculator: 'salary', city, month, salaryMode, hasValidationMessages })
+    trackEvent('calculate_complete', { calculator: 'salary', city, month, salaryMode, hasValidationMessages, ruleQualityStatus: getRuleQualityStatus(ruleQualityIssues) })
     notify(hasValidationMessages ? '请先修正输入提示' : '已更新计算结果')
   }
   const copyShareLink = async () => {
@@ -248,7 +253,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
       <section className="workspace-grid" aria-label="个税计算器">
         <Panel as="form" className="input-panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
-          <SelectField id="city" label="缴费城市" value={city} onChange={setCity} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<span className="city-actions"><Button className={styles.formTextAction} variant="text" type="button" onClick={locate}>自动定位</Button><Button className={styles.formTextAction} variant="text" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</Button></span>} />
+          <SelectField id="city" label="缴费城市" value={city} onChange={setCity} invalid={hasRuleQualityErrors} options={Object.entries(cityRules).map(([key, item]) => ({ value: key, label: item.label }))} action={<span className="city-actions"><Button className={styles.formTextAction} variant="text" type="button" onClick={locate}>自动定位</Button><Button className={styles.formTextAction} variant="text" type="button" onClick={() => notify('城市规则详情将在规则页展示')}>查看规则</Button></span>} />
           <FormField htmlFor="salary" label={salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`} error={isSalaryInvalid ? '税前收入需要大于 0。' : ''} action={<span className={styles.salaryModeRow}><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</Button><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</Button></span>}><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</FormField>
           <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="month" label="计算月份" value={month} onChange={setMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="startMonth" label="入职月份" value={startMonth} onChange={setStartMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
           {isMonthInvalid && <p className={styles.fieldError}>计算月份不能早于入职月份。</p>}
