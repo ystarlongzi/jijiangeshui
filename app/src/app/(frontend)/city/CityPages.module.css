@@ -77,6 +77,71 @@
   font-size: 14px;
 }
 
+.ruleStatusCard {
+  grid-template-columns: auto 1fr;
+  min-width: 218px;
+  background: var(--surface);
+}
+
+.ruleStatusCard > div {
+  display: grid;
+  gap: 3px;
+}
+
+.ruleStatusCard dl {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.ruleStatusCard dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ruleStatusCard dt,
+.ruleStatusCard dd {
+  margin: 0;
+  font-size: 11px;
+}
+
+.ruleStatusCard dt {
+  color: var(--muted);
+}
+
+.ruleStatusCard dd {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.okRuleStatus {
+  border-color: rgba(0, 129, 106, 0.25);
+}
+
+.warningRuleStatus {
+  border-color: rgba(255, 112, 40, 0.28);
+  background: #fff9f2;
+}
+
+.warningRuleStatus svg,
+.warningRuleStatus strong {
+  color: #f56b2a;
+}
+
+.errorRuleStatus {
+  border-color: rgba(192, 50, 50, 0.28);
+  background: #fff6f5;
+}
+
+.errorRuleStatus svg,
+.errorRuleStatus strong {
+  color: #c7392f;
+}
+
 .contentGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
