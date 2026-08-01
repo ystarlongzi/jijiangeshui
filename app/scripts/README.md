@@ -28,6 +28,7 @@ npm run rules:validate -- ./data/city-rules-seed.json
 npm run rules:audit -- ./data/city-rules-seed.json
 npm run rules:import -- ./data/city-rules-seed.json --dry-run
 npm run rules:import-seed:dry-run
+npm run rules:sources
 
 npm run rules:export-fallback -- ./data/fallback-rules.json
 npm run rules:audit
@@ -37,6 +38,15 @@ npm run rules:audit
 `rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
+
+## 官方来源目录
+
+```bash
+npm run rules:sources
+npm run rules:sources -- ./data/city-rule-sources.json --network
+```
+
+`data/city-rule-sources.json` 记录每个城市当前找到的官方线索和核验状态。默认命令只检查目录结构；追加 `--network` 后，会尝试访问来源 URL，适合采集前确认页面是否还能打开。
 
 ## 本地 Payload 导入
 

@@ -23,6 +23,7 @@ Payload CMS 的规则管理、前台读取、导入脚本和 5 城种子数据�
 - 前台读取策略：优先读取 Payload active 政策；没有数据库或没有 active 政策时回退到前台兜底规则。
 - 导入脚本：`npm run rules:import-seed` 可把 5 城种子导入为 Payload 草稿。
 - 质量审计：`npm run rules:audit -- ./data/city-rules-seed.json` 可检查来源、基数、项目和公积金比例。
+- 来源目录：`app/data/city-rule-sources.json` 记录 5 城当前官方线索和核验状态，`npm run rules:sources` 可检查结构，追加 `--network` 可尝试访问来源页面。
 
 ## 当前阻塞
 

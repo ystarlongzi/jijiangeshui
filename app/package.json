@@ -18,6 +18,7 @@
     "rules:export-fallback": "tsx scripts/export-fallback-rules.ts",
     "rules:validate": "tsx scripts/validate-rule-import.ts",
     "rules:audit": "tsx scripts/audit-rules.ts",
+    "rules:sources": "tsx scripts/check-rule-sources.ts",
     "db:up": "docker compose -p jijian-geshui -f ../docker-compose.yml up -d postgres",
     "db:down": "docker compose -p jijian-geshui -f ../docker-compose.yml down"
   },

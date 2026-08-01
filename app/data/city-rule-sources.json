@@ -1,0 +1,82 @@
+{
+  "updatedAt": "2026-08-01",
+  "cities": [
+    {
+      "city": "beijing",
+      "cityName": "北京市",
+      "policyYear": 2026,
+      "sources": [
+        {
+          "scope": "housingFund",
+          "title": "北京住房公积金管理中心 2025 住房公积金年度政策解读",
+          "url": "https://gjj.beijing.gov.cn/web/zwgk61/2024zcjd/743765478/index.html",
+          "status": "verifiedPartial",
+          "notes": "已定位公积金缴存年度、比例和基数上下限线索；仍需转换成 2026 页面使用的规则版本。"
+        },
+        {
+          "scope": "social",
+          "title": "北京市海淀区人社局历年社保缴费基数附件入口",
+          "url": "https://zyk.bjhd.gov.cn/zwdt/tdzt/2018/csrlsb/bgxzcs/202007/t20200729_4416600_m.shtml",
+          "status": "needsParsing",
+          "notes": "页面提供历年社保缴费基数和比例附件入口，下一步需要解析附件。"
+        }
+      ]
+    },
+    {
+      "city": "shanghai",
+      "cityName": "上海市",
+      "policyYear": 2026,
+      "sources": [
+        {
+          "scope": "housingFund",
+          "title": "上海住房公积金 2025 年度基数调整提示",
+          "url": "https://zjw.sh.gov.cn/bmtishi/20250704/7961083f6a9d4c648577e6576a596466.html",
+          "status": "verifiedPartial",
+          "notes": "已定位公积金调整线索；社保基数和各险种比例仍需官方来源补齐。"
+        }
+      ]
+    },
+    {
+      "city": "shenzhen",
+      "cityName": "深圳市",
+      "policyYear": 2026,
+      "sources": [
+        {
+          "scope": "pension",
+          "title": "深圳市人社局关于执行广东省企业职工养老保险缴费基数上下限的通知",
+          "url": "https://hrss.sz.gov.cn/tzgg/content/post_11898586.html",
+          "status": "needsParsing",
+          "notes": "养老保险基数线索已定位；医保、失业、工伤、生育、公积金仍需继续找官方来源。"
+        }
+      ]
+    },
+    {
+      "city": "guangzhou",
+      "cityName": "广州市",
+      "policyYear": 2026,
+      "sources": [
+        {
+          "scope": "pension",
+          "title": "广州市人民政府转发广东省企业职工养老保险缴费基数上下限说明",
+          "url": "https://www.gz.gov.cn/zwfw/zxfw/sbfw/content/post_10510453.html",
+          "status": "verifiedPartial",
+          "notes": "养老保险基数线索已定位；医保、失业、工伤、生育、公积金仍需补齐。"
+        }
+      ]
+    },
+    {
+      "city": "hangzhou",
+      "cityName": "杭州市",
+      "policyYear": 2026,
+      "sources": [
+        {
+          "scope": "housingFund",
+          "title": "杭州住房公积金调整报道",
+          "url": "https://www.guandian.cn/article/20260724/576712.html",
+          "status": "needsOfficialSource",
+          "notes": "这是媒体报道，不作为最终入库来源；需要找到杭州公积金中心原始通知。"
+        }
+      ]
+    }
+  ]
+}
