@@ -18,12 +18,17 @@ import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSele
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
-import { cityRules, getHousingRateOptions } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 
-export default function ReverseTaxClient() {
+type ReverseTaxClientProps = {
+  rules?: Record<string, CityRule>
+}
+
+export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseTaxClientProps) {
   const { money } = useMoneyFormat()
+  const cityRules = rules
   const [targetTakeHome, setTargetTakeHome] = useState(15000)
   const [city, setCity] = useState('beijing')
   const [month, setMonth] = useState(8)

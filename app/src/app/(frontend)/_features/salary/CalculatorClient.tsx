@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
-import { cityRules, getContributionBaseRule, getHousingRateOptions, taxBrackets } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getContributionBaseRule, getHousingRateOptions, taxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
@@ -27,8 +27,13 @@ import styles from './CalculatorClient.module.css'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
-export default function CalculatorClient() {
+type CalculatorClientProps = {
+  rules?: Record<string, CityRule>
+}
+
+export default function CalculatorClient({ rules = fallbackCityRules }: CalculatorClientProps) {
   const { money } = useMoneyFormat()
+  const cityRules = rules
   const [city, setCity] = useState('beijing')
   const [salary, setSalary] = useState(20000)
   const [salaryMode, setSalaryMode] = useState<'fixed' | 'monthly'>('fixed')
