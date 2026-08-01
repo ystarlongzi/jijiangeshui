@@ -12,7 +12,8 @@
     "payload": "payload",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
-    "rules:import": "tsx scripts/import-rules.ts"
+    "rules:import": "tsx scripts/import-rules.ts",
+    "rules:audit": "tsx scripts/audit-rules.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.86.0",
