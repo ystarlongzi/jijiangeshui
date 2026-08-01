@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default async function CityIndexPage() {
   const cityRules = await getAvailableCityRules()
   const cities = Object.entries(cityRules)
+  const cityStats = getCityRuleStats(cities)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
@@ -28,6 +29,13 @@ export default async function CityIndexPage() {
       <div><div className={styles.titleLine}><MapPin size={20} /><span>{currentYear} 年城市规则</span></div><h1>城市个税计算器</h1><p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p></div>
     </section>
 
+    <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
+      <div><span>已收录城市</span><strong>{cityStats.total}</strong></div>
+      <div><span>{currentYear} 年规则</span><strong>{cityStats.currentYearRules}</strong></div>
+      <div><span>已配置来源</span><strong>{cityStats.withSourceUrl}</strong></div>
+      <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong></div>
+    </section>
+
     <section className={styles.indexGrid} aria-label="已收录城市">
       {cities.map(([key, rule]) => <Link className={styles.indexCard} href={`/city/${key}`} key={key}>
         <span>{rule.label}</span><small>{rule.province} · {rule.pinyin}</small>
@@ -35,6 +43,10 @@ export default async function CityIndexPage() {
           <div><dt>社保基数</dt><dd>{formatBaseRange(rule, 'social')}</dd></div>
           <div><dt>公积金基数</dt><dd>{formatBaseRange(rule, 'housingFund')}</dd></div>
         </dl>
+        <div className={styles.ruleMeta}>
+          <span>生效 {rule.effective}</span>
+          <span className={hasSourceUrl(rule) ? styles.okStatus : styles.warnStatus}>{hasSourceUrl(rule) ? '已配置来源' : '来源待补'}</span>
+        </div>
         <strong>查看城市规则 <ArrowRight size={14} /></strong>
       </Link>)}
     </section>
@@ -61,4 +73,18 @@ function formatMoney(value: number) {
 function formatBaseRange(rule: CityRule, type: 'social' | 'housingFund') {
   const baseRule = getContributionBaseRule(rule, type)
   return `${formatMoney(baseRule.min)} - ${formatMoney(baseRule.max)}`
+}
+
+function hasSourceUrl(rule: CityRule) {
+  return rule.sources.some((source) => Boolean(source.url))
+}
+
+function getCityRuleStats(cities: Array<[string, CityRule]>) {
+  const withSourceUrl = cities.filter(([, rule]) => hasSourceUrl(rule)).length
+  return {
+    total: cities.length,
+    currentYearRules: cities.filter(([, rule]) => rule.effective.startsWith(String(currentYear))).length,
+    withSourceUrl,
+    missingSourceUrl: cities.length - withSourceUrl,
+  }
 }

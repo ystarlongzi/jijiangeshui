@@ -276,6 +276,41 @@
   padding: 32px 0;
 }
 
+.coveragePanel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.coveragePanel div {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.coveragePanel div:last-child {
+  border-right: 0;
+}
+
+.coveragePanel span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.coveragePanel strong {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 750;
+}
+
 .indexCard {
   display: grid;
   gap: 18px;
@@ -332,6 +367,32 @@
   color: var(--ink);
   font-weight: 750;
   text-align: right;
+}
+
+.ruleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+
+.ruleMeta span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ruleMeta .okStatus {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ruleMeta .warnStatus {
+  background: #fff4e8;
+  color: #d96b20;
 }
 
 .indexCard strong {
@@ -432,11 +493,21 @@
   }
 
   .indexGrid,
-  .provinceList {
+  .provinceList,
+  .coveragePanel {
     grid-template-columns: 1fr;
   }
 
   .indexGrid {
     padding: 24px 0;
+  }
+
+  .coveragePanel div {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .coveragePanel div:last-child {
+    border-bottom: 0;
   }
 }
