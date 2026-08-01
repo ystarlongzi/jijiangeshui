@@ -2,6 +2,14 @@ import { z } from 'zod'
 
 const idSchema = z.union([z.string(), z.number()])
 const rawRecordSchema = z.record(z.string(), z.unknown())
+const policySourceSchema = z
+  .object({
+    title: z.string().nullable().optional(),
+    url: z.string().nullable().optional(),
+    checkedAt: z.string().nullable().optional(),
+    remark: z.string().nullable().optional(),
+  })
+  .passthrough()
 
 export const crawlCitySchema = z
   .object({
@@ -23,6 +31,7 @@ export const crawlPolicySchema = z
     baseRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
     itemRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
     externalCodes: rawRecordSchema.optional(),
+    source: policySourceSchema.optional(),
     status: z.string().optional(),
     errorMessage: z.string().nullable().optional(),
   })

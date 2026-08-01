@@ -1,8 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { getPayload } from 'payload'
 
-import config from '../src/payload.config'
 import {
   crawlResultSchema,
   wrappedPolicySchema,
@@ -26,6 +24,7 @@ import {
  */
 const importTriggerTypes = ['manual', 'scheduled', 'retry'] as const
 type ImportTriggerType = (typeof importTriggerTypes)[number]
+type PayloadInstance = Awaited<ReturnType<typeof import('payload').getPayload>>
 
 const inputPath = process.argv[2]
 const dryRun = process.argv.includes('--dry-run')
@@ -85,12 +84,27 @@ function normalizeTriggerType(value: unknown): ImportTriggerType {
   return importTriggerTypes.includes(value as ImportTriggerType) ? (value as ImportTriggerType) : 'manual'
 }
 
+function normalizePolicySource(policy: CrawlPolicy) {
+  return {
+    title: policy.source?.title || `${policy.areaName || '未知城市'}社保公积金规则来源待补充`,
+    url: policy.source?.url,
+    checkedAt: policy.source?.checkedAt || new Date().toISOString(),
+    remark: policy.source?.remark,
+  }
+}
+
+async function createPayloadClient(): Promise<PayloadInstance> {
+  // dry-run 不需要数据库；只有真正导入时才加载 Payload，避免本地预览被后台环境依赖卡住。
+  const [{ getPayload }, { default: config }] = await Promise.all([import('payload'), import('../src/payload.config')])
+  return getPayload({ config })
+}
+
 async function main() {
   const absolutePath = path.resolve(process.cwd(), inputPath)
   const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
   const cities = source.cityInfo?.list || []
   const policies = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry)
-  const payload = dryRun ? null : await getPayload({ config })
+  const payload = dryRun ? null : await createPayloadClient()
   let createdCities = 0
   let createdPolicies = 0
   let failedPolicies = 0
@@ -155,11 +169,7 @@ async function main() {
       policyYear: Number(policy.policyYear),
       effectiveFrom: policy.effectiveFrom || `${policy.policyYear}-01-01`,
       policyStatus: 'pendingReview',
-      source: {
-        title: 'Hrwork 社保公积金接口采集',
-        url: 'https://web.hrwork.com',
-        checkedAt: new Date().toISOString(),
-      },
+      source: normalizePolicySource(policy),
       baseRules: baseRules.map((rule) => ({
         baseType: rule.baseType || 'social',
         baseMin: numberOrNull(rule.baseMin) ?? 0,

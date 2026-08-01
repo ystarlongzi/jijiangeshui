@@ -49,6 +49,12 @@ type ExportedRule = {
         }>
       }
       status: 'success'
+      source?: {
+        title?: string
+        url?: string
+        checkedAt?: string
+        remark?: string
+      }
     }>
   }
   crawlJob: {
@@ -65,6 +71,10 @@ const outputPath = outputFlagIndex >= 0 ? process.argv[outputFlagIndex + 1] : pr
 function getPolicyYear(rule: CityRule) {
   // policyYear 取生效日期年份，例如 2026-07-01 -> 2026。
   return Number(rule.effective.slice(0, 4))
+}
+
+function getPrimarySource(rule: CityRule) {
+  return rule.sources.find((source) => source.checkedAt) || rule.sources[0]
 }
 
 function createExportPayload(): ExportedRule {
@@ -84,37 +94,48 @@ function createExportPayload(): ExportedRule {
     },
     socialInsurancePolicy: {
       // socialInsurancePolicy 是每个城市的具体年度政策，包含基数范围和缴费项目。
-      list: entries.map(([slug, rule]) => ({
-        areaId: slug,
-        areaName: rule.label,
-        policyYear: getPolicyYear(rule),
-        effectiveFrom: rule.effective,
-        baseRulesInfo: {
-          // 基数范围按类型输出：social 社保基数，housingFund 公积金基数。
-          list: Object.values(rule.baseRules).map((baseRule) => ({
-            baseType: baseRule.type,
-            baseMin: baseRule.min,
-            baseMax: baseRule.max,
-          })),
-        },
-        itemRulesInfo: {
-          // 缴费项目按前台计算使用的结构展开，导入时会再转成 Payload 的嵌套字段。
-          list: rule.contributionItems.map((item, index) => ({
-            systemType: item.systemType,
-            itemCode: item.code,
-            itemName: item.name,
-            baseType: item.baseType,
-            employeeCalcMethod: item.employee.method,
-            employeeRate: item.employee.rate,
-            employeeFixedAmount: item.employee.fixedAmount,
-            employerCalcMethod: item.employer.method,
-            employerRate: item.employer.rate,
-            employerFixedAmount: item.employer.fixedAmount,
-            sortOrder: (index + 1) * 10,
-          })),
-        },
-        status: 'success',
-      })),
+      list: entries.map(([slug, rule]) => {
+        const source = getPrimarySource(rule)
+
+        return {
+          areaId: slug,
+          areaName: rule.label,
+          policyYear: getPolicyYear(rule),
+          effectiveFrom: rule.effective,
+          baseRulesInfo: {
+            // 基数范围按类型输出：social 社保基数，housingFund 公积金基数。
+            list: Object.values(rule.baseRules).map((baseRule) => ({
+              baseType: baseRule.type,
+              baseMin: baseRule.min,
+              baseMax: baseRule.max,
+            })),
+          },
+          itemRulesInfo: {
+            // 缴费项目按前台计算使用的结构展开，导入时会再转成 Payload 的嵌套字段。
+            list: rule.contributionItems.map((item, index) => ({
+              systemType: item.systemType,
+              itemCode: item.code,
+              itemName: item.name,
+              baseType: item.baseType,
+              employeeCalcMethod: item.employee.method,
+              employeeRate: item.employee.rate,
+              employeeFixedAmount: item.employee.fixedAmount,
+              employerCalcMethod: item.employer.method,
+              employerRate: item.employer.rate,
+              employerFixedAmount: item.employer.fixedAmount,
+              sortOrder: (index + 1) * 10,
+            })),
+          },
+          source: source
+            ? {
+                title: source.title,
+                url: source.url,
+                checkedAt: source.checkedAt,
+              }
+            : undefined,
+          status: 'success' as const,
+        }
+      }),
     },
     crawlJob: {
       // 兜底数据不是实时采集结果，但仍然补齐 crawlJob，方便复用校验 schema。
