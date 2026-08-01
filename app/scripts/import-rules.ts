@@ -2,13 +2,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import {
-  crawlResultSchema,
-  wrappedPolicySchema,
-  type CrawlCity,
-  type CrawlPolicy,
-  type CrawlPolicyEntry,
-  type WrappedPolicy,
-} from '../src/lib/city-rule-import-schema'
+  normalizePolicyEntry,
+  normalizePolicyForCms,
+  slugifyRuleEntity,
+} from '../src/lib/city-rule-import-normalizer'
+import { crawlResultSchema } from '../src/lib/city-rule-import-schema'
 
 /**
  * 将采集或导出的城市社保公积金 JSON 写入 Payload CMS。
@@ -33,64 +31,8 @@ if (!inputPath) {
   throw new Error('请提供采集 JSON 文件，例如：npm run rules:import -- ./data/hrwork.json --dry-run')
 }
 
-function slugify(city: CrawlCity | CrawlPolicy) {
-  // 优先使用 areaCode/areaId 这类稳定标识；没有时才退回城市名。
-  // 这里生成的 slug 需要和城市集合中的 slug 保持一致，后面政策导入会靠它关联城市。
-  const source = ('areaCode' in city ? city.areaCode : undefined) || city.areaId || city.areaName || 'unknown-city'
-  return String(source)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-function numberOrNull(value: unknown) {
-  // 外部采集数据可能出现空字符串、null 或缺字段；统一转成后台字段可接受的 number/null。
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
-}
-
-function normalizeItemRule(item: Record<string, unknown>, index: number) {
-  // 把采集端的扁平字段转换成 Payload collection 里的 employee/employer 嵌套结构。
-  // systemType 会影响默认基数类型：公积金使用 housingFund，企业成本不参与个人基数计算。
-  return {
-    systemType: item.systemType || 'social',
-    itemCode: item.itemCode || `unknown-${index + 1}`,
-    itemName: item.itemName || `未命名项目 ${index + 1}`,
-    baseType: item.systemType === 'housingFund' ? 'housingFund' : item.systemType === 'employerCost' ? 'none' : 'social',
-    employee: {
-      calcMethod: item.employeeCalcMethod || 'none',
-      rate: numberOrNull(item.employeeRate),
-      fixedAmount: numberOrNull(item.employeeFixedAmount),
-    },
-    employer: {
-      calcMethod: item.employerCalcMethod || 'none',
-      rate: numberOrNull(item.employerRate),
-      fixedAmount: numberOrNull(item.employerFixedAmount),
-    },
-    sortOrder: numberOrNull(item.sortOrder) ?? (index + 1) * 10,
-  }
-}
-
-function isWrappedPolicyEntry(entry: CrawlPolicyEntry): entry is WrappedPolicy {
-  // 兼容两种输入：直接 policy 对象，或 { policy, ...meta } 包裹对象。
-  return wrappedPolicySchema.safeParse(entry).success
-}
-
-function normalizePolicyEntry(entry: CrawlPolicyEntry): CrawlPolicy {
-  return isWrappedPolicyEntry(entry) ? entry.policy : entry
-}
-
 function normalizeTriggerType(value: unknown): ImportTriggerType {
   return importTriggerTypes.includes(value as ImportTriggerType) ? (value as ImportTriggerType) : 'manual'
-}
-
-function normalizePolicySource(policy: CrawlPolicy) {
-  return {
-    title: policy.source?.title || `${policy.areaName || '未知城市'}社保公积金规则来源待补充`,
-    url: policy.source?.url,
-    checkedAt: policy.source?.checkedAt || new Date().toISOString(),
-    remark: policy.source?.remark,
-  }
 }
 
 async function createPayloadClient(): Promise<PayloadInstance> {
@@ -114,7 +56,7 @@ async function main() {
     // 先确保城市维表存在。政策表只存 city id，不直接存城市文本。
     const name = city.areaName?.trim()
     if (!name) continue
-    const slug = slugify(city)
+    const slug = slugifyRuleEntity(city)
     const existing = payload
       ? await payload.find({ collection: 'cities', limit: 1, where: { slug: { equals: slug } } })
       : { docs: [] }
@@ -143,7 +85,7 @@ async function main() {
   for (const policy of policies) {
     if (!policy?.areaName || policy.policyYear === undefined) continue
 
-    const citySlug = slugify(policy)
+    const citySlug = slugifyRuleEntity(policy)
     const cityResult = payload
       ? await payload.find({ collection: 'cities', limit: 1, where: { slug: { equals: citySlug } } })
       : { docs: [{ id: `dry-run-city-${citySlug}` }] }
@@ -156,8 +98,7 @@ async function main() {
       continue
     }
 
-    const baseRules = policy.baseRulesInfo?.list || []
-    const itemRules = policy.itemRulesInfo?.list || []
+    const normalizedPolicy = normalizePolicyForCms(policy)
     // 采集失败或部分失败不阻断导入，但会写入 warnings，方便后台审核时看到风险。
     const warningMessages = [
       ...(policy.status && policy.status !== 'success' ? [`采集状态：${policy.status}`] : []),
@@ -166,16 +107,12 @@ async function main() {
     const data = {
       policyTitle: `${policy.areaName} ${policy.policyYear} 年社保公积金规则`,
       city: cityDoc.id,
-      policyYear: Number(policy.policyYear),
-      effectiveFrom: policy.effectiveFrom || `${policy.policyYear}-01-01`,
+      policyYear: normalizedPolicy.policyYear,
+      effectiveFrom: normalizedPolicy.effectiveFrom,
       policyStatus: 'pendingReview',
-      source: normalizePolicySource(policy),
-      baseRules: baseRules.map((rule) => ({
-        baseType: rule.baseType || 'social',
-        baseMin: numberOrNull(rule.baseMin) ?? 0,
-        baseMax: numberOrNull(rule.baseMax) ?? 0,
-      })),
-      itemRules: itemRules.map(normalizeItemRule),
+      source: normalizedPolicy.source,
+      baseRules: normalizedPolicy.baseRules,
+      itemRules: normalizedPolicy.itemRules,
       warnings: warningMessages.map((message) => ({ message })),
       rawData: policy,
     }

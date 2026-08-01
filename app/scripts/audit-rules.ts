@@ -3,13 +3,12 @@ import path from 'node:path'
 
 import { adaptCmsPolicyToCityRule } from '../src/lib/city-rule-adapter'
 import {
-  crawlResultSchema,
-  wrappedPolicySchema,
-  type CrawlCity,
-  type CrawlPolicy,
-  type CrawlPolicyEntry,
-  type WrappedPolicy,
-} from '../src/lib/city-rule-import-schema'
+  createAuditCity,
+  normalizePolicyEntry,
+  normalizePolicyForCms,
+  slugifyRuleEntity,
+} from '../src/lib/city-rule-import-normalizer'
+import { crawlResultSchema } from '../src/lib/city-rule-import-schema'
 import {
   auditCityRule,
   getPrimaryRuleSource,
@@ -58,81 +57,6 @@ const strict = process.argv.includes('--strict')
 const inputPath = process.argv.find((arg, index) => index > 1 && !arg.startsWith('-'))
 let currentIssues: RuleQualityIssue[] = []
 
-function isWrappedPolicyEntry(entry: CrawlPolicyEntry): entry is WrappedPolicy {
-  return wrappedPolicySchema.safeParse(entry).success
-}
-
-function normalizePolicyEntry(entry: CrawlPolicyEntry): CrawlPolicy {
-  return isWrappedPolicyEntry(entry) ? entry.policy : entry
-}
-
-function slugify(city: CrawlCity | CrawlPolicy) {
-  const source = ('areaCode' in city ? city.areaCode : undefined) || city.areaId || city.areaName || 'unknown-city'
-  return String(source)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-function numberOrNull(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
-}
-
-function stringOrUndefined(value: unknown) {
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
-}
-
-function normalizeItemRule(item: Record<string, unknown>, index: number) {
-  const systemType = stringOrUndefined(item.systemType)
-
-  return {
-    systemType: systemType || 'social',
-    itemCode: stringOrUndefined(item.itemCode) || `unknown-${index + 1}`,
-    itemName: stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`,
-    baseType: systemType === 'housingFund' ? 'housingFund' : systemType === 'employerCost' ? 'none' : 'social',
-    employee: {
-      calcMethod: stringOrUndefined(item.employeeCalcMethod) || 'none',
-      rate: numberOrNull(item.employeeRate),
-      fixedAmount: numberOrNull(item.employeeFixedAmount),
-    },
-    employer: {
-      calcMethod: stringOrUndefined(item.employerCalcMethod) || 'none',
-      rate: numberOrNull(item.employerRate),
-      fixedAmount: numberOrNull(item.employerFixedAmount),
-    },
-    sortOrder: numberOrNull(item.sortOrder) ?? (index + 1) * 10,
-  }
-}
-
-function toAuditCity(policy: CrawlPolicy, city?: CrawlCity) {
-  return {
-    name: city?.areaName || policy.areaName,
-    slug: city ? slugify(city) : slugify(policy),
-    provinceName: city?.parentAreaName || policy.areaName,
-    shortName: city?.shortName || policy.areaName,
-  }
-}
-
-function toCmsPolicy(policy: CrawlPolicy) {
-  return {
-    policyYear: Number(policy.policyYear),
-    effectiveFrom: policy.effectiveFrom || `${policy.policyYear || new Date().getFullYear()}-01-01`,
-    source: {
-      title: policy.source?.title || `${policy.areaName || '未知城市'}社保公积金规则来源待补充`,
-      url: policy.source?.url,
-      checkedAt: policy.source?.checkedAt,
-      remark: policy.source?.remark,
-    },
-    baseRules: (policy.baseRulesInfo?.list || []).map((rule) => ({
-      baseType: stringOrUndefined(rule.baseType) || 'social',
-      baseMin: numberOrNull(rule.baseMin) ?? 0,
-      baseMax: numberOrNull(rule.baseMax) ?? 0,
-    })),
-    itemRules: (policy.itemRulesInfo?.list || []).map(normalizeItemRule),
-  }
-}
-
 async function loadAuditSource(): Promise<AuditSource> {
   if (!inputPath) {
     return { label: 'fallback cityRules', entries: Object.entries(cityRules) }
@@ -140,11 +64,16 @@ async function loadAuditSource(): Promise<AuditSource> {
 
   const absolutePath = path.resolve(process.cwd(), inputPath)
   const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
-  const cities = new Map((source.cityInfo?.list || []).map((city) => [slugify(city), city]))
+  const cities = new Map((source.cityInfo?.list || []).map((city) => [slugifyRuleEntity(city), city]))
   const entries = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry).flatMap((policy, index) => {
-    const code = slugify(policy) || `policy-${index + 1}`
+    const code = slugifyRuleEntity(policy) || `policy-${index + 1}`
     const city = cities.get(code)
-    return [[code, adaptCmsPolicyToCityRule(toCmsPolicy(policy), toAuditCity(policy, city))] satisfies [string, CityRule]]
+    return [
+      [code, adaptCmsPolicyToCityRule(normalizePolicyForCms(policy), createAuditCity(policy, city))] satisfies [
+        string,
+        CityRule,
+      ],
+    ]
   })
 
   return { label: absolutePath, entries }

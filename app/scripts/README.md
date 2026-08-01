@@ -48,4 +48,8 @@ Payload CMS 草稿政策
 前台按城市读取正式规则
 ```
 
-`city-rule-import-schema.ts` 定义采集 JSON 的宽松结构；`city-rule-quality.ts` 定义规则质量审计逻辑。它们放在 `src/lib`，是因为脚本和前台页面都会复用。
+`src/lib` 里有三类脚本会复用的规则能力：
+
+- `city-rule-import-schema.ts`：定义采集 JSON 的宽松结构，负责先把外部数据“接住”。
+- `city-rule-import-normalizer.ts`：把采集字段统一转换成 Payload/前台共用口径，例如城市 slug、来源兜底、基数和缴费项目映射。
+- `city-rule-quality.ts`：定义规则质量审计逻辑，检查来源、基数范围、缴费项目和公积金比例是否可信。
