@@ -21,7 +21,9 @@ import { crawlResultSchema } from '../src/lib/city-rule-import-schema'
  * - 新政策默认进入 pendingReview，避免采集数据直接影响前台计算
  */
 const importTriggerTypes = ['manual', 'scheduled', 'retry'] as const
+const importSourceTypes = ['fallback', 'manual', 'official', 'hrwork'] as const
 type ImportTriggerType = (typeof importTriggerTypes)[number]
+type ImportSourceType = (typeof importSourceTypes)[number]
 type PayloadInstance = Awaited<ReturnType<typeof import('payload').getPayload>>
 
 const inputPath = process.argv[2]
@@ -33,6 +35,10 @@ if (!inputPath) {
 
 function normalizeTriggerType(value: unknown): ImportTriggerType {
   return importTriggerTypes.includes(value as ImportTriggerType) ? (value as ImportTriggerType) : 'manual'
+}
+
+function normalizeImportSource(value: unknown): ImportSourceType {
+  return importSourceTypes.includes(value as ImportSourceType) ? (value as ImportSourceType) : 'manual'
 }
 
 async function createPayloadClient(): Promise<PayloadInstance> {
@@ -157,7 +163,7 @@ async function main() {
       collection: 'import-jobs',
       data: {
         jobTitle: `社保公积金规则导入 ${new Date().toISOString().slice(0, 10)}`,
-        source: 'hrwork',
+        source: normalizeImportSource(source.crawlJob?.source),
         status: failedPolicies > 0 ? 'partialSuccess' : 'success',
         triggerType: normalizeTriggerType(source.crawlJob?.triggerType),
         startedAt: source.crawlJob?.startedAt,

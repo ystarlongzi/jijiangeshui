@@ -58,6 +58,7 @@ type ExportedRule = {
     }>
   }
   crawlJob: {
+    source: 'fallback',
     status: 'success'
     triggerType: 'manual'
     startedAt: string
@@ -139,6 +140,7 @@ function createExportPayload(): ExportedRule {
     },
     crawlJob: {
       // 兜底数据不是实时采集结果，但仍然补齐 crawlJob，方便复用校验 schema。
+      source: 'fallback',
       status: 'success',
       triggerType: 'manual',
       startedAt: now,

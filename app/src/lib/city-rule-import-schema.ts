@@ -51,6 +51,7 @@ export const crawlResultSchema = z
     socialInsurancePolicy: z.object({ list: z.array(crawlPolicyEntrySchema).optional() }).optional(),
     crawlJob: z
       .object({
+        source: z.string().optional(),
         status: z.string().optional(),
         triggerType: z.string().optional(),
         startedAt: z.string().optional(),

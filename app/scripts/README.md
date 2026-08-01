@@ -24,15 +24,18 @@
 ## 常用命令
 
 ```bash
+npm run rules:validate -- ./data/city-rules-seed.json
+npm run rules:audit -- ./data/city-rules-seed.json
+npm run rules:import -- ./data/city-rules-seed.json --dry-run
+
 npm run rules:export-fallback -- ./data/fallback-rules.json
-npm run rules:validate -- ./data/fallback-rules.json
 npm run rules:audit
-npm run rules:audit -- ./data/fallback-rules.json
-npm run rules:import -- ./data/fallback-rules.json --dry-run
 ```
 
 真正写入数据库时去掉 `--dry-run`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
 `rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。
+
+`data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
 
 ## 数据流
 
