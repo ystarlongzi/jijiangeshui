@@ -11,14 +11,25 @@
           "title": "北京住房公积金管理中心 2025 住房公积金年度政策解读",
           "url": "https://gjj.beijing.gov.cn/web/zwgk61/2024zcjd/743765478/index.html",
           "status": "verifiedPartial",
-          "notes": "已定位公积金缴存年度、比例和基数上下限线索；仍需转换成 2026 页面使用的规则版本。",
+          "notes": "这是 2025-2026 公积金年度规则，可作为历史版本参考；不能直接作为 2026-2027 公积金年度上下限。",
           "facts": [
-            { "key": "periodStart", "value": "2025-07-01", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
-            { "key": "periodEnd", "value": "2026-06-30", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
-            { "key": "housingRateMin", "value": 5, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
-            { "key": "housingRateMax", "value": 12, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
-            { "key": "housingBaseMin", "value": 2540, "unit": "CNY/month", "evidence": "自2025年9月1日起，住房公积金月缴存基数下限调整为2540元。" },
-            { "key": "housingBaseMax", "value": 35811, "unit": "CNY/month", "evidence": "2025住房公积金年度住房公积金月缴存基数上限为35811元。" }
+            { "key": "previousHousingPeriodStart", "value": "2025-07-01", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
+            { "key": "previousHousingPeriodEnd", "value": "2026-06-30", "unit": "date", "evidence": "2025住房公积金年度是指2025年7月1日至2026年6月30日。" },
+            { "key": "previousHousingRateMin", "value": 5, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
+            { "key": "previousHousingRateMax", "value": 12, "unit": "%", "evidence": "继续执行5%至12%的缴存比例政策。" },
+            { "key": "previousHousingBaseMin", "value": 2540, "unit": "CNY/month", "evidence": "自2025年9月1日起，住房公积金月缴存基数下限调整为2540元。" },
+            { "key": "previousHousingBaseMax", "value": 35811, "unit": "CNY/month", "evidence": "2025住房公积金年度住房公积金月缴存基数上限为35811元。" }
+          ]
+        },
+        {
+          "scope": "housingFund2026",
+          "title": "北京住房公积金管理中心 2026 住房公积金年度缴存基数申报常见问题解答",
+          "url": "https://gjj.beijing.gov.cn/web/zwfw5/1747335/1747336/744064407/index.html",
+          "status": "needsOfficialSource",
+          "notes": "2026 住房公积金年度上下限尚未公布；需要等正式上下限通知后才能入库。",
+          "facts": [
+            { "key": "housingPeriodStart", "value": "2026-07-01", "unit": "date", "evidence": "2026住房公积金年度缴存基数申报常见问题解答。" },
+            { "key": "housingBasePublishStatus", "value": "notPublished", "unit": "status", "evidence": "公积金缴存基数上下限未公布，不影响单位办理年度缴存基数申报。" }
           ]
         },
         {

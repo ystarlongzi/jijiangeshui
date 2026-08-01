@@ -40,6 +40,50 @@ npm run rules:audit
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
 
+## Hrwork 批量采集接入
+
+`../scripts/hrwork-social-insurance-console-crawler.js` 是浏览器控制台脚本，用来从 Hrwork 的社保公积金接口批量生成采集 JSON。
+
+推荐流程：
+
+1. 在浏览器打开 `https://web.hrwork.com`。
+2. 打开开发者工具 Console，把 `scripts/hrwork-social-insurance-console-crawler.js` 完整粘贴进去。
+3. 先小范围试跑，再全量采集：
+
+```js
+const result = await crawlHrworkSocialInsuranceRules({
+  cityFilter: (area) => ['北京', '上海', '广州', '深圳', '杭州'].some((name) => area.areaName.includes(name)),
+  policyYear: '2026',
+  effectiveFrom: '2026-01-01',
+  concurrency: 2,
+  delayMs: 500,
+})
+```
+
+全量采集：
+
+```js
+const result = await crawlAllHrworkSocialInsuranceRules({
+  policyYear: '2026',
+  effectiveFrom: '2026-01-01',
+  concurrency: 3,
+  delayMs: 500,
+})
+```
+
+脚本默认会下载 `hrwork-social-insurance-YYYY-MM-DD.json`。把文件放到 `app/data/` 后，按顺序执行：
+
+```bash
+npm run rules:validate -- ./data/hrwork-social-insurance-2026-08-01.json
+npm run rules:audit -- ./data/hrwork-social-insurance-2026-08-01.json
+npm run rules:import -- ./data/hrwork-social-insurance-2026-08-01.json --dry-run
+npm run rules:import -- ./data/hrwork-social-insurance-2026-08-01.json
+```
+
+导入到 Payload 后会创建或更新 `社保公积金政策` 草稿，业务状态默认为 `pendingReview`。因为 Hrwork 是第三方聚合来源，导入脚本会自动给这些政策写入审核警告；人工确认城市官方口径后，再清理 warning 并发布为 `active`。
+
+这条链路的定位是“先批量初始化，再后台核对”，不是直接把第三方数据上线。
+
 ## 官方来源目录
 
 ```bash

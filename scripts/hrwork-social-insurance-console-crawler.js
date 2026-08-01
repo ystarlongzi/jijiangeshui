@@ -12,7 +12,10 @@
  *
  *    const result = await crawlHrworkSocialInsuranceRules({ cityFilter: "杭州" });
  *
- * 4. 使用 result 导入后台，或使用脚本自动下载的 JSON 文件。
+ * 4. 把下载的 JSON 文件放到 app/data/ 下，再用 app/scripts 里的校验和导入脚本写入 Payload CMS 草稿。
+ *
+ * 注意：Hrwork 是第三方聚合数据源，适合批量初始化城市规则；导入 Payload 后仍要进入人工审核，
+ * 不应绕过审核直接发布为前台有效规则。
  */
 (function () {
   const API_BASE = "https://gw.hrwork.com/pcommon-service/shebao/open";
@@ -41,6 +44,12 @@
 
     // 触发方式。手动在浏览器控制台执行时默认为 manual。
     triggerType: "manual"
+  };
+
+  const HRWORK_SOURCE = {
+    title: "Hrwork 社保公积金工具采集（第三方）",
+    url: "https://web.hrwork.com",
+    remark: "第三方聚合来源，适合批量初始化；发布前需结合城市官方口径核验。"
   };
 
   const ITEM_MAPPINGS = [
@@ -346,6 +355,10 @@
       areaName: area.areaName,
       policyYear: String(options.policyYear),
       effectiveFrom,
+      source: {
+        ...HRWORK_SOURCE,
+        checkedAt: new Date().toISOString().slice(0, 10)
+      },
       baseRulesInfo: nextBaseRulesInfo,
       itemRulesInfo
     };
@@ -454,6 +467,10 @@
         areaName: area.areaName,
         policyYear: String(options.policyYear),
         effectiveFrom: options.effectiveFrom === undefined ? `${options.policyYear}-01-01` : options.effectiveFrom,
+        source: {
+          ...HRWORK_SOURCE,
+          checkedAt: new Date().toISOString().slice(0, 10)
+        },
         baseRulesInfo: {
           list: [],
           crawlJob: makeFailedJob("getInsOrg", error)
@@ -492,6 +509,10 @@
         areaName: area.areaName,
         policyYear: String(options.policyYear),
         effectiveFrom: options.effectiveFrom === undefined ? `${options.policyYear}-01-01` : options.effectiveFrom,
+        source: {
+          ...HRWORK_SOURCE,
+          checkedAt: new Date().toISOString().slice(0, 10)
+        },
         baseRulesInfo,
         itemRulesInfo: {
           list: [],
@@ -540,6 +561,7 @@
       const finishedAt = nowIso();
       const crawlJob = {
         endpoint: "all",
+        source: "hrwork",
         startedAt,
         finishedAt,
         status: "failed",
@@ -586,6 +608,7 @@
     const finishedAt = nowIso();
     const crawlJob = {
       endpoint: "all",
+      source: "hrwork",
       startedAt,
       finishedAt,
       status,

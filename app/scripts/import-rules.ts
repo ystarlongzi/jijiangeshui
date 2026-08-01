@@ -41,6 +41,14 @@ function normalizeImportSource(value: unknown): ImportSourceType {
   return importSourceTypes.includes(value as ImportSourceType) ? (value as ImportSourceType) : 'manual'
 }
 
+function createSourceReviewWarnings(sourceType: ImportSourceType) {
+  if (sourceType !== 'hrwork') return []
+
+  return [
+    'Hrwork 为第三方聚合来源。本规则可作为批量初始化草稿，发布为有效规则前建议核对城市官方社保、公积金口径。',
+  ]
+}
+
 function parseEnvValue(value: string) {
   const trimmed = value.trim()
   const quote = trimmed[0]
@@ -91,6 +99,7 @@ async function main() {
   const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
   const cities = source.cityInfo?.list || []
   const policies = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry)
+  const importSource = normalizeImportSource(source.crawlJob?.source)
   const payload = dryRun ? null : await createPayloadClient()
   let createdCities = 0
   let createdPolicies = 0
@@ -146,6 +155,7 @@ async function main() {
     const normalizedPolicy = normalizePolicyForCms(policy)
     // 采集失败或部分失败不阻断导入，但会写入 warnings，方便后台审核时看到风险。
     const warningMessages = [
+      ...createSourceReviewWarnings(importSource),
       ...(policy.status && policy.status !== 'success' ? [`采集状态：${policy.status}`] : []),
       ...(policy.errorMessage ? [policy.errorMessage] : []),
     ]
@@ -202,7 +212,7 @@ async function main() {
       collection: 'import-jobs',
       data: {
         jobTitle: `社保公积金规则导入 ${new Date().toISOString().slice(0, 10)}`,
-        source: normalizeImportSource(source.crawlJob?.source),
+        source: importSource,
         status: failedPolicies > 0 ? 'partialSuccess' : 'success',
         triggerType: normalizeTriggerType(source.crawlJob?.triggerType),
         startedAt: source.crawlJob?.startedAt,
