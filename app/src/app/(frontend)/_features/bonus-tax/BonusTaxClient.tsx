@@ -8,6 +8,7 @@ import { Button } from '../../_components/Button'
 import Toast from '../../_components/Toast'
 import MoneyInput from '../../_components/MoneyInput'
 import Panel from '../../_components/Panel'
+import ProcessTable from '../../_components/ProcessTable'
 import { useMoneyFormat } from '../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../_lib/analytics'
 import { downloadCsv } from '../../_lib/csv'
@@ -139,7 +140,7 @@ function BonusProcess({ result, bonus, annualSalary, annualInsurance, annualDedu
   const bonusAverage = bonus / 12
   const standardDeduction = 60000
 
-  return <section className={styles.processPanel}><div className={styles.processHeading}><h2>计算过程</h2><p>把两种计税方式拆开看，方便核对税率和到手金额。</p></div><div className={styles.processSection}><h3>单独计税</h3><dl><div><dt>月均奖金</dt><dd>{money(bonus)} ÷ 12 = {money(bonusAverage, 2)}</dd></div><div><dt>适用税率</dt><dd>{separateRate}%</dd></div><div><dt>应缴个税</dt><dd>{money(bonus)} × {separateRate}% - {money(result.separate.bracket.quick / 12)} = {money(result.separate.tax)}</dd></div><div><dt>奖金到手</dt><dd>{money(bonus)} - {money(result.separate.tax)} = {money(result.separate.takeHome)}</dd></div></dl></div><div className={styles.processSection}><h3>并入综合所得</h3><dl><div><dt>全年应纳税所得额</dt><dd>{money(annualSalary)} - {money(annualInsurance)} - {money(annualDeductions)} - {money(standardDeduction)} = {money(result.base.taxable)}</dd></div><div><dt>并入年终奖后</dt><dd>{money(result.base.taxable)} + {money(bonus)} = {money(result.combined.taxableIncome)}</dd></div><div><dt>适用税率</dt><dd>{combinedRate}%</dd></div><div><dt>增量个税</dt><dd>{money(result.combined.tax)}</dd></div><div><dt>奖金到手</dt><dd>{money(bonus)} - {money(result.combined.tax)} = {money(result.combined.takeHome)}</dd></div></dl></div></section>
+  return <ProcessTable title="计算过程" description="把两种计税方式拆开看，方便核对税率和到手金额。" groups={[{ title: '单独计税', rows: [{ label: '月均奖金', value: <>{money(bonus)} ÷ 12 = {money(bonusAverage, 2)}</> }, { label: '适用税率', value: `${separateRate}%` }, { label: '应缴个税', value: <>{money(bonus)} × {separateRate}% - {money(result.separate.bracket.quick / 12)} = {money(result.separate.tax)}</> }, { label: '奖金到手', value: <>{money(bonus)} - {money(result.separate.tax)} = {money(result.separate.takeHome)}</> }] }, { title: '并入综合所得', rows: [{ label: '全年应纳税所得额', value: <>{money(annualSalary)} - {money(annualInsurance)} - {money(annualDeductions)} - {money(standardDeduction)} = {money(result.base.taxable)}</> }, { label: '并入年终奖后', value: <>{money(result.base.taxable)} + {money(bonus)} = {money(result.combined.taxableIncome)}</> }, { label: '适用税率', value: `${combinedRate}%` }, { label: '增量个税', value: money(result.combined.tax) }, { label: '奖金到手', value: <>{money(bonus)} - {money(result.combined.tax)} = {money(result.combined.takeHome)}</> }] }]} />
 }
 
 function BonusInput({ id, label, value, onChange }: { id: string; label: string; value: number; onChange: (value: number) => void }) {

@@ -9,6 +9,7 @@ import Toast from '../../_components/Toast'
 import FormField from '../../_components/FormField'
 import MoneyInput from '../../_components/MoneyInput'
 import Panel from '../../_components/Panel'
+import ProcessTable from '../../_components/ProcessTable'
 import SelectField from '../../_components/SelectField'
 import { useMoneyFormat } from '../../_components/MoneyFormatProvider'
 import MetricGrid from '../../_components/MetricGrid'
@@ -153,5 +154,5 @@ function ReverseProcess({ result, targetTakeHome, employeeInsurance }: { result:
   const { money } = useMoneyFormat()
   const rate = Math.round(result.result.bracket.rate * 100)
 
-  return <section className={styles.processPanel}><div className={styles.processHeading}><h2>计算过程</h2><p>先用二分法找到接近期望到手的税前工资，再套用工资薪金累计预扣法核算本月结果。</p></div><div className={styles.processSection}><h3>反推条件</h3><dl><div><dt>期望到手</dt><dd>{money(targetTakeHome)}</dd></div><div><dt>税前月薪</dt><dd>约 {money(result.salary)}</dd></div><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div></dl></div><div className={styles.processSection}><h3>本月核算</h3><dl><div><dt>累计应纳税所得额</dt><dd>{money(result.result.taxable)}</dd></div><div><dt>适用预扣率</dt><dd>{rate}%</dd></div><div><dt>本月个税</dt><dd>{money(result.result.currentTax, 2)}</dd></div><div><dt>到手工资</dt><dd>{money(result.salary)} - {money(employeeInsurance, 2)} - {money(result.result.currentTax, 2)} = {money(result.result.takeHome, 2)}</dd></div></dl></div></section>
+  return <ProcessTable title="计算过程" description="先用二分法找到接近期望到手的税前工资，再套用工资薪金累计预扣法核算本月结果。" groups={[{ title: '反推条件', rows: [{ label: '期望到手', value: money(targetTakeHome) }, { label: '税前月薪', value: <>约 {money(result.salary)}</> }, { label: '社保缴费基数', value: money(result.socialBase) }, { label: '公积金缴费基数', value: money(result.housingBase) }] }, { title: '本月核算', rows: [{ label: '累计应纳税所得额', value: money(result.result.taxable) }, { label: '适用预扣率', value: `${rate}%` }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '到手工资', value: <>{money(result.salary)} - {money(employeeInsurance, 2)} - {money(result.result.currentTax, 2)} = {money(result.result.takeHome, 2)}</> }] }]} />
 }
