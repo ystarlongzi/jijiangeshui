@@ -29,6 +29,7 @@ npm run rules:audit -- ./data/city-rules-seed.json
 npm run rules:import -- ./data/city-rules-seed.json --dry-run
 npm run rules:import-seed:dry-run
 npm run rules:sources
+npm run rules:sources -- --gaps
 
 npm run rules:export-fallback -- ./data/fallback-rules.json
 npm run rules:audit
@@ -44,9 +45,11 @@ npm run rules:audit
 ```bash
 npm run rules:sources
 npm run rules:sources -- ./data/city-rule-sources.json --network
+npm run rules:sources -- --gaps
 ```
 
 `data/city-rule-sources.json` 记录每个城市当前找到的官方线索和核验状态。默认命令只检查目录结构；追加 `--network` 后，会尝试访问来源 URL，适合采集前确认页面是否还能打开。
+追加 `--gaps` 后，会按养老、医疗、失业、工伤、生育和住房公积金列出每个城市缺少的基数和比例事实，适合继续采集前先确认缺口。
 
 ## 本地 Payload 导入
 

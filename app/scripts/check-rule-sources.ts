@@ -37,9 +37,70 @@ const sourceCatalogSchema = z.object({
 
 type SourceStatus = z.infer<typeof sourceStatusSchema>
 
-const inputPath = process.argv[2] || './data/city-rule-sources.json'
+const positionalArgs = process.argv.slice(2).filter((argument) => !argument.startsWith('--'))
+const inputPath = positionalArgs[0] || './data/city-rule-sources.json'
 const checkNetwork = process.argv.includes('--network')
 const jsonOutput = process.argv.includes('--json')
+const showGaps = process.argv.includes('--gaps')
+
+const requiredFactGroups = [
+  {
+    scope: 'pension',
+    label: '养老保险',
+    keys: ['pensionBaseMin', 'pensionBaseMax', 'pensionEmployeeRate', 'pensionEmployerRate'],
+  },
+  {
+    scope: 'medical',
+    label: '医疗保险',
+    keys: ['medicalBaseMin', 'medicalBaseMax', 'medicalEmployeeRate', 'medicalEmployerRate'],
+  },
+  {
+    scope: 'unemployment',
+    label: '失业保险',
+    keys: ['unemploymentBaseMin', 'unemploymentBaseMax', 'unemploymentEmployeeRate', 'unemploymentEmployerRate'],
+  },
+  {
+    scope: 'injury',
+    label: '工伤保险',
+    keys: ['injuryBaseMin', 'injuryBaseMax', 'injuryEmployerRate'],
+  },
+  {
+    scope: 'maternity',
+    label: '生育保险',
+    keys: ['maternityBaseMin', 'maternityBaseMax', 'maternityEmployerRate'],
+  },
+  {
+    scope: 'housingFund',
+    label: '住房公积金',
+    keys: ['housingBaseMin', 'housingBaseMax', 'housingRateMin', 'housingRateMax'],
+  },
+]
+
+function getFactKeys(city: z.infer<typeof sourceCatalogSchema>['cities'][number]) {
+  return new Set(city.sources.flatMap((source) => source.facts?.map((fact) => fact.key) || []))
+}
+
+function createGapRows(catalog: z.infer<typeof sourceCatalogSchema>) {
+  return catalog.cities.map((city) => {
+    const factKeys = getFactKeys(city)
+    const missingGroups = requiredFactGroups
+      .map((group) => {
+        const missingKeys = group.keys.filter((key) => !factKeys.has(key))
+        return missingKeys.length > 0
+          ? `${group.label}缺${missingKeys.length}/${group.keys.length}`
+          : ''
+      })
+      .filter(Boolean)
+
+    return {
+      city: city.cityName,
+      year: city.policyYear,
+      facts: factKeys.size,
+      completeGroups: requiredFactGroups.length - missingGroups.length,
+      missingGroups: missingGroups.length > 0 ? missingGroups.join('；') : '无',
+    }
+  })
+}
 
 function createStatusSummary() {
   return {
@@ -93,6 +154,7 @@ async function main() {
     sources: rows.length,
     facts: rows.reduce((total, row) => total + row.facts, 0),
     summary,
+    gaps: createGapRows(catalog),
     rows,
   }
 
@@ -102,6 +164,10 @@ async function main() {
   }
 
   console.table(rows)
+  if (showGaps) {
+    console.log('\n规则事实缺口：')
+    console.table(result.gaps)
+  }
   console.log(
     `\n完成：${result.cities} 个城市，${result.sources} 条来源。` +
       ` 已提取 ${result.facts} 条事实。` +
@@ -109,6 +175,9 @@ async function main() {
   )
   if (!checkNetwork) {
     console.log('提示：追加 --network 可尝试访问来源 URL；默认只做本地结构检查。')
+  }
+  if (!showGaps) {
+    console.log('提示：追加 --gaps 可查看每个城市缺少哪些基数和比例事实。')
   }
 }
 
