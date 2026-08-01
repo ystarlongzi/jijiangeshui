@@ -1,4 +1,4 @@
-import type { CityRule } from './tax-rules'
+import type { CityRule, ContributionSideRule } from './tax-rules'
 import { taxBrackets } from './tax-rules'
 
 export type InsuranceItem = {
@@ -31,16 +31,37 @@ export const roundMoney = (value: number) => Math.round((value + Number.EPSILON)
 export const getBracket = (taxable: number) => taxBrackets.find((bracket) => taxable <= bracket.ceiling) || taxBrackets[taxBrackets.length - 1]
 
 export function calculateInsurance(rule: CityRule, socialBase: number, housingBase: number, employeeHousingRate: number, employerHousingRate: number): InsuranceItem[] {
-  const items = [
-    { name: '养老保险', employee: socialBase * (rule.socialEmployee / 100), employer: socialBase * (rule.socialEmployer / 100), employeeFormula: `${Math.round(socialBase)} × ${rule.socialEmployee}%`, employerFormula: `${Math.round(socialBase)} × ${rule.socialEmployer}%` },
-    { name: '医疗保险', employee: socialBase * (rule.medicalEmployee / 100), employer: socialBase * (rule.medicalEmployer / 100), employeeFormula: `${Math.round(socialBase)} × ${rule.medicalEmployee}%`, employerFormula: `${Math.round(socialBase)} × ${rule.medicalEmployer}%` },
-    { name: '失业保险', employee: socialBase * 0.005, employer: socialBase * 0.005, employeeFormula: `${Math.round(socialBase)} × 0.5%`, employerFormula: `${Math.round(socialBase)} × 0.5%` },
-    { name: '工伤保险', employee: 0, employer: socialBase * 0.002, employeeFormula: '-', employerFormula: `${Math.round(socialBase)} × 0.2%` },
-    { name: '生育保险', employee: 0, employer: socialBase * 0.008, employeeFormula: '-', employerFormula: `${Math.round(socialBase)} × 0.8%` },
-    { name: '公积金', employee: housingBase * (employeeHousingRate / 100), employer: housingBase * (employerHousingRate / 100), employeeFormula: `${Math.round(housingBase)} × ${employeeHousingRate}%`, employerFormula: `${Math.round(housingBase)} × ${employerHousingRate}%`, housing: true },
-  ]
+  return rule.contributionItems.map((item) => {
+    const base = item.baseType === 'housingFund' ? housingBase : socialBase
+    const employeeRule = item.housing ? { method: 'rate' as const, rate: employeeHousingRate } : item.employee
+    const employerRule = item.housing ? { method: 'rate' as const, rate: employerHousingRate } : item.employer
+    const employee = calculateContributionSide(employeeRule, base)
+    const employer = calculateContributionSide(employerRule, base)
 
-  return items.map((item) => ({ ...item, subtotal: item.employee + item.employer }))
+    return {
+      name: item.name,
+      employee,
+      employer,
+      employeeFormula: formatContributionFormula(employeeRule, base),
+      employerFormula: formatContributionFormula(employerRule, base),
+      housing: item.housing,
+      subtotal: employee + employer,
+    }
+  })
+}
+
+function calculateContributionSide(rule: ContributionSideRule, base: number) {
+  if (rule.method === 'none') return 0
+  if (rule.method === 'fixed') return rule.fixedAmount || 0
+  if (rule.method === 'rate') return base * ((rule.rate || 0) / 100)
+  return base * ((rule.rate || 0) / 100) + (rule.fixedAmount || 0)
+}
+
+function formatContributionFormula(rule: ContributionSideRule, base: number) {
+  if (rule.method === 'none') return '-'
+  if (rule.method === 'fixed') return `¥${rule.fixedAmount || 0}`
+  if (rule.method === 'rate') return `${Math.round(base)} × ${rule.rate || 0}%`
+  return `${Math.round(base)} × ${rule.rate || 0}% + ¥${rule.fixedAmount || 0}`
 }
 
 export function calculateMonth(salary: number, month: number, startMonth: number, deduction: number, insuranceItems: InsuranceItem[]): MonthlyCalculation {
