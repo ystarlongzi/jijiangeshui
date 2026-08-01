@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
-import { cityRules as fallbackCityRules, getContributionBaseRule, getHousingRateOptions, taxBrackets, type CityRule } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, getHousingRateOptions, taxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
@@ -52,7 +52,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const [calculationOpen, setCalculationOpen] = useState(false)
   const [toast, setToast] = useState('')
 
-  const rule = cityRules[city]
+  const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
   const cityHousingRateOptions = getHousingRateOptions(rule)

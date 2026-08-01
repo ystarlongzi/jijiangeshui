@@ -18,7 +18,7 @@ import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSele
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
-import { cityRules as fallbackCityRules, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getCityRuleForMonth, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 
@@ -54,7 +54,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
     if (requestedTarget > 0) setTargetTakeHome(requestedTarget)
     if (requestedMonth) setMonth(requestedMonth)
     if (requestedStartMonth) setStartMonth(requestedStartMonth)
-    const requestedRule = requestedCity && cityRules[requestedCity] ? cityRules[requestedCity] : cityRules.beijing
+    const requestedRule = getCityRuleForMonth(requestedCity && cityRules[requestedCity] ? cityRules[requestedCity] : cityRules.beijing, currentYear, requestedMonth || month)
     const cityHousingRateOptions = getHousingRateOptions(requestedRule)
     if (requestedEmployeeHousingRate && cityHousingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
     if (requestedEmployerHousingRate && cityHousingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
@@ -65,7 +65,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
     }
   }, [])
 
-  const rule = cityRules[city]
+  const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
   const cityHousingRateOptions = getHousingRateOptions(rule)
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate])

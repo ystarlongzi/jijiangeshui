@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 
 import config from '@payload-config'
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
-import { cityRules, type CityRule } from './tax-rules'
+import { cityRules, selectEffectiveCityRule, type CityRule } from './tax-rules'
 
 type CityRuleMap = Record<string, CityRule>
 
@@ -49,7 +49,7 @@ async function readCityRulesFromPayload(): Promise<CityRuleMap> {
     const policyResult = await payload.find({
       collection: 'social-insurance-policies',
       depth: 0,
-      limit: 1,
+      limit: 50,
       sort: '-effectiveFrom',
       where: {
         and: [
@@ -58,10 +58,12 @@ async function readCityRulesFromPayload(): Promise<CityRuleMap> {
         ],
       },
     })
-    const policy = policyResult.docs[0] as CmsPolicyDoc | undefined
+    const policies = policyResult.docs as CmsPolicyDoc[]
 
-    if (policy) {
-      rules[city.slug] = adaptCmsPolicyToCityRule(policy, city)
+    if (policies.length > 0) {
+      const versions = policies.map((policy) => adaptCmsPolicyToCityRule(policy, city))
+      const activeRule = selectEffectiveCityRule(versions, `${new Date().getFullYear()}-12-31`) || versions[0]
+      if (activeRule) rules[city.slug] = { ...activeRule, policyVersions: versions }
     }
   }
 

@@ -40,10 +40,12 @@ export type CityRule = {
   province: string
   pinyin: string
   effective: string
+  effectiveTo?: string
   baseRules: Record<ContributionBaseType, ContributionBaseRule>
   contributionItems: ContributionItemRule[]
   housingRateOptions: number[]
   sources: ContributionSource[]
+  policyVersions?: CityRule[]
   socialMin: number
   socialMax: number
   housingMin: number
@@ -120,6 +122,19 @@ export function getContributionBaseRule(rule: CityRule, type: ContributionBaseTy
 
 export function getHousingRateOptions(rule: CityRule) {
   return rule.housingRateOptions
+}
+
+export function getCityRuleForMonth(rule: CityRule, year: number, month: number) {
+  const normalizedMonth = Math.max(1, Math.min(12, Math.trunc(month || 1)))
+  return selectEffectiveCityRule([rule, ...(rule.policyVersions || [])], `${year}-${String(normalizedMonth).padStart(2, '0')}-01`) || rule
+}
+
+export function selectEffectiveCityRule(rules: CityRule[], targetDate: string) {
+  const sortedRules = [...rules]
+    .filter((rule) => rule.effective)
+    .sort((a, b) => b.effective.localeCompare(a.effective))
+
+  return sortedRules.find((rule) => rule.effective <= targetDate && (!rule.effectiveTo || rule.effectiveTo >= targetDate)) || sortedRules[0]
 }
 
 export const taxBrackets = [

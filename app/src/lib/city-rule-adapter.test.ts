@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
+import { cityRules, getCityRuleForMonth, selectEffectiveCityRule, type CityRule } from './tax-rules'
 
 test('Payload 社保规则：小数比例转换为前端计算使用的百分数', () => {
   const rule = adaptCmsPolicyToCityRule(
@@ -64,4 +65,20 @@ test('Payload 社保规则：小数比例转换为前端计算使用的百分数
   assert.equal(rule.medicalEmployer, 9.5)
   assert.equal(rule.contributionItems.length, 3)
   assert.equal(rule.contributionItems[2]?.housing, true)
+})
+
+test('城市规则版本：按计算月份命中当期生效政策', () => {
+  const oldRule: CityRule = { ...cityRules.beijing, effective: '2026-01-01', effectiveTo: '2026-06-30', socialMin: 5000 }
+  const newRule: CityRule = { ...cityRules.beijing, effective: '2026-07-01', socialMin: 6326 }
+  const ruleWithVersions: CityRule = { ...newRule, policyVersions: [newRule, oldRule] }
+
+  assert.equal(getCityRuleForMonth(ruleWithVersions, 2026, 5).socialMin, 5000)
+  assert.equal(getCityRuleForMonth(ruleWithVersions, 2026, 8).socialMin, 6326)
+})
+
+test('城市规则版本：没有命中日期时回退到最新政策', () => {
+  const oldRule: CityRule = { ...cityRules.beijing, effective: '2025-01-01', effectiveTo: '2025-12-31' }
+  const newRule: CityRule = { ...cityRules.beijing, effective: '2026-07-01' }
+
+  assert.equal(selectEffectiveCityRule([oldRule, newRule], '2024-01-01')?.effective, '2026-07-01')
 })

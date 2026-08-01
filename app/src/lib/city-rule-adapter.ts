@@ -49,6 +49,7 @@ type CmsContributionSource = {
 type CmsSocialInsurancePolicy = {
   policyYear?: number | null
   effectiveFrom?: string | null
+  effectiveTo?: string | null
   source?: CmsContributionSource | null
   baseRules?: CmsContributionBaseRule[] | null
   itemRules?: CmsContributionItemRule[] | null
@@ -153,6 +154,7 @@ export function adaptCmsPolicyToCityRule(policy: CmsSocialInsurancePolicy, city:
     province: city.provinceName || city.name || '未知省份',
     pinyin: city.slug || 'unknown-city',
     effective,
+    effectiveTo: policy.effectiveTo || undefined,
     baseRules,
     contributionItems,
     housingRateOptions,
