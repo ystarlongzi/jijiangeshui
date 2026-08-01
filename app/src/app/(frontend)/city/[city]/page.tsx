@@ -7,6 +7,7 @@ import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../_components/SiteHeader'
 import SiteFooter from '../../_components/SiteFooter'
+import DataTable from '../../_components/DataTable'
 import Panel from '../../_components/Panel'
 import PrimaryActionLink from '../../_components/PrimaryActionLink'
 import RuleSourcePanel from '../../_components/RuleSourcePanel'
@@ -39,11 +40,38 @@ export default async function CityPage({ params }: CityPageProps) {
   const ruleSourceLinks = rule.sources
     .filter((source): source is typeof source & { url: string } => Boolean(source.url))
     .map((source) => ({ label: source.title, url: source.url }))
+  const contributionRows = rule.contributionItems.map((item) => ({
+    key: item.code,
+    cells: {
+      item: item.name,
+      base: item.baseType === 'housingFund' ? housingBaseRule.label : item.baseType === 'social' ? socialBaseRule.label : '不关联基数',
+      employee: formatSideRule(item.employee),
+      employer: formatSideRule(item.employer),
+    },
+  }))
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
     <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={styles.status}><ShieldCheck size={20} /><span>当前规则生效</span><strong>{rule.effective}</strong></div></section>
     <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>{socialBaseRule.label}</dt><dd>{formatMoney(socialBaseRule.min)} - {formatMoney(socialBaseRule.max)}</dd></div><div><dt>{housingBaseRule.label}</dt><dd>{formatMoney(housingBaseRule.min)} - {formatMoney(housingBaseRule.max)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl>{rule.contributionItems.filter((item) => item.systemType === 'social').slice(0, 3).map((item) => <div key={item.code}><dt>{item.name}</dt><dd>{formatSideRule(item.employee)} / {formatSideRule(item.employer)}</dd></div>)}<div><dt>公积金</dt><dd>个人和单位可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%</dd></div></dl></article></section>
+    <Panel as="section" className={styles.policyTablePanel}>
+      <div className={styles.tableHeading}>
+        <div><h2>{rule.label}五险一金比例表</h2><p>完整列出当前计算器使用的个人和单位缴费规则。</p></div>
+        <span>{currentYear} 年</span>
+      </div>
+      <DataTable
+        columns={[
+          { key: 'item', header: '缴费项目' },
+          { key: 'base', header: '使用基数' },
+          { key: 'employee', header: '个人缴纳' },
+          { key: 'employer', header: '单位缴纳' },
+        ]}
+        rows={contributionRows}
+        wrapperClassName={styles.policyTableWrap}
+        tableClassName={styles.policyTable}
+      />
+      <p className={styles.tableNote}>公积金比例在计算器中可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%，实际缴纳以单位申报和城市规则为准。</p>
+    </Panel>
     <Panel as="section" className={styles.exampleCard}>
       <div>
         <span>{rule.label}工资案例</span>
