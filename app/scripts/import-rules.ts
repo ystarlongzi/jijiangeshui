@@ -1,61 +1,16 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getPayload } from 'payload'
-import { z } from 'zod'
 
 import config from '../src/payload.config'
-
-const idSchema = z.union([z.string(), z.number()])
-const rawRecordSchema = z.record(z.string(), z.unknown())
-
-const crawlCitySchema = z
-  .object({
-    areaId: idSchema.optional(),
-    areaName: z.string().optional(),
-    shortName: z.string().optional(),
-    areaCode: z.string().optional(),
-    parentAreaId: idSchema.optional(),
-    parentAreaName: z.string().optional(),
-  })
-  .passthrough()
-
-const crawlPolicySchema = z
-  .object({
-    areaId: idSchema.optional(),
-    areaName: z.string().optional(),
-    policyYear: idSchema.optional(),
-    effectiveFrom: z.string().optional(),
-    baseRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
-    itemRulesInfo: z.object({ list: z.array(rawRecordSchema).optional() }).optional(),
-    externalCodes: rawRecordSchema.optional(),
-    status: z.string().optional(),
-    errorMessage: z.string().nullable().optional(),
-  })
-  .passthrough()
-
-const wrappedPolicySchema = z.object({ policy: crawlPolicySchema }).passthrough()
-const crawlPolicyEntrySchema = z.union([wrappedPolicySchema, crawlPolicySchema])
-
-const crawlResultSchema = z
-  .object({
-    cityInfo: z.object({ list: z.array(crawlCitySchema).optional() }).optional(),
-    socialInsurancePolicy: z.object({ list: z.array(crawlPolicyEntrySchema).optional() }).optional(),
-    crawlJob: z
-      .object({
-        status: z.string().optional(),
-        triggerType: z.string().optional(),
-        startedAt: z.string().optional(),
-        finishedAt: z.string().optional(),
-        errorMessage: z.string().nullable().optional(),
-      })
-      .optional(),
-  })
-  .passthrough()
-
-type CrawlCity = z.infer<typeof crawlCitySchema>
-type CrawlPolicy = z.infer<typeof crawlPolicySchema>
-type CrawlPolicyEntry = z.infer<typeof crawlPolicyEntrySchema>
-type WrappedPolicy = z.infer<typeof wrappedPolicySchema>
+import {
+  crawlResultSchema,
+  wrappedPolicySchema,
+  type CrawlCity,
+  type CrawlPolicy,
+  type CrawlPolicyEntry,
+  type WrappedPolicy,
+} from '../src/lib/city-rule-import-schema'
 
 const importTriggerTypes = ['manual', 'scheduled', 'retry'] as const
 type ImportTriggerType = (typeof importTriggerTypes)[number]
