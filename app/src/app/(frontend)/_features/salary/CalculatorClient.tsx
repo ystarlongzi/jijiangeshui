@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, getHousingRateOptions, taxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
-import { currentYear, ruleCheckedDate } from '@/lib/site'
+import { currentYear } from '@/lib/site'
 import { specialDeductionItems } from '@/lib/special-deductions'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 import SiteHeader from '../../_components/SiteHeader'
@@ -53,6 +53,10 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const [toast, setToast] = useState('')
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
+  const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
+  const ruleSourceLinks = rule.sources
+    .filter((source): source is typeof source & { url: string } => Boolean(source.url))
+    .map((source) => ({ label: source.title, url: source.url }))
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
   const cityHousingRateOptions = getHousingRateOptions(rule)
@@ -221,7 +225,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
       `单位公积金：${money(housingEmployer, 2)}`,
       `累计应纳税所得额：${money(result.taxable, 2)}`,
       `适用预扣率：${rate}%`,
-      `规则核对日期：${ruleCheckedDate}`,
+      `规则核对日期：${ruleSourceDate}`,
       '结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。',
     ].join('\n')
 
@@ -239,7 +243,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
     <SiteHeader active="calculator" />
 
     <main id="top" className={styles.pageContent}>
-      <section className="page-intro" id="calculator"><div><p className={styles.eyebrow}>工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div></section>
+      <section className="page-intro" id="calculator"><div><p className={styles.eyebrow}>工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleSourceDate}</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
         <Panel as="form" className="input-panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
@@ -274,7 +278,9 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
       <RuleSourcePanel
         title="每个结果都有出处"
         description="计算口径参考国家税务总局及 12366 公开规则，政策变化后会更新规则版本和核对日期。"
+        checkedAt={ruleSourceDate}
         links={[
+          ...ruleSourceLinks,
           { label: '累计预扣法说明', url: 'https://www.chinatax.gov.cn/chinatax/n810341/n810760/c3959585/content.html' },
           { label: '专项附加扣除标准', url: 'https://fgk.chinatax.gov.cn/zcfgk/c100012/c5213592/content.html' },
         ]}

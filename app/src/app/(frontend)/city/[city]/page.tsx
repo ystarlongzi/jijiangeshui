@@ -35,6 +35,10 @@ export default async function CityPage({ params }: CityPageProps) {
   const defaultHousingRate = cityHousingRateOptions[cityHousingRateOptions.length - 1] || 12
   const exampleInsurance = calculateInsurance(rule, Math.min(Math.max(exampleSalary, socialBaseRule.min), socialBaseRule.max), Math.min(Math.max(exampleSalary, housingBaseRule.min), housingBaseRule.max), defaultHousingRate, defaultHousingRate)
   const exampleResult = calculateMonth(exampleSalary, 8, 1, 0, exampleInsurance)
+  const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
+  const ruleSourceLinks = rule.sources
+    .filter((source): source is typeof source & { url: string } => Boolean(source.url))
+    .map((source) => ({ label: source.title, url: source.url }))
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
@@ -60,7 +64,8 @@ export default async function CityPage({ params }: CityPageProps) {
     <RuleSourcePanel
       title={`${rule.label}规则说明`}
       description="城市社保、公积金规则会随年度和地方口径调整，页面结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。"
-      links={[]}
+      checkedAt={ruleSourceDate}
+      links={ruleSourceLinks}
     />
     <SiteFooter />
   </main></div>
