@@ -4,7 +4,8 @@ import { ArrowRight, MapPin } from 'lucide-react'
 import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
-import { cityRules, getContributionBaseRule } from '@/lib/tax-rules'
+import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
+import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { currentYear, siteName } from '@/lib/site'
 import styles from './CityPages.module.css'
 
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/city' },
 }
 
-export default function CityIndexPage() {
+export default async function CityIndexPage() {
+  const cityRules = await getAvailableCityRules()
   const cities = Object.entries(cityRules)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
@@ -56,7 +58,7 @@ function formatMoney(value: number) {
   return `¥${value.toLocaleString('zh-CN')}`
 }
 
-function formatBaseRange(rule: (typeof cityRules)[string], type: 'social' | 'housingFund') {
+function formatBaseRange(rule: CityRule, type: 'social' | 'housingFund') {
   const baseRule = getContributionBaseRule(rule, type)
   return `${formatMoney(baseRule.min)} - ${formatMoney(baseRule.max)}`
 }

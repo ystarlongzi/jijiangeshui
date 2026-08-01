@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
-import { cityRules } from '@/lib/tax-rules'
+import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { siteUrl } from '@/lib/site'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const coreRoutes: MetadataRoute.Sitemap = [
     { url: siteUrl, changeFrequency: 'weekly', priority: 1 },
     { url: `${siteUrl}/calculator`, changeFrequency: 'monthly', priority: 0.9 },
@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/city`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
   ]
+  const cityRules = await getAvailableCityRules()
   const cityRoutes: MetadataRoute.Sitemap = Object.keys(cityRules).map((city) => ({
     url: `${siteUrl}/city/${city}`,
     changeFrequency: 'monthly',
