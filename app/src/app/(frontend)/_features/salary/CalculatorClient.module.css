@@ -153,6 +153,7 @@
 
 .pageContent :global(.base-editor) {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 2px 0 4px;
   padding: 14px;
@@ -1052,6 +1053,10 @@
 
   .pageContent :global(.flow-legend) {
     gap: 8px 12px;
+  }
+
+  .pageContent :global(.base-editor) {
+    grid-template-columns: 1fr;
   }
 
   .pageContent :global(.monthly-salary-grid) {
