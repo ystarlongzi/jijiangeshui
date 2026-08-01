@@ -13,8 +13,9 @@
    - 它只检查字段是否完整，不判断政策数字是否一定正确。
 
 3. `audit-rules.ts`
-   - 审计前台兜底规则的质量。
+   - 审计前台兜底规则或外部采集 JSON 的质量。
    - 重点检查来源、基数范围、缴费项目、公积金比例选项这些会影响计算可信度的内容。
+   - 传入 JSON 文件时，会先按导入映射转换成前台 `CityRule`，再走同一套质量规则。
 
 4. `import-rules.ts`
    - 把校验后的 JSON 写入 Payload CMS。
@@ -26,10 +27,12 @@
 npm run rules:export-fallback -- ./data/fallback-rules.json
 npm run rules:validate -- ./data/fallback-rules.json
 npm run rules:audit
+npm run rules:audit -- ./data/fallback-rules.json
 npm run rules:import -- ./data/fallback-rules.json --dry-run
 ```
 
 真正写入数据库时去掉 `--dry-run`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
+`rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。
 
 ## 数据流
 
