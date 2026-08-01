@@ -99,8 +99,11 @@
 }
 
 .formTextAction {
+  display: inline-flex;
+  align-items: center;
   font-size: 11px;
   line-height: 1.4;
+  text-decoration: none;
 }
 
 .salaryModeRow {
