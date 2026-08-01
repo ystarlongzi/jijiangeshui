@@ -23,6 +23,7 @@ import DataTable from '../../_components/DataTable'
 import TrackedLink from '../../_components/TrackedLink'
 import ValidationPanel from '../../_components/ValidationPanel'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
+import useCityLocator from '../../_hooks/useCityLocator'
 import { trackEvent } from '../../_lib/analytics'
 import { downloadCsv } from '../../_lib/csv'
 import styles from './CalculatorClient.module.css'
@@ -109,6 +110,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
     setToast(message)
     window.setTimeout(() => setToast(''), 2400)
   }
+  const locate = useCityLocator(notify)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -153,12 +155,6 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
     setCity('beijing'); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
     setSalaryMode('fixed'); setMonthlySalaries(Array.from({ length: 12 }, () => 20000)); setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductionSelections({}); setDeductionDialogOpen(false); setCalculationOpen(false)
     notify('已恢复城市默认设置')
-  }
-
-  const locate = () => {
-    if (!navigator.geolocation) return notify('当前浏览器不支持自动定位，请手动选择城市')
-    notify('正在获取位置，请允许浏览器访问定位权限')
-    navigator.geolocation.getCurrentPosition(() => notify('已获取位置，正式版将匹配对应城市规则'), () => notify('暂时无法获取位置，请手动选择城市'))
   }
 
   const saveDeductionSelections = (value: Record<string, string>, amount: number) => {

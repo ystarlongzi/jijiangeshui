@@ -17,6 +17,7 @@ import MetricGrid from '../../_components/MetricGrid'
 import styles from './ReverseTaxClient.module.css'
 import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSelector'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
+import useCityLocator from '../../_hooks/useCityLocator'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
@@ -82,11 +83,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseT
     setToast(message)
     window.setTimeout(() => setToast(''), 2400)
   }
-  const locate = () => {
-    if (!navigator.geolocation) return notify('当前浏览器不支持自动定位，请手动选择城市')
-    notify('正在获取位置，请允许浏览器访问定位权限')
-    navigator.geolocation.getCurrentPosition(() => notify('已获取位置，正式版将匹配对应城市规则'), () => notify('暂时无法获取位置，请手动选择城市'))
-  }
+  const locate = useCityLocator(notify)
   const copyShareLink = async () => {
     const url = new URL(window.location.href)
     url.pathname = '/reverse-tax'
