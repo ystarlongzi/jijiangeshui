@@ -375,7 +375,7 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
     downloadCsv(`五险一金汇缴明细-${currentYear}-${month}月.csv`, rows)
   }
 
-  return <Panel as="section" className="detail-panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className={styles.exportButton} type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><DataTable columns={columns} rows={tableRows} wrapperClassName="detail-table-wrap" tableClassName="insurance-table" /><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></Panel>
+  return <Panel as="section" className="detail-panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{currentYear} 年 {month} 月</span></div><button className={styles.exportButton} type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><DataTable ariaLabel={`${currentYear} 年 ${month} 月五险一金汇缴明细`} columns={columns} rows={tableRows} wrapperClassName="detail-table-wrap" tableClassName="insurance-table" /><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></Panel>
 }
 
 function AnnualTable({ salaries, month, startMonth, deduction, insurance, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; money: (value: number, decimals?: number) => string }) {
@@ -426,7 +426,7 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
     const height = inactive ? 0 : Math.max(6, item.currentTax / maxTax * 100)
     const style = { '--tax-height': `${height}%` } as CSSProperties
     return <div className={`annual-tax-bar ${currentMonth === month ? 'current' : ''} ${inactive ? 'inactive' : ''}`} key={currentMonth}><span className="bar-value">{inactive ? '-' : money(item.currentTax, 0)}</span><span className="bar-track"><span className="bar-fill" style={style} /></span><span className="bar-month">{currentMonth}月</span></div>
-  })}</div></div><DataTable columns={columns} rows={tableRows} wrapperClassName="annual-table-wrap" tableClassName="annual-table" /><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></Panel>
+  })}</div></div><DataTable ariaLabel="全年预扣逐月明细" columns={columns} rows={tableRows} wrapperClassName="annual-table-wrap" tableClassName="annual-table" /><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></Panel>
 }
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
@@ -446,7 +446,7 @@ function RateTable({ money }: { money: (value: number, decimals?: number) => str
     },
   }))
 
-  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><Panel className={styles.rateTablePanel}><DataTable columns={columns} rows={rows} wrapperClassName={styles.rateTableWrap} tableClassName={styles.rateTable} /><div className={styles.sourceLine}>本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></Panel></section>
+  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><Panel className={styles.rateTablePanel}><DataTable ariaLabel="个人所得税预扣率表" columns={columns} rows={rows} wrapperClassName={styles.rateTableWrap} tableClassName={styles.rateTable} /><div className={styles.sourceLine}>本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></Panel></section>
 }
 
 function Faq() {

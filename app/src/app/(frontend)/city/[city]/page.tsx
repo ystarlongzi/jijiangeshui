@@ -65,6 +65,7 @@ export default async function CityPage({ params }: CityPageProps) {
         <span>{currentYear} 年</span>
       </div>
       <DataTable
+        ariaLabel={`${rule.label}五险一金比例表`}
         columns={[
           { key: 'item', header: '缴费项目' },
           { key: 'base', header: '使用基数' },

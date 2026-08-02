@@ -43,3 +43,9 @@
 .table tbody tr:hover td {
   background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface));
 }
+
+.emptyRow td {
+  padding: 28px 18px;
+  color: var(--subtle);
+  text-align: center;
+}
