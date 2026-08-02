@@ -960,16 +960,11 @@
 }
 
 .rateTable th {
-  background: var(--surface-muted);
   text-align: left;
 }
 
 .rateTable td {
   text-align: left;
-}
-
-.rateTable tbody tr:first-child td {
-  border-top: 0;
 }
 
 .sourceLine {

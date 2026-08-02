@@ -453,7 +453,7 @@ function RateTable({ money }: { money: (value: number, decimals?: number) => str
     },
   }))
 
-  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><Panel className={styles.rateTablePanel}><DataTable ariaLabel="个人所得税预扣率表" columns={columns} rows={rows} wrapperClassName={styles.rateTableWrap} tableClassName={styles.rateTable} /><div className={styles.sourceLine}>本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></Panel></section>
+  return <section className="content-section" id="tax-rate-table"><div className="content-heading"><h2>个人所得税预扣率表</h2></div><Panel className={styles.rateTablePanel}><DataTable ariaLabel="个人所得税预扣率表" columns={columns} rows={rows} headerTone="muted" wrapperClassName={styles.rateTableWrap} tableClassName={styles.rateTable} /><div className={styles.sourceLine}>本表用于工资薪金累计预扣预缴，不适用于所有所得类型。<a href="https://12366.chinatax.gov.cn/bzds/pdfview/pdf/068-3-1.pdf" target="_blank" rel="noreferrer">查看 12366 来源 →</a></div></Panel></section>
 }
 
 function Faq() {

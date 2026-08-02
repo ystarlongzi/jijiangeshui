@@ -27,6 +27,10 @@
   white-space: nowrap;
 }
 
+.table[data-header-tone='muted'] th {
+  background: var(--surface-muted);
+}
+
 .table th:first-child,
 .table td:first-child {
   text-align: left;

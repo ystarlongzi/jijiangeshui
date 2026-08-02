@@ -27,6 +27,7 @@ type DataTableProps = {
   rows: DataTableRow[]
   ariaLabel?: string
   emptyText?: ReactNode
+  headerTone?: 'muted'
   wrapperClassName?: string
   tableClassName?: string
 }
@@ -36,6 +37,7 @@ export default function DataTable({
   rows,
   ariaLabel,
   emptyText = '暂无数据',
+  headerTone,
   wrapperClassName,
   tableClassName,
 }: DataTableProps) {
@@ -44,7 +46,7 @@ export default function DataTable({
 
   return (
     <div className={wrapClassName}>
-      <table className={resolvedTableClassName} aria-label={ariaLabel}>
+      <table className={resolvedTableClassName} aria-label={ariaLabel} data-header-tone={headerTone}>
         <thead>
           <tr>
             {columns.map((column) => (
