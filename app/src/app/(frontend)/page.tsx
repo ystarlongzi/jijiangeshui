@@ -26,7 +26,7 @@ import SectionHeading from './_components/SectionHeading'
 import PrimaryActionLink from './_components/PrimaryActionLink'
 import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/city-rule-service'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
-import { getPreferredCityRuleLinks } from './_lib/cityRuleSource'
+import { getCityRuleSourceCoverage, getPreferredCityRuleLinks } from './_lib/cityRuleSource'
 
 export const metadata = {
   title: `工资到手与个税计算器｜${siteName}`,
@@ -68,6 +68,7 @@ export default async function HomePage() {
     ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
     rules: cityRuleDataset.rules,
   })
+  const popularCityCoverage = getCityRuleSourceCoverage(popularCities.map((city) => city.key), cityRuleDataset.ruleSourcesByCity)
   const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年预扣个税。` }
   return <div className="app-shell">
     <SiteHeader active="home" />
@@ -97,7 +98,7 @@ export default async function HomePage() {
 
     <section className={styles.readingSection}><SectionHeading title="常用规则与内容" action={<TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '查看专题' }}>查看专题 <ArrowRight size={15} /></TrackedLink>} /><div className={styles.readingLinks}><TrackedLink href="/tax-rate" eventPayload={{ module: 'home_reading', label: '个人所得税预扣率表' }}><Percent size={18} /><span>个人所得税预扣率表</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/special-deductions" eventPayload={{ module: 'home_reading', label: '专项附加扣除计算器' }}><BookOpen size={18} /><span>专项附加扣除计算器</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/topics" eventPayload={{ module: 'home_reading', label: '个税专题入口' }}><Sparkles size={18} /><span>个税专题入口</span><ArrowRight size={15} /></TrackedLink><TrackedLink href="/faq" eventPayload={{ module: 'home_reading', label: '工资个税常见问题' }}><CircleHelp size={18} /><span>工资个税常见问题</span><ArrowRight size={15} /></TrackedLink></div></section>
 
-    <section className={styles.citySection}><SectionHeading title="热门城市" description="查看城市社保、公积金基数范围和缴费比例。" action={<TrackedLink href="/city" eventPayload={{ module: 'home_cities', label: '全部城市' }}>全部城市 <ArrowRight size={15} /></TrackedLink>} /><div className={styles.cityLinks}>{popularCities.map((city) => <TrackedLink href={`/city/${city.key}`} eventPayload={{ module: 'home_cities', label: city.label, source: city.sourceType }} key={city.key}><MapPin size={16} /><span>{city.label}</span><em className={city.sourceType === 'payload' ? styles.cmsCitySource : styles.fallbackCitySource}>{city.sourceLabel}</em><ArrowRight size={14} /></TrackedLink>)}</div></section>
+    <section className={styles.citySection}><SectionHeading title="热门城市" description="查看城市社保、公积金基数范围和缴费比例。" action={<TrackedLink href="/city" eventPayload={{ module: 'home_cities', label: '全部城市' }}>全部城市 <ArrowRight size={15} /></TrackedLink>} /><p className={styles.citySourceSummary}>热门城市 CMS 覆盖 {popularCityCoverage.payload}/{popularCityCoverage.total} · 覆盖率 {popularCityCoverage.payloadRate}%</p><div className={styles.cityLinks}>{popularCities.map((city) => <TrackedLink href={`/city/${city.key}`} eventPayload={{ module: 'home_cities', label: city.label, source: city.sourceType }} key={city.key}><MapPin size={16} /><span>{city.label}</span><em className={city.sourceType === 'payload' ? styles.cmsCitySource : styles.fallbackCitySource}>{city.sourceLabel}</em><ArrowRight size={14} /></TrackedLink>)}</div></section>
 
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData) }} />
     <SiteFooter />
