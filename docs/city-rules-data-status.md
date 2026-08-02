@@ -1,43 +1,34 @@
 # 城市社保公积金规则数据状态
 
-更新时间：2026-08-01
+更新时间：2026-08-02
 
 ## 当前结论
 
-Payload CMS 的规则管理、前台读取、导入脚本和 5 城种子数据已经具备基础链路，但“不同城市社保、公积金基数和缴纳比例”的官方采集还没有完成。
+Payload CMS 的规则管理、前台读取、导入脚本和全量 Hrwork 采集数据已经具备基础链路。当前 2026 年规则已覆盖 394 个启用城市，前台可以按城市读取社保、公积金基数和缴费比例。
 
-当前 `app/data/city-rules-seed.json` 来自前台内置兜底规则，适合：
+当前 `app/data/hrwork-social-insurance-2026-08-01.json` 来自 Hrwork 第三方聚合采集，适合：
 
-- 跑通 Payload 导入、审核、发布流程。
-- 本地演示北京、上海、深圳、广州、杭州 5 个城市的城市差异。
-- 作为正式采集数据的字段样例。
+- 批量初始化 2026 年城市社保公积金规则。
+- 支撑前台城市选择、城市规则页和工资薪金自动估算。
+- 作为后续官方逐城核验的结构化底稿。
 
 不适合：
 
-- 直接作为官方核验后的线上规则。
-- 直接覆盖所有城市、所有险种、所有公积金口径。
+- 在前台展示“Payload CMS”“Hrwork”“待复核”等后台维护状态。
+- 替代长期的官方来源复核；重点城市仍需要逐城补官方来源和政策口径说明。
 
 ## 已具备能力
 
 - Payload 后台集合：城市、社保公积金政策、导入任务。
 - 前台读取策略：优先读取 Payload active 政策；没有数据库或没有 active 政策时回退到前台兜底规则。
-- 导入脚本：`npm run rules:import-seed` 可把 5 城种子导入为 Payload 草稿。
-- 质量审计：`npm run rules:audit -- ./data/city-rules-seed.json` 可检查来源、基数、项目和公积金比例。
-- 来源目录：`app/data/city-rule-sources.json` 记录 5 城当前官方线索、结构化事实和核验状态，`npm run rules:sources` 可检查结构，追加 `--network` 可尝试访问来源页面，追加 `--gaps` 可查看每个城市缺少哪些基数和比例事实。
+- 一键流水线：`npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json --write --publish --clear-warnings --policy-year 2026` 可完成校验、审计、导入、发布和概览。
+- 当前 CMS 状态：394/394 个启用城市已发布 active 规则，来源链接 394/394，核对日期 394/394，解析 warning 0。
+- 质量审计：`npm run rules:audit -- --cms --policy-year 2026 --summary` 可检查当前已发布规则是否可被前台安全读取。
+- 来源目录：`app/data/city-rule-sources.json` 记录重点城市官方线索、结构化事实和核验状态，`npm run rules:sources` 可检查结构，追加 `--network` 可尝试访问来源页面，追加 `--gaps` 可查看每个城市缺少哪些基数和比例事实。
 
 ## 当前阻塞
 
-本机 Docker CLI 可用，但 Docker daemon 未启动，所以当前无法实际把 seed 写入本地 PostgreSQL。
-
-启动 Docker Desktop 后，在 `app/` 目录执行：
-
-```bash
-cp .env.example .env
-npm run db:up
-npm run rules:import-seed
-```
-
-导入后政策仍是 `pendingReview` 草稿，需要在 Payload 后台审核并发布为 `active`，前台才会读取数据库规则。
+暂无影响前台读取的规则数据阻塞。后续阻塞主要来自“官方逐城复核”的人力和来源解析工作。
 
 ## 官方来源核验进展
 
@@ -53,11 +44,11 @@ npm run rules:import-seed
 
 ## 下一步数据工作
 
-1. 先补 5 个核心城市的官方来源 URL 和附件解析。
+1. 优先复核北京、上海、深圳、广州、杭州 5 个核心城市的官方来源 URL 和附件解析。
 2. 按城市拆分社保基数规则，避免把养老、医保、失业等不同上下限混成一个“社保基数”。
 3. 补公积金缴存比例年度规则，尤其是北京、上海这类 5%-12%，以及可能允许困难单位降低比例的例外说明。
-4. 用 `npm run rules:sources -- --gaps` 跟踪缺口，直到 5 城养老、医疗、失业、工伤、生育和住房公积金的基数/比例事实都补齐。
-5. 采集完成后生成新的 JSON 文件，例如 `app/data/city-rules-official-2026.json`。
+4. 用 `npm run rules:sources -- --gaps` 跟踪官方来源缺口，直到核心城市养老、医疗、失业、工伤、生育和住房公积金的基数/比例事实都补齐。
+5. 官方复核完成后生成覆盖文件，例如 `app/data/city-rules-official-2026.json`。
 6. 通过 `rules:validate`、`rules:audit --strict` 和 `rules:import` 导入 Payload 草稿，再人工审核发布。
 
 ## 来源链接
