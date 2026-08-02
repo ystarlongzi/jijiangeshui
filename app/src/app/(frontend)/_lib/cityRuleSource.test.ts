@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { getCityRuleSourceStatus } from './cityRuleSource'
+import type { CityRule } from '@/lib/tax-rules'
+import { countCityRuleSources, getCityRuleSourceStatus, getPreferredCityRuleLinks } from './cityRuleSource'
 
 test('returns Payload CMS status for cities backed by CMS rules', () => {
   const status = getCityRuleSourceStatus({
@@ -44,4 +45,29 @@ test('returns city-level fallback detail when CMS is available but a city is not
   assert.equal(status.source, 'fallback')
   assert.equal(status.label, '内置兜底')
   assert.equal(status.detail, '当前城市暂无后台有效规则')
+})
+
+test('counts Payload CMS and fallback city rule sources', () => {
+  const counts = countCityRuleSources(['beijing', 'shanghai', 'hangzhou'], {
+    beijing: 'payload',
+    shanghai: 'payload',
+  })
+
+  assert.deepEqual(counts, { fallback: 1, payload: 2 })
+})
+
+test('builds preferred city links and skips unavailable cities', () => {
+  const links = getPreferredCityRuleLinks({
+    preferredCityKeys: ['beijing', 'missing', 'hangzhou'],
+    ruleSourcesByCity: { beijing: 'payload' },
+    rules: {
+      beijing: { label: '北京市' } as CityRule,
+      hangzhou: { label: '杭州市' } as CityRule,
+    },
+  })
+
+  assert.deepEqual(links, [
+    { key: 'beijing', label: '北京市', sourceLabel: 'CMS', sourceType: 'payload' },
+    { key: 'hangzhou', label: '杭州市', sourceLabel: '兜底', sourceType: 'fallback' },
+  ])
 })
