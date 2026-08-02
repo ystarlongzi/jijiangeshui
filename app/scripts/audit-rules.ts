@@ -15,6 +15,7 @@ import {
   auditCityRule,
   getPrimaryRuleSource,
   getRuleQualityStatus,
+  hasRuleSourceUrl,
   type RuleQualityCategory,
   type RuleQualityIssue,
 } from '../src/lib/city-rule-quality'
@@ -258,6 +259,14 @@ async function main() {
   )
   const errorCount = currentIssues.filter((issue) => issue.severity === 'error').length
   const warningCount = currentIssues.filter((issue) => issue.severity === 'warning').length
+  const statusSummary = rows.reduce(
+    (summary, row) => {
+      summary[row.status] += 1
+      return summary
+    },
+    { ok: 0, warning: 0, error: 0 } satisfies Record<AuditRow['status'], number>,
+  )
+  const sourceUrlCount = source.entries.filter(([, rule]) => hasRuleSourceUrl(rule)).length
   const categorySummary = currentIssues.reduce(
     (summary, issue) => {
       summary[issue.category] += 1
@@ -269,8 +278,11 @@ async function main() {
   const summary = {
     source: source.label,
     cities: rows.length,
+    usableCities: rows.length - statusSummary.error,
+    status: statusSummary,
     errors: errorCount,
     warnings: warningCount,
+    sourceUrlCoveragePercent: rows.length > 0 ? Math.round((sourceUrlCount / rows.length) * 100) : 0,
     categories: categorySummary,
   }
 
@@ -290,7 +302,10 @@ async function main() {
   } else if (summaryOnly) {
     console.log(`审计来源：${summary.source}`)
     console.log(
-      `完成：${summary.cities} 个城市，${summary.errors} 个错误，${summary.warnings} 个提醒。` +
+      `完成：${summary.cities} 个城市，可用 ${summary.usableCities} 个。` +
+        ` OK ${summary.status.ok}，提醒 ${summary.status.warning}，错误 ${summary.status.error}。` +
+        ` 来源 URL 覆盖率 ${summary.sourceUrlCoveragePercent}%。` +
+        ` 问题合计：${summary.errors} 个错误，${summary.warnings} 个提醒。` +
         ` 来源 ${summary.categories.source}，基数 ${summary.categories.baseRule}，项目 ${summary.categories.itemRule}，公积金比例 ${summary.categories.housingRate}。`,
     )
     for (const issue of currentIssues.slice(0, 20)) {
