@@ -18,7 +18,11 @@ export const metadata: Metadata = {
 
 export default async function CityIndexPage() {
   const cityRules = await getAvailableCityRules()
-  const cities = Object.entries(cityRules)
+  const cities = Object.entries(cityRules).sort(([, prev], [, next]) => {
+    const provinceOrder = prev.province.localeCompare(next.province, 'zh-CN')
+    if (provinceOrder !== 0) return provinceOrder
+    return prev.label.localeCompare(next.label, 'zh-CN')
+  })
   const cityStats = getCityRuleStats(cities, currentYear)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
@@ -53,7 +57,7 @@ export default async function CityIndexPage() {
     </section>
 
     <section className={styles.provinceSection} aria-label="按地区浏览城市">
-      <SectionHeading title="按地区浏览" description="先覆盖高频城市，后续接入规则后台后会扩展更多省市。" />
+      <SectionHeading title="按地区浏览" description="按省份汇总已收录城市，进入城市页后可查看当地社保、公积金基数范围和默认比例。" />
       <div className={styles.provinceList}>
         {Object.entries(cityGroups).map(([province, group]) => <div className={styles.provinceCard} key={province}>
           <strong>{province}</strong>

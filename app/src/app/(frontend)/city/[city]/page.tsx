@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AlertTriangle, ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
-import { cityRules, getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
-import { getAvailableCityRule } from '@/lib/city-rule-service'
+import { getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
+import { getAvailableCityRule, getAvailableCityRules } from '@/lib/city-rule-service'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
@@ -16,8 +16,9 @@ import styles from '../CityPages.module.css'
 
 type CityPageProps = { params: Promise<{ city: string }> }
 
-export function generateStaticParams() {
-  return Object.keys(cityRules).map((city) => ({ city }))
+export async function generateStaticParams() {
+  const rules = await getAvailableCityRules()
+  return Object.keys(rules).map((city) => ({ city }))
 }
 
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
