@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'admins',
+  defaultSort: 'email',
   labels: {
     singular: '管理员',
     plural: '管理员',
@@ -9,6 +10,7 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: {
     useAsTitle: 'email',
+    group: '系统记录',
     defaultColumns: ['email', 'name', 'role'],
   },
   fields: [

@@ -2,13 +2,16 @@ import type { CollectionConfig } from 'payload'
 
 export const Cities: CollectionConfig = {
   slug: 'cities',
+  defaultSort: ['provinceName', 'name'],
   labels: {
     singular: '城市',
     plural: '城市',
   },
   admin: {
     useAsTitle: 'name',
+    group: '基础数据',
     defaultColumns: ['name', 'provinceName', 'slug', 'enabled'],
+    listSearchableFields: ['name', 'shortName', 'provinceName', 'slug', 'areaId', 'areaCode'],
     description: '管理城市基础信息和城市 SEO 页面入口。',
   },
   fields: [
@@ -33,6 +36,9 @@ export const Cities: CollectionConfig = {
       label: '省份',
       type: 'text',
       required: true,
+      admin: {
+        description: '用于城市列表分组和城市 SEO 页面展示。',
+      },
     },
     {
       name: 'level',
@@ -50,6 +56,9 @@ export const Cities: CollectionConfig = {
       name: 'areaId',
       label: '第三方 areaId',
       type: 'text',
+      admin: {
+        description: '来源平台的城市 ID，用于规则采集和导入匹配。',
+      },
     },
     {
       name: 'parentAreaId',
@@ -60,6 +69,9 @@ export const Cities: CollectionConfig = {
       name: 'areaCode',
       label: '第三方 areaCode',
       type: 'text',
+      admin: {
+        description: '来源平台的城市编码，作为导入匹配的补充字段。',
+      },
     },
     {
       name: 'shortName',

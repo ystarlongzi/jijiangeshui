@@ -2,16 +2,20 @@ import type { CollectionConfig } from 'payload'
 
 export const ImportJobs: CollectionConfig = {
   slug: 'import-jobs',
+  defaultSort: '-createdAt',
   labels: {
     singular: '规则导入任务',
     plural: '规则导入任务',
   },
   admin: {
     useAsTitle: 'jobTitle',
-    defaultColumns: ['jobTitle', 'source', 'status', 'createdAt'],
+    group: '系统记录',
+    defaultColumns: ['jobTitle', 'source', 'status', 'successCities', 'failedCities', 'createdAt'],
+    listSearchableFields: ['jobTitle', 'sourceFile', 'errorMessage'],
+    description: '记录社保公积金规则采集、校验、导入和发布流水线结果。',
   },
   fields: [
-    { name: 'jobTitle', label: '任务名称', type: 'text', required: true },
+    { name: 'jobTitle', label: '任务名称', type: 'text', required: true, admin: { description: '建议包含来源、年份和批次，例如 Hrwork 2026 全量导入。' } },
     {
       name: 'source',
       label: '数据来源',
@@ -31,8 +35,8 @@ export const ImportJobs: CollectionConfig = {
     { name: 'totalCities', label: '城市总数', type: 'number', min: 0 },
     { name: 'successCities', label: '成功城市数', type: 'number', min: 0 },
     { name: 'failedCities', label: '失败城市数', type: 'number', min: 0 },
-    { name: 'sourceFile', label: '来源文件', type: 'text' },
-    { name: 'warnings', label: '警告', type: 'json' },
+    { name: 'sourceFile', label: '来源文件', type: 'text', admin: { description: '导入时使用的 JSON 文件路径或来源标识。' } },
+    { name: 'warnings', label: '警告', type: 'json', admin: { description: '保留校验阶段的非阻断问题。' } },
     { name: 'errorMessage', label: '错误信息', type: 'textarea' },
   ],
 }

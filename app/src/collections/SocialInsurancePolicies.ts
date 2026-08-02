@@ -10,13 +10,16 @@ const calculationMethodOptions = [
 export const SocialInsurancePolicies: CollectionConfig = {
   slug: 'social-insurance-policies',
   dbName: 'sip',
+  defaultSort: '-updatedAt',
   labels: {
     singular: '社保公积金政策',
     plural: '社保公积金政策',
   },
   admin: {
     useAsTitle: 'policyTitle',
-    defaultColumns: ['policyTitle', 'city', 'policyYear', 'effectiveFrom', 'policyStatus'],
+    group: '规则数据',
+    defaultColumns: ['policyTitle', 'city', 'policyYear', 'effectiveFrom', 'policyStatus', 'updatedAt'],
+    listSearchableFields: ['policyTitle', 'source.title', 'source.url', 'externalCodes.social', 'externalCodes.housingFund'],
     description: '政策规则先保存为草稿，人工核对后再标记为有效。',
   },
   versions: {
@@ -66,6 +69,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       type: 'relationship',
       relationTo: 'cities',
       required: true,
+      admin: {
+        description: '选择这条社保公积金规则适用的城市。',
+      },
     },
     {
       name: 'policyYear',
@@ -74,6 +80,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       required: true,
       min: 2000,
       max: 2100,
+      admin: {
+        description: '用于前台按年份读取规则，例如 2026。',
+      },
     },
     {
       name: 'effectiveFrom',
@@ -93,6 +102,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       label: '业务状态',
       type: 'select',
       defaultValue: 'pendingReview',
+      admin: {
+        description: '只有“有效”状态会作为前台城市规则使用。',
+      },
       options: [
         { label: '待审核', value: 'pendingReview' },
         { label: '有效', value: 'active' },
@@ -104,6 +116,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       name: 'source',
       label: '规则来源',
       type: 'group',
+      admin: {
+        description: '记录爬虫来源、官方核对链接和人工备注，便于后续追溯。',
+      },
       fields: [
         { name: 'title', label: '来源标题', type: 'text' },
         { name: 'url', label: '来源链接', type: 'text' },
@@ -117,6 +132,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       type: 'array',
       dbName: 'bases',
       minRows: 1,
+      admin: {
+        description: '社保和公积金可分别设置上下限，前台输入超出范围时按上下限估算。',
+      },
       fields: [
         {
           name: 'baseType',
@@ -142,6 +160,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       label: '缴费项目规则',
       type: 'array',
       dbName: 'items',
+      admin: {
+        description: '维护养老、医疗、失业、工伤、生育、公积金等项目的个人和企业缴费方式。',
+      },
       fields: [
         {
           name: 'systemType',
@@ -199,6 +220,9 @@ export const SocialInsurancePolicies: CollectionConfig = {
       name: 'externalCodes',
       label: '第三方方案编码',
       type: 'group',
+      admin: {
+        description: '保留采集平台的方案编码，方便增量更新或排查匹配问题。',
+      },
       fields: [
         { name: 'social', label: '社保方案编码', type: 'text' },
         { name: 'housingFund', label: '公积金方案编码', type: 'text' },

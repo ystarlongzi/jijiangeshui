@@ -15,13 +15,16 @@ const incomeTypeOptions = [
 export const TaxRateRules: CollectionConfig = {
   slug: 'tax-rate-rules',
   dbName: 'trr',
+  defaultSort: ['ruleYear', 'incomeCategory', 'incomeType'],
   labels: {
     singular: '税率规则',
     plural: '税率规则',
   },
   admin: {
     useAsTitle: 'ruleTitle',
+    group: '规则数据',
     defaultColumns: ['ruleTitle', 'ruleYear', 'incomeType', 'taxpayerIdentity', 'ruleStatus'],
+    listSearchableFields: ['ruleTitle', 'source.title', 'source.url', 'note'],
     description: '维护个人所得税税率表、预扣率表和比例税率规则。',
   },
   versions: {
@@ -56,11 +59,14 @@ export const TaxRateRules: CollectionConfig = {
   },
   fields: [
     { name: 'ruleTitle', label: '规则名称', type: 'text', required: true },
-    { name: 'ruleYear', label: '规则年度', type: 'number', required: true, min: 2000, max: 2100 },
+    { name: 'ruleYear', label: '规则年度', type: 'number', required: true, min: 2000, max: 2100, admin: { description: '用于税率表页面和各计算器按年份取数。' } },
     {
       name: 'incomeCategory',
       label: '所得大类',
       type: 'select',
+      admin: {
+        description: '综合所得包含工资薪金、劳务报酬、稿酬、特许权使用费；分类所得不再区分居民和非居民 tab。',
+      },
       options: [
         { label: '综合所得', value: 'comprehensive' },
         { label: '分类所得', value: 'classified' },
@@ -79,6 +85,9 @@ export const TaxRateRules: CollectionConfig = {
       label: '纳税身份',
       type: 'select',
       defaultValue: 'notApplicable',
+      admin: {
+        description: '分类所得请选择“不区分”；综合所得按规则选择居民个人或非居民个人。',
+      },
       options: [
         { label: '不区分', value: 'notApplicable' },
         { label: '居民个人', value: 'resident' },
@@ -130,6 +139,9 @@ export const TaxRateRules: CollectionConfig = {
       label: '业务状态',
       type: 'select',
       defaultValue: 'pendingReview',
+      admin: {
+        description: '只有“有效”状态会被前台税率表和计算器读取。',
+      },
       options: [
         { label: '待审核', value: 'pendingReview' },
         { label: '有效', value: 'active' },
@@ -141,6 +153,9 @@ export const TaxRateRules: CollectionConfig = {
       name: 'source',
       label: '规则来源',
       type: 'group',
+      admin: {
+        description: '建议保留国家税务总局或政策文件链接和核对日期。',
+      },
       fields: [
         { name: 'title', label: '来源标题', type: 'text' },
         { name: 'url', label: '来源链接', type: 'text' },
@@ -155,6 +170,6 @@ export const TaxRateRules: CollectionConfig = {
       type: 'array',
       fields: [{ name: 'message', label: '警告内容', type: 'text', required: true }],
     },
-    { name: 'rawData', label: '原始数据', type: 'json' },
+    { name: 'rawData', label: '原始数据', type: 'json', admin: { description: '用于审计和排查，不参与计算。' } },
   ],
 }
