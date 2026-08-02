@@ -37,6 +37,10 @@ export function getCityRuleSourceStatus({ city, ruleSourcesByCity = {}, ruleData
   }
 }
 
+export function getCityRuleSourceBadgeLabel(source: FrontendCityRuleSource) {
+  return source === 'payload' ? 'CMS' : '兜底'
+}
+
 export function countCityRuleSources(cityKeys: Iterable<string>, ruleSourcesByCity: Record<string, FrontendCityRuleSource> = {}): FrontendCityRuleSourceCounts {
   const counts: FrontendCityRuleSourceCounts = { fallback: 0, payload: 0 }
 
@@ -74,7 +78,7 @@ export function getPreferredCityRuleLinks({
       return {
         key,
         label: rule.label,
-        sourceLabel: sourceStatus.source === 'payload' ? 'CMS' : '兜底',
+        sourceLabel: getCityRuleSourceBadgeLabel(sourceStatus.source),
         sourceType: sourceStatus.source,
       }
     })

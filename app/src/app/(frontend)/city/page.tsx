@@ -9,7 +9,7 @@ import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/ci
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
-import { countCityRuleSources, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
+import { countCityRuleSources, getCityRuleSourceBadgeLabel, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
 import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
@@ -86,7 +86,7 @@ export default async function CityIndexPage() {
 
             return <Link className={styles.cityLink} href={`/city/${key}`} key={key}>
               <span>{rule.name}</span>
-              <small data-source={sourceStatus.source}>{sourceStatus.source === 'payload' ? 'CMS' : '兜底'}</small>
+              <small data-source={sourceStatus.source}>{getCityRuleSourceBadgeLabel(sourceStatus.source)}</small>
             </Link>
           })}</div>
         </div>)}
