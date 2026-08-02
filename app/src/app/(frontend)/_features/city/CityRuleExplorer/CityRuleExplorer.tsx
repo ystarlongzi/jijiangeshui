@@ -24,7 +24,11 @@ type CityRuleExplorerProps = {
 export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
   const [query, setQuery] = useState('')
   const [province, setProvince] = useState('all')
-  const provinces = useMemo(() => Array.from(new Set(cities.map((city) => city.province))), [cities])
+  const provinceCounts = useMemo(() => cities.reduce<Record<string, number>>((counts, city) => {
+    counts[city.province] = (counts[city.province] || 0) + 1
+    return counts
+  }, {}), [cities])
+  const provinces = useMemo(() => Object.keys(provinceCounts), [provinceCounts])
   const filteredCities = useMemo(() => {
     const keyword = query.trim().toLowerCase()
     return cities.filter((city) => {
@@ -54,13 +58,13 @@ export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
           type="button"
           onClick={() => setProvince(item)}
         >
-          {item}
+          {item}<span>{provinceCounts[item]}</span>
         </button>)}
       </div>
     </div>
 
     <div className={styles.resultMeta}>
-      <span>共 {filteredCities.length} 个城市</span>
+      <span>{filteredCities.length === cities.length ? `已收录 ${cities.length} 个城市` : `已显示 ${filteredCities.length} / ${cities.length} 个城市`}</span>
       {(query || province !== 'all') && <button type="button" onClick={() => { setQuery(''); setProvince('all') }}>清除筛选</button>}
     </div>
 
