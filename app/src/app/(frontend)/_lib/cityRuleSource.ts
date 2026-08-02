@@ -1,3 +1,5 @@
+import type { CityRule } from '@/lib/tax-rules'
+
 export type FrontendCityRuleSource = 'payload' | 'fallback'
 
 export type FrontendCityRuleDatasetSummary = {
@@ -6,6 +8,13 @@ export type FrontendCityRuleDatasetSummary = {
 }
 
 export type FrontendCityRuleSourceCounts = Record<FrontendCityRuleSource, number>
+
+export type FrontendCityRuleLinkItem = {
+  key: string
+  label: string
+  sourceLabel: string
+  sourceType: FrontendCityRuleSource
+}
 
 type CityRuleSourceStatusInput = {
   city: string
@@ -37,4 +46,37 @@ export function countCityRuleSources(cityKeys: Iterable<string>, ruleSourcesByCi
   }
 
   return counts
+}
+
+type PreferredCityRuleLinksInput = {
+  preferredCityKeys: readonly string[]
+  ruleDatasetSummary?: FrontendCityRuleDatasetSummary
+  ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
+  rules: Record<string, CityRule>
+}
+
+export function getPreferredCityRuleLinks({
+  preferredCityKeys,
+  ruleDatasetSummary,
+  ruleSourcesByCity,
+  rules,
+}: PreferredCityRuleLinksInput): FrontendCityRuleLinkItem[] {
+  return preferredCityKeys
+    .map((key) => {
+      const rule = rules[key]
+      if (!rule) return null
+      const sourceStatus = getCityRuleSourceStatus({
+        city: key,
+        ruleDatasetSummary,
+        ruleSourcesByCity,
+      })
+
+      return {
+        key,
+        label: rule.label,
+        sourceLabel: sourceStatus.source === 'payload' ? 'CMS' : '兜底',
+        sourceType: sourceStatus.source,
+      }
+    })
+    .filter((city): city is FrontendCityRuleLinkItem => Boolean(city))
 }
