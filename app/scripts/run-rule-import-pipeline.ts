@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process'
 import path from 'node:path'
 
 const args = process.argv.slice(2)
+const wantsHelp = args.includes('--help') || args.includes('-h')
 const inputPath = args.find((arg) => !arg.startsWith('--'))
 const writeToCms = process.argv.includes('--write')
 const publishToFrontend = process.argv.includes('--publish')
@@ -10,8 +11,43 @@ const showCmsSummary = writeToCms && !process.argv.includes('--no-summary')
 const policyYearArgIndex = process.argv.indexOf('--policy-year')
 const policyYearArgs = policyYearArgIndex >= 0 ? ['--policy-year', process.argv[policyYearArgIndex + 1]].filter(Boolean) : []
 
+function printHelp() {
+  console.log(`
+社保公积金规则导入流水线
+
+用法：
+  npm run rules:pipeline -- <采集 JSON 文件> [选项]
+
+默认流程：
+  validate -> audit -> import --dry-run
+
+选项：
+  --write            写入 Payload CMS 草稿
+  --publish          写入后发布为前台有效规则，需要同时使用 --write
+  --clear-warnings   发布时清理第三方来源 warning
+  --policy-year 年份  限定发布和概览的政策年份，例如 2026
+  --no-summary       写入或发布后不输出 CMS 概览
+  -h, --help         查看帮助
+
+示例：
+  npm run rules:pipeline -- ./data/hrwork-social-insurance-2026.json
+  npm run rules:pipeline -- ./data/hrwork-social-insurance-2026.json --write
+  npm run rules:pipeline -- ./data/hrwork-social-insurance-2026.json --write --publish --clear-warnings --policy-year 2026
+`.trim())
+}
+
+if (wantsHelp) {
+  printHelp()
+  process.exit(0)
+}
+
 if (!inputPath) {
-  throw new Error('请提供采集 JSON 文件，例如：npm run rules:pipeline -- ./data/hrwork.json --write')
+  printHelp()
+  throw new Error('\n请提供采集 JSON 文件。')
+}
+
+if (publishToFrontend && !writeToCms) {
+  throw new Error('--publish 会修改 Payload CMS，需要同时追加 --write。')
 }
 
 const requiredInputPath = inputPath
