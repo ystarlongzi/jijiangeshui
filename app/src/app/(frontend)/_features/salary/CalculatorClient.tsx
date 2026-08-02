@@ -418,7 +418,6 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
   const columns = [{ key: 'month', header: '月份' }, { key: 'income', header: '到手 / 税前' }, { key: 'insurance', header: '个人五险一金' }, { key: 'taxable', header: '累计应纳税所得额' }, { key: 'rate', header: '预扣率' }, { key: 'tax', header: '本月个税' }]
   const tableRows = rows.map(({ currentMonth, inactive, salary, item }) => ({
     key: currentMonth,
-    className: currentMonth === month ? 'current-month' : '',
     tone: currentMonth === month ? 'highlight' as const : undefined,
     cells: {
       month: `${currentMonth} 月`,

@@ -900,12 +900,6 @@
   padding: 12px 13px;
 }
 
-.pageContent :global(.annual-table tr.current-month td) {
-  background: var(--accent-soft);
-  border-top-color: transparent;
-  font-weight: 600;
-}
-
 .pageContent :global(.annual-table td:first-child) {
   color: var(--muted);
   font-weight: 700;
