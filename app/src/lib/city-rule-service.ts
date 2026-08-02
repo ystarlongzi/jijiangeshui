@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
@@ -21,8 +22,16 @@ type CmsPolicyDoc = Parameters<typeof adaptCmsPolicyToCityRule>[0] & {
   city?: string | number | { id?: string | number | null } | null
 }
 
+const DEFAULT_CITY_RULE_CACHE_SECONDS = 300
+
 function canUsePendingRules() {
   return process.env.CITY_RULE_INCLUDE_PENDING === 'true' || process.env.NODE_ENV !== 'production'
+}
+
+function getCityRuleCacheSeconds() {
+  const configured = Number(process.env.CITY_RULE_CACHE_SECONDS)
+  if (Number.isFinite(configured) && configured >= 0) return configured
+  return DEFAULT_CITY_RULE_CACHE_SECONDS
 }
 
 function hasSlug(city: CmsCityDoc): city is CmsCityDoc & { slug: string } {
@@ -33,7 +42,7 @@ export async function getAvailableCityRules(): Promise<CityRuleMap> {
   if (!process.env.DATABASE_URI) return cityRules
 
   try {
-    return await readCityRulesFromPayload()
+    return await readCachedCityRulesFromPayload()
   } catch (error) {
     console.warn('读取 Payload 城市规则失败，已回退到内置规则。', error)
     return cityRules
@@ -43,6 +52,16 @@ export async function getAvailableCityRules(): Promise<CityRuleMap> {
 export async function getAvailableCityRule(slug: string): Promise<CityRule | undefined> {
   const rules = await getAvailableCityRules()
   return rules[slug]
+}
+
+async function readCachedCityRulesFromPayload() {
+  const cacheSeconds = getCityRuleCacheSeconds()
+  if (cacheSeconds === 0) return readCityRulesFromPayload()
+
+  return unstable_cache(readCityRulesFromPayload, ['payload-city-rules'], {
+    revalidate: cacheSeconds,
+    tags: ['city-rules'],
+  })()
 }
 
 async function readCityRulesFromPayload(): Promise<CityRuleMap> {
