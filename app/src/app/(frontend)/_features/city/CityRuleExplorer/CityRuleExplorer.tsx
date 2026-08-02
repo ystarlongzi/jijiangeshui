@@ -14,6 +14,8 @@ export type CityRuleExplorerItem = {
   pinyin: string
   province: string
   socialBaseRange: string
+  sourceLabel: string
+  sourceType: 'payload' | 'fallback'
   sourceReady: boolean
 }
 
@@ -82,6 +84,7 @@ export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
           <div><dt>公积金基数</dt><dd>{city.housingBaseRange}</dd></div>
         </dl>
         <div className={styles.ruleMeta}>
+          <em className={city.sourceType === 'payload' ? styles.cmsStatus : styles.fallbackStatus}>{city.sourceLabel}</em>
           <em>生效 {city.effective}</em>
           <em className={city.sourceReady ? styles.okStatus : styles.warnStatus}>{city.sourceReady ? '已配置来源' : '来源待补'}</em>
         </div>

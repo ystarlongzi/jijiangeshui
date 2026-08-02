@@ -9,6 +9,7 @@ import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/ci
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
+import { getCityRuleSourceStatus } from '../_lib/cityRuleSource'
 import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
@@ -35,17 +36,27 @@ export default async function CityIndexPage() {
     groups[province] = [...(groups[province] || []), city]
     return groups
   }, {})
-  const cityExplorerItems: CityRuleExplorerItem[] = cities.map(([key, rule]) => ({
-    effective: rule.effective,
-    housingBaseRange: formatBaseRange(rule, 'housingFund'),
-    key,
-    label: rule.label,
-    name: rule.name,
-    pinyin: rule.pinyin,
-    province: rule.province,
-    socialBaseRange: formatBaseRange(rule, 'social'),
-    sourceReady: hasRuleSourceUrl(rule),
-  }))
+  const cityExplorerItems: CityRuleExplorerItem[] = cities.map(([key, rule]) => {
+    const sourceStatus = getCityRuleSourceStatus({
+      city: key,
+      ruleDatasetSummary: datasetSummary,
+      ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
+    })
+
+    return {
+      effective: rule.effective,
+      housingBaseRange: formatBaseRange(rule, 'housingFund'),
+      key,
+      label: rule.label,
+      name: rule.name,
+      pinyin: rule.pinyin,
+      province: rule.province,
+      socialBaseRange: formatBaseRange(rule, 'social'),
+      sourceLabel: sourceStatus.label,
+      sourceReady: hasRuleSourceUrl(rule),
+      sourceType: sourceStatus.source,
+    }
+  })
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <section className={`${styles.hero} ${styles.indexHero}`}>

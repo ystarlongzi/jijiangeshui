@@ -177,6 +177,16 @@
   color: #d96b20;
 }
 
+.ruleMeta .cmsStatus {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ruleMeta .fallbackStatus {
+  background: var(--surface-muted);
+  color: var(--subtle);
+}
+
 .card strong {
   display: inline-flex;
   align-items: center;
