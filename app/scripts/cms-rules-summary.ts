@@ -100,6 +100,10 @@ function summarizeStatus(policies: CmsPolicyDoc[]) {
   )
 }
 
+function toPercent(part: number, total: number) {
+  return total > 0 ? Math.round((part / total) * 100) : 0
+}
+
 async function main() {
   await loadLocalEnv()
 
@@ -148,8 +152,11 @@ async function main() {
       status,
       activePolicyCities: activeCityIds.size,
       activeCoverageRate: enabledCities.length ? Number((activeCityIds.size / enabledCities.length).toFixed(4)) : 0,
+      activeCoveragePercent: toPercent(activeCityIds.size, enabledCities.length),
       policiesWithSourceUrl: sourceCount,
+      sourceUrlCoveragePercent: toPercent(sourceCount, policies.length),
       policiesWithCheckedDate: checkedCount,
+      checkedDateCoveragePercent: toPercent(checkedCount, policies.length),
       warnings: warningCount,
       missingActiveCities,
       orphanActivePolicies: activePolicies
@@ -168,8 +175,8 @@ async function main() {
     console.log(`Payload CMS 社保公积金规则概览${policyYear ? `（${policyYear}）` : ''}`)
     console.log(`城市：${summary.enabledCities}/${summary.cities} 个启用`)
     console.log(`政策：${summary.policies} 条，待审核 ${status.pendingReview}，有效 ${status.active}，已归档 ${status.archived}`)
-    console.log(`有效规则覆盖：${summary.activePolicyCities}/${summary.enabledCities} 个启用城市（${Math.round(summary.activeCoverageRate * 100)}%）`)
-    console.log(`来源链接：${sourceCount}/${summary.policies}，核对日期：${checkedCount}/${summary.policies}，解析警告：${warningCount}`)
+    console.log(`有效规则覆盖：${summary.activePolicyCities}/${summary.enabledCities} 个启用城市（${summary.activeCoveragePercent}%）`)
+    console.log(`来源链接：${sourceCount}/${summary.policies}（${summary.sourceUrlCoveragePercent}%），核对日期：${checkedCount}/${summary.policies}（${summary.checkedDateCoveragePercent}%），解析警告：${warningCount}`)
 
     if (summary.orphanActivePolicies > 0) {
       console.log(`提醒：${summary.orphanActivePolicies} 条有效政策没有匹配到城市。`)
