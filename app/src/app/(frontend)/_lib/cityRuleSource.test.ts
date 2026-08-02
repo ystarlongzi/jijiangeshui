@@ -28,7 +28,7 @@ test('returns dataset fallback detail when the whole dataset is fallback', () =>
   })
 
   assert.equal(status.source, 'fallback')
-  assert.equal(status.label, '规则待补')
+  assert.equal(status.label, '默认规则')
   assert.equal(status.detail, '使用默认城市规则')
 })
 
@@ -43,8 +43,8 @@ test('returns city-level fallback detail when managed rules are available but a 
   })
 
   assert.equal(status.source, 'fallback')
-  assert.equal(status.label, '规则待补')
-  assert.equal(status.detail, '当前城市规则待补充')
+  assert.equal(status.label, '默认规则')
+  assert.equal(status.detail, '使用默认城市规则')
 })
 
 test('counts managed and fallback city rule sources', () => {
@@ -68,7 +68,7 @@ test('calculates managed city rule coverage rate', () => {
 
 test('returns short labels for city rule sources', () => {
   assert.equal(getCityRuleSourceBadgeLabel('payload'), '已收录')
-  assert.equal(getCityRuleSourceBadgeLabel('fallback'), '待补')
+  assert.equal(getCityRuleSourceBadgeLabel('fallback'), '默认')
 })
 
 test('builds preferred city links and skips unavailable cities', () => {
@@ -83,6 +83,6 @@ test('builds preferred city links and skips unavailable cities', () => {
 
   assert.deepEqual(links, [
     { key: 'beijing', label: '北京市', sourceLabel: '已收录', sourceType: 'payload' },
-    { key: 'hangzhou', label: '杭州市', sourceLabel: '待补', sourceType: 'fallback' },
+    { key: 'hangzhou', label: '杭州市', sourceLabel: '默认', sourceType: 'fallback' },
   ])
 })

@@ -34,20 +34,14 @@ export function getCityRuleSourceStatus({ city, ruleSourcesByCity = {}, ruleData
   return {
     detail: isPayload
       ? '已收录城市规则'
-      : isFallbackDataset(ruleDatasetSummary?.sourceLabel)
-        ? '使用默认城市规则'
-        : '当前城市规则待补充',
-    label: isPayload ? '已收录规则' : '规则待补',
+      : '使用默认城市规则',
+    label: isPayload ? '已收录规则' : '默认规则',
     source,
   }
 }
 
-function isFallbackDataset(sourceLabel?: string) {
-  return sourceLabel === '内置兜底' || sourceLabel === '默认规则'
-}
-
 export function getCityRuleSourceBadgeLabel(source: FrontendCityRuleSource) {
-  return source === 'payload' ? '已收录' : '待补'
+  return source === 'payload' ? '已收录' : '默认'
 }
 
 export function countCityRuleSources(cityKeys: Iterable<string>, ruleSourcesByCity: Record<string, FrontendCityRuleSource> = {}): FrontendCityRuleSourceCounts {
