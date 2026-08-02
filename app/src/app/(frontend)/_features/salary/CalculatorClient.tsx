@@ -235,6 +235,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, ruleSource
       `累计应纳税所得额：${money(result.taxable, 2)}`,
       `适用预扣率：${rate}%`,
       `规则核对日期：${ruleSourceDate}`,
+      `规则来源：${activeRuleSourceLabel}（${activeRuleSourceDetail}）`,
       '结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。',
     ].join('\n')
 

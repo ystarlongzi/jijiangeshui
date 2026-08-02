@@ -118,6 +118,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSource
       `计算月份：${month} 月`,
       `入职月份：${startMonth} 月`,
       `规则核对日期：${ruleSourceDate}`,
+      `规则来源：${activeRuleSourceLabel}（${activeRuleSourceDetail}）`,
       `期望到手工资：${money(targetTakeHome)}`,
       `专项附加扣除：${money(deductionAmount)} / 月`,
       '',
