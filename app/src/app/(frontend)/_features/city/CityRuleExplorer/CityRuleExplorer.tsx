@@ -29,6 +29,7 @@ type CityRuleExplorerProps = {
 export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
   const [query, setQuery] = useState('')
   const [province, setProvince] = useState('all')
+  const [healthFilter, setHealthFilter] = useState<'all' | 'stale' | 'sourceMissing'>('all')
   const provinceCounts = useMemo(() => cities.reduce<Record<string, number>>((counts, city) => {
     counts[city.province] = (counts[city.province] || 0) + 1
     return counts
@@ -39,9 +40,13 @@ export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
     return cities.filter((city) => {
       const matchedProvince = province === 'all' || city.province === province
       const matchedKeyword = !keyword || `${city.label} ${city.name} ${city.province} ${city.pinyin} ${city.key}`.toLowerCase().includes(keyword)
-      return matchedProvince && matchedKeyword
+      const matchedHealth =
+        healthFilter === 'all' ||
+        (healthFilter === 'stale' && city.freshnessStatus !== 'fresh') ||
+        (healthFilter === 'sourceMissing' && !city.sourceReady)
+      return matchedProvince && matchedKeyword && matchedHealth
     })
-  }, [cities, province, query])
+  }, [cities, healthFilter, province, query])
 
   return <section className={styles.explorer} aria-label="已收录城市">
     <div className={styles.toolbar}>
@@ -68,9 +73,15 @@ export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
       </div>
     </div>
 
+    <div className={styles.healthFilter} aria-label="按维护状态筛选">
+      <button className={healthFilter === 'all' ? styles.active : ''} type="button" onClick={() => setHealthFilter('all')}>全部状态</button>
+      <button className={healthFilter === 'stale' ? styles.active : ''} type="button" onClick={() => setHealthFilter('stale')}>待复核</button>
+      <button className={healthFilter === 'sourceMissing' ? styles.active : ''} type="button" onClick={() => setHealthFilter('sourceMissing')}>来源待补</button>
+    </div>
+
     <div className={styles.resultMeta}>
       <span>{filteredCities.length === cities.length ? `已收录 ${cities.length} 个城市` : `已显示 ${filteredCities.length} / ${cities.length} 个城市`}</span>
-      {(query || province !== 'all') && <button type="button" onClick={() => { setQuery(''); setProvince('all') }}>清除筛选</button>}
+      {(query || province !== 'all' || healthFilter !== 'all') && <button type="button" onClick={() => { setQuery(''); setProvince('all'); setHealthFilter('all') }}>清除筛选</button>}
     </div>
 
     {filteredCities.length > 0 ? <div className={styles.grid}>

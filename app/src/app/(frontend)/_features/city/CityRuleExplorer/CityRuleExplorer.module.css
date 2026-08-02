@@ -36,6 +36,7 @@
 }
 
 .provinceFilter button,
+.healthFilter button,
 .resultMeta button {
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -53,6 +54,17 @@
   padding: 8px 11px;
 }
 
+.healthFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.healthFilter button {
+  padding: 7px 10px;
+}
+
 .provinceFilter span {
   color: var(--subtle);
   font-size: 11px;
@@ -60,7 +72,9 @@
 }
 
 .provinceFilter button:hover,
-.provinceFilter .active {
+.provinceFilter .active,
+.healthFilter button:hover,
+.healthFilter .active {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
