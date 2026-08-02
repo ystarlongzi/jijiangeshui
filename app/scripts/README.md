@@ -30,6 +30,8 @@
 ```bash
 npm run rules:validate -- ./data/city-rules-seed.json
 npm run rules:audit -- ./data/city-rules-seed.json
+npm run rules:audit -- --cms --policy-year 2026
+npm run rules:audit -- --cms --policy-year 2026 --summary
 npm run rules:import -- ./data/city-rules-seed.json --dry-run
 npm run rules:import-seed:dry-run
 npm run rules:publish -- --policy-year 2026
@@ -42,7 +44,7 @@ npm run rules:audit
 ```
 
 真正写入数据库时去掉 `--dry-run`，也可以直接执行 `npm run rules:import-seed`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
-`rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。
+`rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。追加 `--cms` 可以直接审计 Payload CMS 当前已发布规则；追加 `--summary` 可以只看汇总和少量问题样例。
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
 

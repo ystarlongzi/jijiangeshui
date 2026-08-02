@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { getPayload, type Where } from 'payload'
+
 import { adaptCmsPolicyToCityRule } from '../src/lib/city-rule-adapter'
 import {
   createAuditCity,
@@ -16,7 +18,7 @@ import {
   type RuleQualityCategory,
   type RuleQualityIssue,
 } from '../src/lib/city-rule-quality'
-import { cityRules, type CityRule } from '../src/lib/tax-rules'
+import { cityRules, selectEffectiveCityRule, type CityRule } from '../src/lib/tax-rules'
 
 /**
  * 审计城市社保公积金规则。
@@ -27,6 +29,8 @@ import { cityRules, type CityRule } from '../src/lib/tax-rules'
  * 用法：
  * - npm run rules:audit                         审计前台 fallback cityRules
  * - npm run rules:audit -- ./data/hrwork.json   审计采集或导出的 JSON 文件
+ * - npm run rules:audit -- --cms --policy-year 2026
+ * - npm run rules:audit -- --cms --policy-year 2026 --summary
  * - npm run rules:audit -- ./data/hrwork.json --strict
  *
  * 它适合在修改、导入或采集城市基数、比例、来源信息后快速跑一遍，确认：
@@ -53,11 +57,91 @@ type AuditSource = {
 }
 
 const useJson = process.argv.includes('--json')
+const summaryOnly = process.argv.includes('--summary')
 const strict = process.argv.includes('--strict')
+const useCms = process.argv.includes('--cms')
 const inputPath = process.argv.find((arg, index) => index > 1 && !arg.startsWith('-'))
 let currentIssues: RuleQualityIssue[] = []
 
+type CmsCityDoc = {
+  id: string | number
+  name?: string | null
+  slug?: string | null
+  provinceName?: string | null
+  shortName?: string | null
+}
+
+type CmsPolicyDoc = Parameters<typeof adaptCmsPolicyToCityRule>[0] & {
+  city?: string | number | { id?: string | number | null } | null
+}
+
+function getFlagValue(name: string) {
+  const inlineArg = process.argv.find((arg) => arg.startsWith(`${name}=`))
+  if (inlineArg) return inlineArg.slice(name.length + 1)
+
+  const index = process.argv.indexOf(name)
+  if (index >= 0) return process.argv[index + 1]
+
+  return undefined
+}
+
+function parsePositiveInteger(value: string | undefined, label: string) {
+  if (!value) return undefined
+
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${label} 必须是正整数，当前值：${value}`)
+  }
+
+  return parsed
+}
+
+function parseEnvValue(value: string) {
+  const trimmed = value.trim()
+  const quote = trimmed[0]
+
+  if ((quote === '"' || quote === "'") && trimmed.endsWith(quote)) {
+    return trimmed.slice(1, -1)
+  }
+
+  return trimmed
+}
+
+async function loadLocalEnv() {
+  for (const fileName of ['.env', '.env.local']) {
+    const envPath = path.resolve(process.cwd(), fileName)
+
+    try {
+      const content = await fs.readFile(envPath, 'utf8')
+      for (const line of content.split(/\r?\n/)) {
+        const trimmed = line.trim()
+        if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue
+
+        const key = trimmed.slice(0, trimmed.indexOf('=')).trim()
+        const value = trimmed.slice(trimmed.indexOf('=') + 1)
+        if (key && process.env[key] === undefined) {
+          process.env[key] = parseEnvValue(value)
+        }
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    }
+  }
+}
+
+function getRelationId(value: CmsPolicyDoc['city']) {
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (value && (typeof value.id === 'string' || typeof value.id === 'number')) return String(value.id)
+  return undefined
+}
+
+function hasSlug(city: CmsCityDoc): city is CmsCityDoc & { slug: string } {
+  return typeof city.slug === 'string' && city.slug.trim() !== ''
+}
+
 async function loadAuditSource(): Promise<AuditSource> {
+  if (useCms) return loadCmsAuditSource()
+
   if (!inputPath) {
     return { label: 'fallback cityRules', entries: Object.entries(cityRules) }
   }
@@ -77,6 +161,59 @@ async function loadAuditSource(): Promise<AuditSource> {
   })
 
   return { label: absolutePath, entries }
+}
+
+async function loadCmsAuditSource(): Promise<AuditSource> {
+  await loadLocalEnv()
+  if (!process.env.DATABASE_URI) {
+    throw new Error('缺少 DATABASE_URI。请确认 app/.env 已配置并且 PostgreSQL 已启动。')
+  }
+
+  const policyYear = parsePositiveInteger(getFlagValue('--policy-year'), '--policy-year')
+  const { default: config } = await import('../src/payload.config')
+  const payload = await getPayload({ config })
+  const cityResult = await payload.find({
+    collection: 'cities',
+    depth: 0,
+    limit: 1000,
+    where: { enabled: { equals: true } },
+  })
+  const cityMap = new Map((cityResult.docs as CmsCityDoc[]).filter(hasSlug).map((city) => [String(city.id), city]))
+  const filters: Where[] = [{ policyStatus: { equals: 'active' } }]
+  if (policyYear) filters.push({ policyYear: { equals: policyYear } })
+
+  const policyResult = await payload.find({
+    collection: 'social-insurance-policies',
+    depth: 0,
+    limit: 1000,
+    sort: '-effectiveFrom',
+    where: { and: filters },
+  })
+  const groupedPolicies = new Map<string, CmsPolicyDoc[]>()
+
+  for (const policy of policyResult.docs as CmsPolicyDoc[]) {
+    const cityId = getRelationId(policy.city)
+    if (!cityId || !cityMap.has(cityId)) continue
+    groupedPolicies.set(cityId, [...(groupedPolicies.get(cityId) || []), policy])
+  }
+
+  const entries = Array.from(groupedPolicies.entries()).flatMap(([cityId, policies]) => {
+    const city = cityMap.get(cityId)
+    if (!city?.slug) return []
+
+    const versions = policies.map((policy) => adaptCmsPolicyToCityRule(policy, city))
+    const activeRule = selectEffectiveCityRule(versions, `${policyYear || new Date().getFullYear()}-12-31`) || versions[0]
+    if (!activeRule) return []
+
+    return [[city.slug, { ...activeRule, policyVersions: versions }] satisfies [string, CityRule]]
+  })
+
+  await payload.destroy()
+
+  return {
+    label: `Payload CMS active social-insurance-policies${policyYear ? ` ${policyYear}` : ''}`,
+    entries,
+  }
 }
 
 function formatRange(min: number, max: number) {
@@ -129,6 +266,14 @@ async function main() {
     { source: 0, baseRule: 0, itemRule: 0, housingRate: 0 } satisfies Record<RuleQualityCategory, number>,
   )
 
+  const summary = {
+    source: source.label,
+    cities: rows.length,
+    errors: errorCount,
+    warnings: warningCount,
+    categories: categorySummary,
+  }
+
   if (useJson) {
     // JSON 输出方便后续接入 CI、报表或后台任务。
     console.log(
@@ -136,18 +281,24 @@ async function main() {
         {
           rows,
           issues: currentIssues,
-          summary: {
-            source: source.label,
-            cities: rows.length,
-            errors: errorCount,
-            warnings: warningCount,
-            categories: categorySummary,
-          },
+          summary,
         },
         null,
         2,
       ),
     )
+  } else if (summaryOnly) {
+    console.log(`审计来源：${summary.source}`)
+    console.log(
+      `完成：${summary.cities} 个城市，${summary.errors} 个错误，${summary.warnings} 个提醒。` +
+        ` 来源 ${summary.categories.source}，基数 ${summary.categories.baseRule}，项目 ${summary.categories.itemRule}，公积金比例 ${summary.categories.housingRate}。`,
+    )
+    for (const issue of currentIssues.slice(0, 20)) {
+      console.log(`[${issue.severity}] ${issue.city}: ${issue.message}`)
+    }
+    if (currentIssues.length > 20) {
+      console.log(`还有 ${currentIssues.length - 20} 条问题未展示，可去掉 --summary 查看完整明细。`)
+    }
   } else {
     console.log(`审计来源：${source.label}`)
     console.table(rows)
@@ -169,7 +320,11 @@ async function main() {
   }
 }
 
-main().catch((error: unknown) => {
-  console.error(error)
-  process.exitCode = 1
-})
+main()
+  .then(() => {
+    process.exit(process.exitCode || 0)
+  })
+  .catch((error: unknown) => {
+    console.error(error)
+    process.exit(1)
+  })
