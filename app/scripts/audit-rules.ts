@@ -36,6 +36,7 @@ import { cityRules, selectEffectiveCityRule, type CityRule } from '../src/lib/ta
  * - npm run rules:audit -- --cms --policy-year 2026
  * - npm run rules:audit -- --cms --policy-year 2026 --summary
  * - npm run rules:audit -- --cms --policy-year 2026 --stale
+ * - npm run rules:audit -- --cms --policy-year 2026 --stale --stale-days 90
  * - npm run rules:audit -- ./data/hrwork.json --strict
  *
  * 它适合在修改、导入或采集城市基数、比例、来源信息后快速跑一遍，确认：
@@ -68,7 +69,8 @@ const summaryOnly = process.argv.includes('--summary')
 const staleOnly = process.argv.includes('--stale')
 const strict = process.argv.includes('--strict')
 const useCms = process.argv.includes('--cms')
-const inputPath = process.argv.find((arg, index) => index > 1 && !arg.startsWith('-'))
+const inputPath = getInputPath()
+const staleDays = parsePositiveInteger(getFlagValue('--stale-days'), '--stale-days') || 180
 let currentIssues: RuleQualityIssue[] = []
 
 type CmsCityDoc = {
@@ -89,6 +91,23 @@ function getFlagValue(name: string) {
 
   const index = process.argv.indexOf(name)
   if (index >= 0) return process.argv[index + 1]
+
+  return undefined
+}
+
+function getInputPath() {
+  const valueFlags = new Set(['--policy-year', '--stale-days'])
+
+  for (let index = 2; index < process.argv.length; index += 1) {
+    const arg = process.argv[index]
+    if (!arg || arg.startsWith('-')) {
+      if (valueFlags.has(arg)) index += 1
+      continue
+    }
+
+    if (valueFlags.has(process.argv[index - 1])) continue
+    return arg
+  }
 
   return undefined
 }
@@ -230,7 +249,7 @@ function formatRange(min: number, max: number) {
 
 function createRow(code: string, rule: CityRule, issues: RuleQualityIssue[]): AuditRow {
   const checkedAt = getPrimaryRuleSource(rule)?.checkedAt || ''
-  const freshness = getRuleFreshnessStatus(checkedAt)
+  const freshness = getRuleFreshnessStatus(checkedAt, new Date(), staleDays)
 
   return {
     code,
@@ -294,6 +313,7 @@ async function main() {
     status: statusSummary,
     errors: errorCount,
     warnings: warningCount,
+    staleDays,
     sourceUrlCoveragePercent: rows.length > 0 ? Math.round((sourceUrlCount / rows.length) * 100) : 0,
     categories: categorySummary,
   }
@@ -315,7 +335,7 @@ async function main() {
   } else if (summaryOnly) {
     console.log(`审计来源：${summary.source}`)
     console.log(
-      `完成：${summary.cities} 个城市${staleOnly ? `，展示待复核 ${summary.displayedCities} 个` : ''}，可用 ${summary.usableCities} 个。` +
+      `完成：${summary.cities} 个城市${staleOnly ? `，展示待复核 ${summary.displayedCities} 个（阈值 ${summary.staleDays} 天）` : ''}，可用 ${summary.usableCities} 个。` +
         ` OK ${summary.status.ok}，提醒 ${summary.status.warning}，错误 ${summary.status.error}。` +
         ` 来源 URL 覆盖率 ${summary.sourceUrlCoveragePercent}%。` +
         ` 问题合计：${summary.errors} 个错误，${summary.warnings} 个提醒。` +
@@ -332,7 +352,7 @@ async function main() {
     }
   } else {
     console.log(`审计来源：${source.label}`)
-    if (staleOnly) console.log(`仅展示需要复核或缺少核对日期的城市：${displayRows.length} 个`)
+    if (staleOnly) console.log(`仅展示需要复核或缺少核对日期的城市：${displayRows.length} 个（阈值 ${staleDays} 天）`)
     console.table(displayRows)
     if (currentIssues.length) {
       printIssueGroup('source', '来源问题')
