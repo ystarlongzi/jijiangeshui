@@ -362,13 +362,13 @@ function InsuranceTable({ insurance, month, money }: { insurance: InsuranceItem[
       key: item.name,
       cells: { name: item.name, employee: amountWithFormula(item.employee, item.employeeFormula), employer: amountWithFormula(item.employer, item.employerFormula), subtotal: money(item.subtotal, 2) },
     })),
-    { key: 'social-total', className: 'subtotal social-subtotal', cells: { name: '社保合计', employee: money(sum(social, 'employee'), 2), employer: money(sum(social, 'employer'), 2), subtotal: money(sum(social, 'subtotal'), 2) } },
+    { key: 'social-total', className: 'subtotal social-subtotal', tone: 'subtotal' as const, cells: { name: '社保合计', employee: money(sum(social, 'employee'), 2), employer: money(sum(social, 'employer'), 2), subtotal: money(sum(social, 'subtotal'), 2) } },
     ...housing.map((item) => ({
       key: item.name,
       className: 'housing-row',
       cells: { name: item.name, employee: amountWithFormula(item.employee, item.employeeFormula), employer: amountWithFormula(item.employer, item.employerFormula), subtotal: money(item.subtotal, 2) },
     })),
-    { key: 'insurance-total', className: 'subtotal total-subtotal', cells: { name: '社保、公积金合计', employee: money(sum(insurance, 'employee'), 2), employer: money(sum(insurance, 'employer'), 2), subtotal: money(sum(insurance, 'subtotal'), 2) } },
+    { key: 'insurance-total', className: 'subtotal total-subtotal', tone: 'subtotal' as const, cells: { name: '社保、公积金合计', employee: money(sum(insurance, 'employee'), 2), employer: money(sum(insurance, 'employer'), 2), subtotal: money(sum(insurance, 'subtotal'), 2) } },
   ]
   const exportCsv = () => {
     const header = ['缴纳项目', '个人缴纳', '个人公式', '企业缴纳', '企业公式', '小计']

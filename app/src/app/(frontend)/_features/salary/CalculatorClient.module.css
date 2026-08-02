@@ -712,9 +712,7 @@
 }
 
 .pageContent :global(.insurance-table tbody tr.subtotal td) {
-  border-top-style: solid;
   color: var(--orange);
-  font-weight: 750;
 }
 
 .pageContent :global(.insurance-table tbody tr.subtotal td:first-child) {
