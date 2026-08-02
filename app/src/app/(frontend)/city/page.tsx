@@ -5,7 +5,7 @@ import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
 import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
@@ -18,13 +18,17 @@ export const metadata: Metadata = {
 }
 
 export default async function CityIndexPage() {
-  const cityRules = await getAvailableCityRules()
+  const cityRuleDataset = await getAvailableCityRuleDataset()
+  const cityRules = cityRuleDataset.rules
   const cities = Object.entries(cityRules).sort(([, prev], [, next]) => {
     const provinceOrder = prev.province.localeCompare(next.province, 'zh-CN')
     if (provinceOrder !== 0) return provinceOrder
     return prev.label.localeCompare(next.label, 'zh-CN')
   })
   const cityStats = getCityRuleStats(cities, currentYear)
+  const isPayloadSource = cityRuleDataset.source === 'payload'
+  const cmsCoverage = isPayloadSource ? `${cityRuleDataset.cmsActivePolicyCities}/${cityRuleDataset.cmsEnabledCities}` : '未接入'
+  const mergedCities = isPayloadSource ? cityRuleDataset.cmsMergedCities : cityStats.total
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
@@ -48,9 +52,9 @@ export default async function CityIndexPage() {
     </section>
 
     <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
-      <div><span>已收录城市</span><strong>{cityStats.total}</strong></div>
-      <div><span>{currentYear} 年规则</span><strong>{cityStats.currentYearRules}</strong></div>
-      <div><span>已配置来源</span><strong>{cityStats.withSourceUrl}</strong></div>
+      <div><span>前台规则来源</span><strong className={styles.sourceValue}>{isPayloadSource ? 'Payload CMS' : '内置兜底'}</strong></div>
+      <div><span>CMS 有效城市</span><strong>{cmsCoverage}</strong></div>
+      <div><span>已合并城市</span><strong>{mergedCities}</strong></div>
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong></div>
     </section>
 

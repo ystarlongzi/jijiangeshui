@@ -430,6 +430,10 @@
   font-weight: 750;
 }
 
+.coveragePanel .sourceValue {
+  font-size: 18px;
+}
+
 .provinceSection {
   padding: 12px 0 34px;
 }
