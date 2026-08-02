@@ -11,6 +11,7 @@ export type RuleQualityIssue = {
 }
 
 export type RuleQualityStatus = 'ok' | 'warning' | 'error'
+export type RuleFreshnessStatus = 'fresh' | 'stale' | 'missing'
 
 export type CityRuleStats = {
   total: number
@@ -31,6 +32,21 @@ export function getPrimaryRuleSource(rule: CityRule) {
 
 export function hasRuleSourceUrl(rule: CityRule) {
   return rule.sources.some((source) => Boolean(source.url))
+}
+
+export function getRuleFreshnessStatus(checkedAt?: string, now = new Date(), staleDays = 180): RuleFreshnessStatus {
+  if (!checkedAt) return 'missing'
+  const checkedDate = new Date(`${checkedAt}T00:00:00+08:00`)
+  if (Number.isNaN(checkedDate.getTime())) return 'missing'
+
+  const diffDays = Math.floor((now.getTime() - checkedDate.getTime()) / 86400000)
+  return diffDays > staleDays ? 'stale' : 'fresh'
+}
+
+export function getRuleFreshnessLabel(status: RuleFreshnessStatus) {
+  if (status === 'fresh') return '近期核对'
+  if (status === 'stale') return '需要复核'
+  return '缺少核对'
 }
 
 export function getRuleQualityStatus(issues: RuleQualityIssue[]): RuleQualityStatus {

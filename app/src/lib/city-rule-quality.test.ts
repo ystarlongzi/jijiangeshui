@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { auditCityRule, getCityRuleStats, getRuleQualityStatus, hasRuleSourceUrl } from './city-rule-quality'
+import {
+  auditCityRule,
+  getCityRuleStats,
+  getRuleFreshnessLabel,
+  getRuleFreshnessStatus,
+  getRuleQualityStatus,
+  hasRuleSourceUrl,
+} from './city-rule-quality'
 import { cityRules, type CityRule } from './tax-rules'
 
 test('城市规则质量：缺少来源 URL 时给出提醒但不阻断', () => {
@@ -36,4 +43,19 @@ test('城市规则统计：汇总当年规则和来源覆盖情况', () => {
   assert.equal(stats.missingSourceUrl, 5)
   assert.equal(stats.sourceUrlCoverageRate, 0)
   assert.equal(stats.warnings, 5)
+})
+
+test('城市规则核对新鲜度：按核对日期判断是否需要复核', () => {
+  const now = new Date('2026-08-02T12:00:00+08:00')
+
+  assert.equal(getRuleFreshnessStatus('2026-07-01', now), 'fresh')
+  assert.equal(getRuleFreshnessStatus('2025-12-01', now), 'stale')
+  assert.equal(getRuleFreshnessStatus('', now), 'missing')
+  assert.equal(getRuleFreshnessStatus('bad-date', now), 'missing')
+})
+
+test('城市规则核对新鲜度：输出前台展示文案', () => {
+  assert.equal(getRuleFreshnessLabel('fresh'), '近期核对')
+  assert.equal(getRuleFreshnessLabel('stale'), '需要复核')
+  assert.equal(getRuleFreshnessLabel('missing'), '缺少核对')
 })
