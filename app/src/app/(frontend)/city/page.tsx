@@ -30,7 +30,14 @@ export default async function CityIndexPage() {
   const isPayloadSource = cityRuleDataset.source === 'payload'
   const datasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
   const cmsCoverage = isPayloadSource ? `${cityRuleDataset.cmsActivePolicyCities}/${cityRuleDataset.cmsEnabledCities}` : '未接入'
-  const mergedCities = isPayloadSource ? cityRuleDataset.cmsMergedCities : cityStats.total
+  const sourceCounts = cities.reduce(
+    (counts, [key]) => {
+      const source = cityRuleDataset.ruleSourcesByCity[key] || 'fallback'
+      counts[source] += 1
+      return counts
+    },
+    { fallback: 0, payload: 0 },
+  )
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
@@ -66,7 +73,7 @@ export default async function CityIndexPage() {
     <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
       <div><span>前台规则来源</span><strong className={styles.sourceValue}>{datasetSummary.sourceLabel}</strong><small>{datasetSummary.sourceDetail}</small></div>
       <div><span>CMS 有效城市</span><strong>{cmsCoverage}</strong></div>
-      <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>已合并 {mergedCities} 个</small></div>
+      <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>CMS {sourceCounts.payload} 个 · 兜底 {sourceCounts.fallback} 个</small></div>
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong><small>URL 覆盖率 {cityStats.sourceUrlCoverageRate}%</small></div>
     </section>
 
