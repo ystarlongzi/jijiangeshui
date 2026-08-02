@@ -19,6 +19,7 @@ import styles from './ReverseTaxClient.module.css'
 import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSelector'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
+import { getCityRuleSourceStatus, type FrontendCityRuleDatasetSummary, type FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
@@ -27,11 +28,8 @@ import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 
 type ReverseTaxClientProps = {
   rules?: Record<string, CityRule>
-  ruleSourcesByCity?: Record<string, 'payload' | 'fallback'>
-  ruleDatasetSummary?: {
-    sourceLabel: string
-    sourceDetail: string
-  }
+  ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
+  ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
 export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSourcesByCity = {}, ruleDatasetSummary }: ReverseTaxClientProps) {
@@ -74,13 +72,9 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSource
   }, [])
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
-  const activeRuleSource = ruleSourcesByCity[city] || 'fallback'
-  const activeRuleSourceLabel = activeRuleSource === 'payload' ? 'Payload CMS' : '内置兜底'
-  const activeRuleSourceDetail = activeRuleSource === 'payload'
-    ? ruleDatasetSummary?.sourceDetail || '已使用后台有效规则'
-    : ruleDatasetSummary?.sourceLabel === '内置兜底'
-      ? ruleDatasetSummary.sourceDetail
-      : '当前城市暂无后台有效规则'
+  const activeRuleSourceStatus = getCityRuleSourceStatus({ city, ruleSourcesByCity, ruleDatasetSummary })
+  const activeRuleSourceLabel = activeRuleSourceStatus.label
+  const activeRuleSourceDetail = activeRuleSourceStatus.detail
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const cityHousingRateOptions = getHousingRateOptions(rule)
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)

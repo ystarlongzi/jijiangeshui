@@ -26,6 +26,7 @@ import ValidationPanel from '../../_components/ValidationPanel'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
 import { trackEvent } from '../../_lib/analytics'
+import { getCityRuleSourceStatus, type FrontendCityRuleDatasetSummary, type FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { downloadCsv } from '../../_lib/csv'
 import styles from './CalculatorClient.module.css'
 
@@ -33,11 +34,8 @@ const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', 
 
 type CalculatorClientProps = {
   rules?: Record<string, CityRule>
-  ruleSourcesByCity?: Record<string, 'payload' | 'fallback'>
-  ruleDatasetSummary?: {
-    sourceLabel: string
-    sourceDetail: string
-  }
+  ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
+  ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
 export default function CalculatorClient({ rules = fallbackCityRules, ruleSourcesByCity = {}, ruleDatasetSummary }: CalculatorClientProps) {
@@ -62,13 +60,9 @@ export default function CalculatorClient({ rules = fallbackCityRules, ruleSource
   const [toast, setToast] = useState('')
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
-  const activeRuleSource = ruleSourcesByCity[city] || 'fallback'
-  const activeRuleSourceLabel = activeRuleSource === 'payload' ? 'Payload CMS' : '内置兜底'
-  const activeRuleSourceDetail = activeRuleSource === 'payload'
-    ? ruleDatasetSummary?.sourceDetail || '已使用后台有效规则'
-    : ruleDatasetSummary?.sourceLabel === '内置兜底'
-      ? ruleDatasetSummary.sourceDetail
-      : '当前城市暂无后台有效规则'
+  const activeRuleSourceStatus = getCityRuleSourceStatus({ city, ruleSourcesByCity, ruleDatasetSummary })
+  const activeRuleSourceLabel = activeRuleSourceStatus.label
+  const activeRuleSourceDetail = activeRuleSourceStatus.detail
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const ruleSourceLinks = rule.sources
     .filter((source): source is typeof source & { url: string } => Boolean(source.url))
