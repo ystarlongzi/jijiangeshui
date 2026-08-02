@@ -40,6 +40,10 @@
   white-space: nowrap;
 }
 
+.table tbody tr:first-child td {
+  border-top: 0;
+}
+
 .table tbody tr[data-tone='highlight'] td {
   background: var(--accent-soft);
   border-top-color: transparent;

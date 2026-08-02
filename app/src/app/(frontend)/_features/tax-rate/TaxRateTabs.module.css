@@ -156,10 +156,6 @@
   text-align: left;
 }
 
-.table tbody tr:first-child td {
-  border-top: 0;
-}
-
 .tabNote {
   display: flex;
   align-items: start;
