@@ -118,6 +118,18 @@
   font-weight: 700;
 }
 
+.ruleStatusCard dd[data-freshness='fresh'] {
+  color: var(--accent);
+}
+
+.ruleStatusCard dd[data-freshness='stale'] {
+  color: #f56b2a;
+}
+
+.ruleStatusCard dd[data-freshness='missing'] {
+  color: #c7392f;
+}
+
 .ruleSourceHint {
   grid-column: 1 / -1;
   margin: 0;
