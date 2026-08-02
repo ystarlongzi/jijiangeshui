@@ -19,7 +19,7 @@ import styles from './ReverseTaxClient.module.css'
 import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSelector'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
-import { getCityRuleSourceStatus, type FrontendCityRuleDatasetSummary, type FrontendCityRuleSource } from '../../_lib/cityRuleSource'
+import type { FrontendCityRuleDatasetSummary, FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getHousingRateOptions, type CityRule } from '@/lib/tax-rules'
@@ -32,7 +32,7 @@ type ReverseTaxClientProps = {
   ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
-export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSourcesByCity = {}, ruleDatasetSummary }: ReverseTaxClientProps) {
+export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseTaxClientProps) {
   const { money } = useMoneyFormat()
   const cityRules = rules
   const [targetTakeHome, setTargetTakeHome] = useState(15000)
@@ -72,9 +72,6 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSource
   }, [])
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
-  const activeRuleSourceStatus = getCityRuleSourceStatus({ city, ruleSourcesByCity, ruleDatasetSummary })
-  const activeRuleSourceLabel = activeRuleSourceStatus.label
-  const activeRuleSourceDetail = activeRuleSourceStatus.detail
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const cityHousingRateOptions = getHousingRateOptions(rule)
   const selectedDeductionItems = Object.values(deductions).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
@@ -118,7 +115,6 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSource
       `计算月份：${month} 月`,
       `入职月份：${startMonth} 月`,
       `规则核对日期：${ruleSourceDate}`,
-      `规则来源：${activeRuleSourceLabel}（${activeRuleSourceDetail}）`,
       `期望到手工资：${money(targetTakeHome)}`,
       `专项附加扣除：${money(deductionAmount)} / 月`,
       '',
@@ -154,7 +150,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, ruleSource
         <FormField className={styles.deductions} htmlFor="reverseDeduction" label="专项附加扣除" action={<Button className={styles.textButton} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}，合计 ${money(deductionAmount)} / 月。` : '可直接输入本月专项附加扣除总额，也可以按项目选择后自动回填。'}><MoneyInput id="reverseDeduction" value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductions({}) }} /></FormField>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>
-      <Panel as="section" className={styles.result} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>反推结果</span><p>{rule.label} · {currentYear} 年 {month} 月</p><div className={styles.ruleSourceStatus}><span>规则来源</span><strong>{activeRuleSourceLabel}</strong><em>{activeRuleSourceDetail}</em></div></div><span className={styles.badge}>累计预扣</span></div><div className={styles.required}><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><MetricGrid items={[{ label: '预计到手', value: money(result.result.takeHome, 2) }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '个人五险一金', value: money(employeeInsurance, 2) }, { label: '适用预扣率', value: `${rate}%` }]} /><div className={styles.resultExplain}><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><ResultActions><ResultActionLink href="/calculator">进入工资计算器 <span>→</span></ResultActionLink><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></Panel>
+      <Panel as="section" className={styles.result} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>反推结果</span><p>{rule.label} · {currentYear} 年 {month} 月</p></div><span className={styles.badge}>累计预扣</span></div><div className={styles.required}><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><MetricGrid items={[{ label: '预计到手', value: money(result.result.takeHome, 2) }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '个人五险一金', value: money(employeeInsurance, 2) }, { label: '适用预扣率', value: `${rate}%` }]} /><div className={styles.resultExplain}><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><ResultActions><ResultActionLink href="/calculator">进入工资计算器 <span>→</span></ResultActionLink><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></Panel>
     </section>
     <ReverseProcess result={result} targetTakeHome={targetTakeHome} employeeInsurance={employeeInsurance} />
     <section className={styles.explain}><div><h2>结果怎么使用？</h2><p>反推结果适合用于谈薪、核对 offer 和预算估算。实际工资条可能受到奖金、补发工资、单位缴费口径等因素影响。</p></div><a href="/calculator">进入工资薪金计算器 <ArrowRight size={15} /></a></section>

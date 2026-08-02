@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { AlertTriangle, ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
 import { getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
-import { getAvailableCityRule, getAvailableCityRuleDataset, getAvailableCityRules, getCityRuleDatasetSummary } from '@/lib/city-rule-service'
-import { auditCityRule, getRuleFreshnessLabel, getRuleFreshnessStatus, getRuleQualityStatus } from '@/lib/city-rule-quality'
+import { getAvailableCityRule, getAvailableCityRuleDataset, getAvailableCityRules } from '@/lib/city-rule-service'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../_components/SiteHeader'
@@ -12,7 +11,6 @@ import DataTable from '../../_components/DataTable'
 import Panel from '../../_components/Panel'
 import PrimaryActionLink from '../../_components/PrimaryActionLink'
 import RuleSourcePanel from '../../_components/RuleSourcePanel'
-import { getCityRuleSourceStatus } from '../../_lib/cityRuleSource'
 import styles from '../CityPages.module.css'
 
 type CityPageProps = { params: Promise<{ city: string }> }
@@ -33,12 +31,6 @@ export default async function CityPage({ params }: CityPageProps) {
   const cityRuleDataset = await getAvailableCityRuleDataset()
   const rule = cityRuleDataset.rules[city]
   if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
-  const ruleDatasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
-  const ruleSourceStatus = getCityRuleSourceStatus({
-    city,
-    ruleDatasetSummary,
-    ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
-  })
   const exampleSalary = 20000
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
@@ -50,12 +42,6 @@ export default async function CityPage({ params }: CityPageProps) {
   const ruleSourceLinks = rule.sources
     .filter((source): source is typeof source & { url: string } => Boolean(source.url))
     .map((source) => ({ label: source.title, url: source.url }))
-  const ruleQualityIssues = auditCityRule(city, rule)
-  const ruleQualityStatus = getRuleQualityStatus(ruleQualityIssues)
-  const ruleQualityLabel = ruleQualityStatus === 'error' ? '规则需补齐' : ruleQualityStatus === 'warning' ? '来源待补' : '规则完整'
-  const ruleFreshnessStatus = getRuleFreshnessStatus(ruleSourceDate)
-  const ruleFreshnessLabel = getRuleFreshnessLabel(ruleFreshnessStatus)
-  const hiddenRuleIssueCount = Math.max(ruleQualityIssues.length - 3, 0)
   const contributionRows = rule.contributionItems.map((item) => ({
     key: item.code,
     cells: {
@@ -68,7 +54,7 @@ export default async function CityPage({ params }: CityPageProps) {
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
-    <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={[styles.status, styles.ruleStatusCard, styles[`${ruleQualityStatus}RuleStatus`]].join(' ')}>{ruleQualityStatus === 'error' ? <AlertTriangle size={20} /> : <ShieldCheck size={20} />}<div><span>规则状态</span><strong>{ruleQualityLabel}</strong></div><dl><div><dt>规则来源</dt><dd>{ruleSourceStatus.label}</dd></div><div><dt>生效日期</dt><dd>{rule.effective}</dd></div><div><dt>核对日期</dt><dd>{ruleSourceDate}</dd></div><div><dt>核对状态</dt><dd data-freshness={ruleFreshnessStatus}>{ruleFreshnessLabel}</dd></div><div><dt>来源链接</dt><dd>{ruleSourceLinks.length || 0} 个</dd></div></dl>{ruleQualityIssues.length > 0 ? <ul className={styles.ruleIssueList}>{ruleQualityIssues.slice(0, 3).map((issue) => <li key={`${issue.category}-${issue.message}`}>{issue.message}</li>)}{hiddenRuleIssueCount > 0 ? <li>另有 {hiddenRuleIssueCount} 项待处理</li> : null}</ul> : null}<p className={styles.ruleSourceHint}>{ruleSourceStatus.detail}</p></div></section>
+    <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={styles.status}><ShieldCheck size={20} /><div><span>当前规则生效</span><strong>{formatDisplayDate(rule.effective)}</strong></div></div></section>
     <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>{socialBaseRule.label}</dt><dd>{formatMoney(socialBaseRule.min)} - {formatMoney(socialBaseRule.max)}</dd></div><div><dt>{housingBaseRule.label}</dt><dd>{formatMoney(housingBaseRule.min)} - {formatMoney(housingBaseRule.max)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl>{rule.contributionItems.filter((item) => item.systemType === 'social').slice(0, 3).map((item) => <div key={item.code}><dt>{item.name}</dt><dd>{formatSideRule(item.employee)} / {formatSideRule(item.employer)}</dd></div>)}<div><dt>公积金</dt><dd>个人和单位可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%</dd></div></dl></article></section>
     <Panel as="section" className={styles.policyTablePanel}>
       <div className={styles.tableHeading}>
@@ -118,6 +104,10 @@ export default async function CityPage({ params }: CityPageProps) {
 
 function formatMoney(value: number) {
   return `¥${value.toLocaleString('zh-CN')}`
+}
+
+function formatDisplayDate(value: string) {
+  return value.split('T')[0]
 }
 
 function formatSideRule(rule: { method: string; rate?: number; fixedAmount?: number }) {

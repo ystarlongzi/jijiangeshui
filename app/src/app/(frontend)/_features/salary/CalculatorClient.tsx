@@ -26,7 +26,7 @@ import ValidationPanel from '../../_components/ValidationPanel'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
 import { trackEvent } from '../../_lib/analytics'
-import { getCityRuleSourceStatus, type FrontendCityRuleDatasetSummary, type FrontendCityRuleSource } from '../../_lib/cityRuleSource'
+import type { FrontendCityRuleDatasetSummary, FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { downloadCsv } from '../../_lib/csv'
 import styles from './CalculatorClient.module.css'
 
@@ -38,7 +38,7 @@ type CalculatorClientProps = {
   ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
-export default function CalculatorClient({ rules = fallbackCityRules, ruleSourcesByCity = {}, ruleDatasetSummary }: CalculatorClientProps) {
+export default function CalculatorClient({ rules = fallbackCityRules }: CalculatorClientProps) {
   const { money } = useMoneyFormat()
   const cityRules = rules
   const [city, setCity] = useState('beijing')
@@ -60,9 +60,6 @@ export default function CalculatorClient({ rules = fallbackCityRules, ruleSource
   const [toast, setToast] = useState('')
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
-  const activeRuleSourceStatus = getCityRuleSourceStatus({ city, ruleSourcesByCity, ruleDatasetSummary })
-  const activeRuleSourceLabel = activeRuleSourceStatus.label
-  const activeRuleSourceDetail = activeRuleSourceStatus.detail
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const ruleSourceLinks = rule.sources
     .filter((source): source is typeof source & { url: string } => Boolean(source.url))
@@ -235,7 +232,6 @@ export default function CalculatorClient({ rules = fallbackCityRules, ruleSource
       `累计应纳税所得额：${money(result.taxable, 2)}`,
       `适用预扣率：${rate}%`,
       `规则核对日期：${ruleSourceDate}`,
-      `规则来源：${activeRuleSourceLabel}（${activeRuleSourceDetail}）`,
       '结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。',
     ].join('\n')
 
@@ -275,7 +271,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, ruleSource
         </Panel>
 
         <div className="results-column">
-          <Panel as="section" className="result-panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className={styles.ruleSourceStatus}><span>规则来源</span><strong>{activeRuleSourceLabel}</strong><em>{activeRuleSourceDetail}</em></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
+          <Panel as="section" className="result-panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {currentYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
             <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
             <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{[3, 10, 20, 25, 30, 35, 45].map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><ResultActions><ResultActionButton onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></ResultActionButton><ResultActionButton onClick={copyPayslip}><Copy size={14} />复制工资条</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</Panel>
           <InsuranceTable insurance={insurance} month={month} money={money} />

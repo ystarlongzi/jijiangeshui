@@ -36,7 +36,6 @@
 }
 
 .provinceFilter button,
-.healthFilter button,
 .resultMeta button {
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -54,17 +53,6 @@
   padding: 8px 11px;
 }
 
-.healthFilter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.healthFilter button {
-  padding: 7px 10px;
-}
-
 .provinceFilter span {
   color: var(--subtle);
   font-size: 11px;
@@ -72,9 +60,7 @@
 }
 
 .provinceFilter button:hover,
-.provinceFilter .active,
-.healthFilter button:hover,
-.healthFilter .active {
+.provinceFilter .active {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
@@ -162,58 +148,6 @@
   color: var(--ink);
   font-weight: 750;
   text-align: right;
-}
-
-.ruleMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: -4px;
-}
-
-.ruleMeta em {
-  padding: 5px 8px;
-  border-radius: 999px;
-  background: var(--surface-muted);
-  color: var(--muted);
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 650;
-}
-
-.ruleMeta .okStatus {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.ruleMeta .warnStatus {
-  background: #fff4e8;
-  color: #d96b20;
-}
-
-.ruleMeta .cmsStatus {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.ruleMeta .fallbackStatus {
-  background: var(--surface-muted);
-  color: var(--subtle);
-}
-
-.ruleMeta em[data-freshness='fresh'] {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.ruleMeta em[data-freshness='stale'] {
-  background: #fff4e8;
-  color: #d96b20;
-}
-
-.ruleMeta em[data-freshness='missing'] {
-  background: #fff0ef;
-  color: #c7392f;
 }
 
 .card strong {

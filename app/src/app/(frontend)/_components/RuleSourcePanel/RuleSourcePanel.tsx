@@ -11,16 +11,18 @@ type RuleSourcePanelProps = {
 }
 
 export default function RuleSourcePanel({
-  title = '规则来源',
-  description = '计算口径参考国家税务总局公开规则，政策变化后需要更新规则版本和核对日期。',
+  title = '官方依据',
+  description = '计算口径参考国家税务总局公开规则，政策变化后会更新规则版本和核对日期。',
   checkedAt = ruleCheckedDate,
   sourceLabel = '查看国家税务总局规则',
   sourceUrl = 'https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html',
   links,
 }: RuleSourcePanelProps) {
-  const sourceLinks = links || [{ label: sourceLabel, url: sourceUrl }]
+  const defaultSourceLinks = [{ label: sourceLabel, url: sourceUrl }]
+  const visibleLinks = (links || defaultSourceLinks).filter((link) => !isThirdPartyRuleLink(link))
+  const sourceLinks = visibleLinks.length > 0 ? visibleLinks : defaultSourceLinks
 
-  return <section className={styles.section} aria-label="官方来源">
+  return <section className={styles.section} aria-label="官方依据">
     <div>
       <h2>{title}</h2>
       <p>{description}</p>
@@ -30,4 +32,10 @@ export default function RuleSourcePanel({
       {sourceLinks.length > 0 ? sourceLinks.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>) : <span>暂无来源链接</span>}
     </div>
   </section>
+}
+
+function isThirdPartyRuleLink(link: { label: string; url: string }) {
+  const label = link.label.toLowerCase()
+  const url = link.url.toLowerCase()
+  return label.includes('hrwork') || label.includes('第三方') || url.includes('hrwork')
 }
