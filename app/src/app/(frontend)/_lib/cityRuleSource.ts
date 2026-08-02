@@ -5,6 +5,8 @@ export type FrontendCityRuleDatasetSummary = {
   sourceDetail: string
 }
 
+export type FrontendCityRuleSourceCounts = Record<FrontendCityRuleSource, number>
+
 type CityRuleSourceStatusInput = {
   city: string
   ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
@@ -24,4 +26,15 @@ export function getCityRuleSourceStatus({ city, ruleSourcesByCity = {}, ruleData
     label: isPayload ? 'Payload CMS' : '内置兜底',
     source,
   }
+}
+
+export function countCityRuleSources(cityKeys: Iterable<string>, ruleSourcesByCity: Record<string, FrontendCityRuleSource> = {}): FrontendCityRuleSourceCounts {
+  const counts: FrontendCityRuleSourceCounts = { fallback: 0, payload: 0 }
+
+  for (const cityKey of cityKeys) {
+    const source = ruleSourcesByCity[cityKey] || 'fallback'
+    counts[source] += 1
+  }
+
+  return counts
 }

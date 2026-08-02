@@ -9,7 +9,7 @@ import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/ci
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
-import { getCityRuleSourceStatus } from '../_lib/cityRuleSource'
+import { countCityRuleSources, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
 import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
@@ -30,14 +30,7 @@ export default async function CityIndexPage() {
   const isPayloadSource = cityRuleDataset.source === 'payload'
   const datasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
   const cmsCoverage = isPayloadSource ? `${cityRuleDataset.cmsActivePolicyCities}/${cityRuleDataset.cmsEnabledCities}` : '未接入'
-  const sourceCounts = cities.reduce(
-    (counts, [key]) => {
-      const source = cityRuleDataset.ruleSourcesByCity[key] || 'fallback'
-      counts[source] += 1
-      return counts
-    },
-    { fallback: 0, payload: 0 },
-  )
+  const sourceCounts = countCityRuleSources(cities.map(([key]) => key), cityRuleDataset.ruleSourcesByCity)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
