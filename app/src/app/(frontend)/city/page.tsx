@@ -77,7 +77,18 @@ export default async function CityIndexPage() {
       <div className={styles.provinceList}>
         {Object.entries(cityGroups).map(([province, group]) => <div className={styles.provinceCard} key={province}>
           <strong>{province}</strong>
-          <div>{group.map(([key, rule]) => <Link href={`/city/${key}`} key={key}>{rule.name}</Link>)}</div>
+          <div>{group.map(([key, rule]) => {
+            const sourceStatus = getCityRuleSourceStatus({
+              city: key,
+              ruleDatasetSummary: datasetSummary,
+              ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
+            })
+
+            return <Link className={styles.cityLink} href={`/city/${key}`} key={key}>
+              <span>{rule.name}</span>
+              <small data-source={sourceStatus.source}>{sourceStatus.source === 'payload' ? 'CMS' : '兜底'}</small>
+            </Link>
+          })}</div>
         </div>)}
       </div>
     </section>

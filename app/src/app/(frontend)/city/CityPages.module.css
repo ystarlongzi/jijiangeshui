@@ -478,7 +478,10 @@
   gap: 8px;
 }
 
-.provinceCard a {
+.provinceCard .cityLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -486,6 +489,21 @@
   color: var(--accent);
   font-size: 12px;
   font-weight: 750;
+}
+
+.cityLink small {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cityLink small[data-source='payload'] {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 @media (max-width: 680px) {
