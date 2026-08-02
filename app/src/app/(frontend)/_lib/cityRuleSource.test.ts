@@ -3,19 +3,19 @@ import test from 'node:test'
 import type { CityRule } from '@/lib/tax-rules'
 import { countCityRuleSources, getCityRuleSourceBadgeLabel, getCityRuleSourceCoverage, getCityRuleSourceStatus, getPreferredCityRuleLinks } from './cityRuleSource'
 
-test('returns Payload CMS status for cities backed by CMS rules', () => {
+test('returns public status for cities backed by managed rules', () => {
   const status = getCityRuleSourceStatus({
     city: 'beijing',
     ruleDatasetSummary: {
-      sourceDetail: '已从 Payload CMS 读取 2 个有效城市',
-      sourceLabel: 'Payload CMS',
+      sourceDetail: '已从后台规则读取 2 个有效城市',
+      sourceLabel: '后台规则',
     },
     ruleSourcesByCity: { beijing: 'payload' },
   })
 
   assert.equal(status.source, 'payload')
-  assert.equal(status.label, 'Payload CMS')
-  assert.equal(status.detail, '已从 Payload CMS 读取 2 个有效城市')
+  assert.equal(status.label, '已收录规则')
+  assert.equal(status.detail, '已收录城市规则')
 })
 
 test('returns dataset fallback detail when the whole dataset is fallback', () => {
@@ -23,31 +23,31 @@ test('returns dataset fallback detail when the whole dataset is fallback', () =>
     city: 'beijing',
     ruleDatasetSummary: {
       sourceDetail: '未配置 DATABASE_URI，使用内置城市规则',
-      sourceLabel: '内置兜底',
+      sourceLabel: '默认规则',
     },
   })
 
   assert.equal(status.source, 'fallback')
-  assert.equal(status.label, '内置兜底')
-  assert.equal(status.detail, '未配置 DATABASE_URI，使用内置城市规则')
+  assert.equal(status.label, '规则待补')
+  assert.equal(status.detail, '使用默认城市规则')
 })
 
-test('returns city-level fallback detail when CMS is available but a city is not backed by CMS', () => {
+test('returns city-level fallback detail when managed rules are available but a city is not backed by them', () => {
   const status = getCityRuleSourceStatus({
     city: 'hangzhou',
     ruleDatasetSummary: {
-      sourceDetail: '已从 Payload CMS 读取 2 个有效城市',
-      sourceLabel: 'Payload CMS',
+      sourceDetail: '已从后台规则读取 2 个有效城市',
+      sourceLabel: '后台规则',
     },
     ruleSourcesByCity: { beijing: 'payload', hangzhou: 'fallback' },
   })
 
   assert.equal(status.source, 'fallback')
-  assert.equal(status.label, '内置兜底')
-  assert.equal(status.detail, '当前城市暂无后台有效规则')
+  assert.equal(status.label, '规则待补')
+  assert.equal(status.detail, '当前城市规则待补充')
 })
 
-test('counts Payload CMS and fallback city rule sources', () => {
+test('counts managed and fallback city rule sources', () => {
   const counts = countCityRuleSources(['beijing', 'shanghai', 'hangzhou'], {
     beijing: 'payload',
     shanghai: 'payload',
@@ -56,7 +56,7 @@ test('counts Payload CMS and fallback city rule sources', () => {
   assert.deepEqual(counts, { fallback: 1, payload: 2 })
 })
 
-test('calculates Payload CMS city rule coverage rate', () => {
+test('calculates managed city rule coverage rate', () => {
   const coverage = getCityRuleSourceCoverage(['beijing', 'shanghai', 'hangzhou', 'guangzhou'], {
     beijing: 'payload',
     shanghai: 'payload',
@@ -67,8 +67,8 @@ test('calculates Payload CMS city rule coverage rate', () => {
 })
 
 test('returns short labels for city rule sources', () => {
-  assert.equal(getCityRuleSourceBadgeLabel('payload'), 'CMS')
-  assert.equal(getCityRuleSourceBadgeLabel('fallback'), '兜底')
+  assert.equal(getCityRuleSourceBadgeLabel('payload'), '已收录')
+  assert.equal(getCityRuleSourceBadgeLabel('fallback'), '待补')
 })
 
 test('builds preferred city links and skips unavailable cities', () => {
@@ -82,7 +82,7 @@ test('builds preferred city links and skips unavailable cities', () => {
   })
 
   assert.deepEqual(links, [
-    { key: 'beijing', label: '北京市', sourceLabel: 'CMS', sourceType: 'payload' },
-    { key: 'hangzhou', label: '杭州市', sourceLabel: '兜底', sourceType: 'fallback' },
+    { key: 'beijing', label: '北京市', sourceLabel: '已收录', sourceType: 'payload' },
+    { key: 'hangzhou', label: '杭州市', sourceLabel: '待补', sourceType: 'fallback' },
   ])
 })
