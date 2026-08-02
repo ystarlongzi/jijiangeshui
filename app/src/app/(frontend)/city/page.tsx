@@ -8,6 +8,7 @@ import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
 import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
+import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
 import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
@@ -29,6 +30,18 @@ export default async function CityIndexPage() {
     groups[province] = [...(groups[province] || []), city]
     return groups
   }, {})
+  const cityExplorerItems: CityRuleExplorerItem[] = cities.map(([key, rule]) => ({
+    effective: rule.effective,
+    housingBaseRange: formatBaseRange(rule, 'housingFund'),
+    key,
+    label: rule.label,
+    name: rule.name,
+    pinyin: rule.pinyin,
+    province: rule.province,
+    socialBaseRange: formatBaseRange(rule, 'social'),
+    sourceReady: hasRuleSourceUrl(rule),
+  }))
+
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <section className={`${styles.hero} ${styles.indexHero}`}>
       <div><div className={styles.titleLine}><MapPin size={20} /><span>{currentYear} 年城市规则</span></div><h1>城市个税计算器</h1><p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p></div>
@@ -41,20 +54,7 @@ export default async function CityIndexPage() {
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong></div>
     </section>
 
-    <section className={styles.indexGrid} aria-label="已收录城市">
-      {cities.map(([key, rule]) => <Link className={styles.indexCard} href={`/city/${key}`} key={key}>
-        <span>{rule.label}</span><small>{rule.province} · {rule.pinyin}</small>
-        <dl>
-          <div><dt>社保基数</dt><dd>{formatBaseRange(rule, 'social')}</dd></div>
-          <div><dt>公积金基数</dt><dd>{formatBaseRange(rule, 'housingFund')}</dd></div>
-        </dl>
-        <div className={styles.ruleMeta}>
-          <span>生效 {rule.effective}</span>
-          <span className={hasRuleSourceUrl(rule) ? styles.okStatus : styles.warnStatus}>{hasRuleSourceUrl(rule) ? '已配置来源' : '来源待补'}</span>
-        </div>
-        <strong>查看城市规则 <ArrowRight size={14} /></strong>
-      </Link>)}
-    </section>
+    <CityRuleExplorer cities={cityExplorerItems} />
 
     <section className={styles.provinceSection} aria-label="按地区浏览城市">
       <SectionHeading title="按地区浏览" description="按省份汇总已收录城市，进入城市页后可查看当地社保、公积金基数范围和默认比例。" />

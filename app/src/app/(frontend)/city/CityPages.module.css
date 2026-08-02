@@ -395,13 +395,6 @@
   font-size: 11px;
 }
 
-.indexGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  padding: 32px 0;
-}
-
 .coveragePanel {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -435,98 +428,6 @@
   color: var(--ink);
   font-size: 24px;
   font-weight: 750;
-}
-
-.indexCard {
-  display: grid;
-  gap: 18px;
-  min-height: 188px;
-  padding: 22px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.indexCard:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.indexCard > span {
-  color: var(--ink);
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.indexCard > small {
-  margin-top: -12px;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.indexCard dl {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-}
-
-.indexCard dl div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-}
-
-.indexCard dt,
-.indexCard dd {
-  margin: 0;
-  font-size: 11px;
-}
-
-.indexCard dt {
-  color: var(--muted);
-}
-
-.indexCard dd {
-  color: var(--ink);
-  font-weight: 750;
-  text-align: right;
-}
-
-.ruleMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: -4px;
-}
-
-.ruleMeta span {
-  padding: 5px 8px;
-  border-radius: 999px;
-  background: var(--surface-muted);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.ruleMeta .okStatus {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.ruleMeta .warnStatus {
-  background: #fff4e8;
-  color: #d96b20;
-}
-
-.indexCard strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent);
-  font-size: 12px;
 }
 
 .provinceSection {

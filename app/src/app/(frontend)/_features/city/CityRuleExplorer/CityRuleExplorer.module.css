@@ -1,0 +1,207 @@
+.explorer {
+  padding: 32px 0;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchBox svg {
+  position: absolute;
+  left: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.searchBox input {
+  width: 100%;
+  min-height: 44px;
+  padding-left: 40px;
+}
+
+.provinceFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.provinceFilter button,
+.resultMeta button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.provinceFilter button {
+  padding: 8px 11px;
+}
+
+.provinceFilter button:hover,
+.provinceFilter .active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.resultMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.resultMeta button {
+  padding: 6px 10px;
+  color: var(--accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  display: grid;
+  gap: 18px;
+  min-height: 188px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.card:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.card > span {
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.card > small {
+  margin-top: -12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.card dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.card dt,
+.card dd {
+  margin: 0;
+  font-size: 11px;
+}
+
+.card dt {
+  color: var(--muted);
+}
+
+.card dd {
+  color: var(--ink);
+  font-weight: 750;
+  text-align: right;
+}
+
+.ruleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+
+.ruleMeta em {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 650;
+}
+
+.ruleMeta .okStatus {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ruleMeta .warnStatus {
+  background: #fff4e8;
+  color: #d96b20;
+}
+
+.card strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.empty {
+  padding: 36px 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .explorer {
+    padding: 24px 0;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .provinceFilter {
+    flex-wrap: nowrap;
+    margin: 0 -14px;
+    padding: 0 14px 4px;
+    overflow-x: auto;
+  }
+
+  .provinceFilter button {
+    flex: 0 0 auto;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
