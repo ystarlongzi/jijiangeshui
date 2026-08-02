@@ -28,6 +28,7 @@ import useCityLocator from '../../_hooks/useCityLocator'
 import { trackEvent } from '../../_lib/analytics'
 import type { FrontendCityRuleDatasetSummary, FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { downloadCsv } from '../../_lib/csv'
+import { formatDateOnly } from '../../_lib/date'
 import styles from './CalculatorClient.module.css'
 
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
@@ -61,6 +62,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
 
   const rule = getCityRuleForMonth(cityRules[city], currentYear, month)
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
+  const displayRuleSourceDate = formatDateOnly(ruleSourceDate)
   const ruleSourceLinks = rule.sources
     .filter((source): source is typeof source & { url: string } => Boolean(source.url))
     .map((source) => ({ label: source.title, url: source.url }))
@@ -231,7 +233,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
       `单位公积金：${money(housingEmployer, 2)}`,
       `累计应纳税所得额：${money(result.taxable, 2)}`,
       `适用预扣率：${rate}%`,
-      `规则核对日期：${ruleSourceDate}`,
+      `规则核对日期：${displayRuleSourceDate}`,
       '结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。',
     ].join('\n')
 
@@ -249,7 +251,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
     <SiteHeader active="calculator" />
 
     <main id="top" className={styles.pageContent}>
-      <section className="page-intro" id="calculator"><div><p className={styles.eyebrow}>工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{ruleSourceDate}</strong></div></section>
+      <section className="page-intro" id="calculator"><div><p className={styles.eyebrow}>工资薪金 · {currentYear}</p><h1>先看懂，再算清。</h1><p className="intro-copy">选择缴费城市，输入工资和必要扣除，看到本月到手与全年预扣明细。</p></div><div className="rule-date"><span className="status-dot" /><span>规则核对日期</span><strong>{displayRuleSourceDate}</strong></div></section>
 
       <section className="workspace-grid" aria-label="个税计算器">
         <Panel as="form" className="input-panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
