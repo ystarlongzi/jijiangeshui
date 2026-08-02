@@ -5,7 +5,7 @@ import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
 import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
-import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/city-rule-service'
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
@@ -27,6 +27,7 @@ export default async function CityIndexPage() {
   })
   const cityStats = getCityRuleStats(cities, currentYear)
   const isPayloadSource = cityRuleDataset.source === 'payload'
+  const datasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
   const cmsCoverage = isPayloadSource ? `${cityRuleDataset.cmsActivePolicyCities}/${cityRuleDataset.cmsEnabledCities}` : '未接入'
   const mergedCities = isPayloadSource ? cityRuleDataset.cmsMergedCities : cityStats.total
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
@@ -52,7 +53,7 @@ export default async function CityIndexPage() {
     </section>
 
     <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
-      <div><span>前台规则来源</span><strong className={styles.sourceValue}>{isPayloadSource ? 'Payload CMS' : '内置兜底'}</strong></div>
+      <div><span>前台规则来源</span><strong className={styles.sourceValue}>{datasetSummary.sourceLabel}</strong><small>{datasetSummary.sourceDetail}</small></div>
       <div><span>CMS 有效城市</span><strong>{cmsCoverage}</strong></div>
       <div><span>已合并城市</span><strong>{mergedCities}</strong></div>
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong></div>

@@ -430,6 +430,13 @@
   font-weight: 750;
 }
 
+.coveragePanel small {
+  margin-top: -4px;
+  color: var(--subtle);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .coveragePanel .sourceValue {
   font-size: 18px;
 }
