@@ -75,6 +75,13 @@
   box-shadow: 0 22px 58px rgba(13, 42, 37, .14);
 }
 
+.popoverHint {
+  padding: 5px 8px 8px;
+  color: var(--subtle);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .option {
   width: 100%;
   display: flex;

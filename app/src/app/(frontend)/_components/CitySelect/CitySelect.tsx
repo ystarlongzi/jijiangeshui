@@ -49,6 +49,10 @@ export default function CitySelect({ action, className, id, invalid = false, lab
     if (!keyword || keyword === selected?.label.toLowerCase()) return options.slice(0, 80)
     return options.filter((option) => option.searchText.includes(keyword)).slice(0, 80)
   }, [options, query, selected?.label])
+  const isFiltered = query.trim() !== '' && query.trim().toLowerCase() !== selected?.label.toLowerCase()
+  const helperText = isFiltered
+    ? `找到 ${visibleOptions.length} 个匹配城市`
+    : `共 ${options.length} 个城市，可输入城市名或拼音搜索`
 
   useEffect(() => {
     setQuery(selected?.label || '')
@@ -124,6 +128,7 @@ export default function CitySelect({ action, className, id, invalid = false, lab
       />
       <ChevronDown className={styles.chevronIcon} aria-hidden="true" size={16} />
       {open && <div className={styles.popover} id={listId} role="listbox">
+        <div className={styles.popoverHint}>{helperText}</div>
         {visibleOptions.length > 0 ? visibleOptions.map((option, index) => {
           const isSelected = option.key === value
           const isActive = index === activeIndex
