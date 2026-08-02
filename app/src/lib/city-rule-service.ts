@@ -10,9 +10,11 @@ import { cityRules, selectEffectiveCityRule, type CityRule } from './tax-rules'
 type CityRuleMap = Record<string, CityRule>
 
 export type CityRuleDatasetSource = 'payload' | 'fallback'
+export type CityRuleSourceByCity = Record<string, CityRuleDatasetSource>
 
 export type CityRuleDataset = {
   rules: CityRuleMap
+  ruleSourcesByCity: CityRuleSourceByCity
   source: CityRuleDatasetSource
   fallbackCities: number
   cmsEnabledCities: number
@@ -111,6 +113,9 @@ async function readCityRulesFromPayload(): Promise<CityRuleDataset> {
     where: { enabled: { equals: true } },
   })
   const rules: CityRuleMap = { ...cityRules }
+  const ruleSourcesByCity: CityRuleSourceByCity = Object.fromEntries(
+    Object.keys(cityRules).map((city) => [city, 'fallback' as const]),
+  )
   const cities = (cityResult.docs as CmsCityDoc[]).filter(hasSlug)
   const activePolicies = await readPoliciesByCity('active')
   const pendingIncluded = canUsePendingRules()
@@ -126,6 +131,7 @@ async function readCityRulesFromPayload(): Promise<CityRuleDataset> {
       const activeRule = selectEffectiveCityRule(versions, `${new Date().getFullYear()}-12-31`) || versions[0]
       if (activeRule) {
         rules[city.slug] = { ...activeRule, policyVersions: versions }
+        ruleSourcesByCity[city.slug] = 'payload'
         cmsMergedCities += 1
       }
     }
@@ -133,6 +139,7 @@ async function readCityRulesFromPayload(): Promise<CityRuleDataset> {
 
   return {
     rules,
+    ruleSourcesByCity,
     source: 'payload',
     fallbackCities: Object.keys(cityRules).length,
     cmsEnabledCities: cities.length,
@@ -171,6 +178,7 @@ function createEmptyPolicySummary() {
 function createFallbackDataset(fallbackReason: string): CityRuleDataset {
   return {
     rules: cityRules,
+    ruleSourcesByCity: Object.fromEntries(Object.keys(cityRules).map((city) => [city, 'fallback' as const])),
     source: 'fallback',
     fallbackCities: Object.keys(cityRules).length,
     cmsEnabledCities: 0,
