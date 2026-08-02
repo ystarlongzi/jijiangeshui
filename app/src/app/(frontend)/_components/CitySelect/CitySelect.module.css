@@ -21,17 +21,32 @@
   position: relative;
   display: flex;
   align-items: center;
+  z-index: 3;
 }
 
-.control svg {
+.searchIcon,
+.chevronIcon {
   position: absolute;
-  left: 14px;
   color: var(--muted);
   pointer-events: none;
 }
 
+.searchIcon {
+  left: 14px;
+}
+
+.chevronIcon {
+  right: 14px;
+  transition: transform .18s ease;
+}
+
+.open .chevronIcon {
+  transform: rotate(180deg);
+}
+
 .control input {
   width: 100%;
+  padding-right: 40px;
   padding-left: 40px;
 }
 
@@ -43,4 +58,72 @@
 .invalid input {
   border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong));
   background: var(--orange-soft);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 22px 58px rgba(13, 42, 37, .14);
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.option span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.option strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.option small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.option svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.active,
+.option:hover {
+  background: var(--surface-muted);
+}
+
+.selected {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.empty {
+  padding: 18px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
