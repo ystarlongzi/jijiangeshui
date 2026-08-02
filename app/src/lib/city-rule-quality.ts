@@ -20,6 +20,8 @@ export type CityRuleStats = {
   withSourceUrl: number
   missingSourceUrl: number
   sourceUrlCoverageRate: number
+  freshness: Record<RuleFreshnessStatus, number>
+  staleOrMissing: number
   errors: number
   warnings: number
 }
@@ -91,6 +93,12 @@ export function getCityRuleStats(cities: Array<[string, CityRule]>, year: number
   const issues = cities.flatMap(([code, rule]) => auditCityRule(code, rule))
   const usableRules = cities.filter(([code, rule]) => getRuleQualityStatus(auditCityRule(code, rule)) !== 'error').length
   const withSourceUrl = cities.filter(([, rule]) => hasRuleSourceUrl(rule)).length
+  const freshness = cities.reduce<Record<RuleFreshnessStatus, number>>((summary, [, rule]) => {
+    const source = getPrimaryRuleSource(rule)
+    const status = getRuleFreshnessStatus(source?.checkedAt || rule.effective)
+    summary[status] += 1
+    return summary
+  }, { fresh: 0, missing: 0, stale: 0 })
 
   return {
     total: cities.length,
@@ -99,6 +107,8 @@ export function getCityRuleStats(cities: Array<[string, CityRule]>, year: number
     withSourceUrl,
     missingSourceUrl: cities.length - withSourceUrl,
     sourceUrlCoverageRate: cities.length > 0 ? Math.round((withSourceUrl / cities.length) * 100) : 0,
+    freshness,
+    staleOrMissing: freshness.stale + freshness.missing,
     errors: issues.filter((issue) => issue.severity === 'error').length,
     warnings: issues.filter((issue) => issue.severity === 'warning').length,
   }

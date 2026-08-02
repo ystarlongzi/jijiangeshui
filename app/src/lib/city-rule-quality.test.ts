@@ -42,6 +42,8 @@ test('城市规则统计：汇总当年规则和来源覆盖情况', () => {
   assert.equal(stats.withSourceUrl, 0)
   assert.equal(stats.missingSourceUrl, 5)
   assert.equal(stats.sourceUrlCoverageRate, 0)
+  assert.deepEqual(stats.freshness, { fresh: 4, missing: 0, stale: 1 })
+  assert.equal(stats.staleOrMissing, 1)
   assert.equal(stats.warnings, 5)
 })
 
