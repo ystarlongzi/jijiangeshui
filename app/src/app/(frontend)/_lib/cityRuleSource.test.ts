@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { CityRule } from '@/lib/tax-rules'
-import { countCityRuleSources, getCityRuleSourceBadgeLabel, getCityRuleSourceStatus, getPreferredCityRuleLinks } from './cityRuleSource'
+import { countCityRuleSources, getCityRuleSourceBadgeLabel, getCityRuleSourceCoverage, getCityRuleSourceStatus, getPreferredCityRuleLinks } from './cityRuleSource'
 
 test('returns Payload CMS status for cities backed by CMS rules', () => {
   const status = getCityRuleSourceStatus({
@@ -54,6 +54,16 @@ test('counts Payload CMS and fallback city rule sources', () => {
   })
 
   assert.deepEqual(counts, { fallback: 1, payload: 2 })
+})
+
+test('calculates Payload CMS city rule coverage rate', () => {
+  const coverage = getCityRuleSourceCoverage(['beijing', 'shanghai', 'hangzhou', 'guangzhou'], {
+    beijing: 'payload',
+    shanghai: 'payload',
+    hangzhou: 'payload',
+  })
+
+  assert.deepEqual(coverage, { fallback: 1, payload: 3, payloadRate: 75, total: 4 })
 })
 
 test('returns short labels for city rule sources', () => {

@@ -9,6 +9,11 @@ export type FrontendCityRuleDatasetSummary = {
 
 export type FrontendCityRuleSourceCounts = Record<FrontendCityRuleSource, number>
 
+export type FrontendCityRuleSourceCoverage = FrontendCityRuleSourceCounts & {
+  payloadRate: number
+  total: number
+}
+
 export type FrontendCityRuleLinkItem = {
   key: string
   label: string
@@ -50,6 +55,17 @@ export function countCityRuleSources(cityKeys: Iterable<string>, ruleSourcesByCi
   }
 
   return counts
+}
+
+export function getCityRuleSourceCoverage(cityKeys: Iterable<string>, ruleSourcesByCity: Record<string, FrontendCityRuleSource> = {}): FrontendCityRuleSourceCoverage {
+  const counts = countCityRuleSources(cityKeys, ruleSourcesByCity)
+  const total = counts.payload + counts.fallback
+
+  return {
+    ...counts,
+    payloadRate: total > 0 ? Math.round(counts.payload / total * 100) : 0,
+    total,
+  }
 }
 
 type PreferredCityRuleLinksInput = {

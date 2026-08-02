@@ -9,7 +9,7 @@ import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/ci
 import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
-import { countCityRuleSources, getCityRuleSourceBadgeLabel, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
+import { getCityRuleSourceBadgeLabel, getCityRuleSourceCoverage, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
 import styles from './CityPages.module.css'
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export default async function CityIndexPage() {
   const isPayloadSource = cityRuleDataset.source === 'payload'
   const datasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
   const cmsCoverage = isPayloadSource ? `${cityRuleDataset.cmsActivePolicyCities}/${cityRuleDataset.cmsEnabledCities}` : '未接入'
-  const sourceCounts = countCityRuleSources(cities.map(([key]) => key), cityRuleDataset.ruleSourcesByCity)
+  const sourceCoverage = getCityRuleSourceCoverage(cities.map(([key]) => key), cityRuleDataset.ruleSourcesByCity)
   const cityGroups = cities.reduce<Record<string, typeof cities>>((groups, city) => {
     const province = city[1].province
     groups[province] = [...(groups[province] || []), city]
@@ -66,7 +66,8 @@ export default async function CityIndexPage() {
     <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
       <div><span>前台规则来源</span><strong className={styles.sourceValue}>{datasetSummary.sourceLabel}</strong><small>{datasetSummary.sourceDetail}</small></div>
       <div><span>CMS 有效城市</span><strong>{cmsCoverage}</strong></div>
-      <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>CMS {sourceCounts.payload} 个 · 兜底 {sourceCounts.fallback} 个</small></div>
+      <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>CMS {sourceCoverage.payload} 个 · 兜底 {sourceCoverage.fallback} 个</small></div>
+      <div><span>CMS 覆盖率</span><strong>{sourceCoverage.payloadRate}%</strong><small>{sourceCoverage.payload}/{sourceCoverage.total} 个城市</small></div>
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong><small>URL 覆盖率 {cityStats.sourceUrlCoverageRate}%</small></div>
     </section>
 
