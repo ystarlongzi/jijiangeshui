@@ -74,6 +74,7 @@ export default async function CityIndexPage() {
       <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>CMS {sourceCoverage.payload} 个 · 兜底 {sourceCoverage.fallback} 个</small></div>
       <div><span>CMS 覆盖率</span><strong>{sourceCoverage.payloadRate}%</strong><small>{sourceCoverage.payload}/{sourceCoverage.total} 个城市</small></div>
       <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong><small>URL 覆盖率 {cityStats.sourceUrlCoverageRate}% · 需修复 {cityStats.errors} · 待补充 {cityStats.warnings}</small></div>
+      <div><span>规则待复核</span><strong>{cityStats.staleOrMissing}</strong><small>近期核对 {cityStats.freshness.fresh} 个 · 偏旧 {cityStats.freshness.stale} 个 · 缺失 {cityStats.freshness.missing} 个</small></div>
     </section>
 
     <CityRuleExplorer cities={cityExplorerItems} />
