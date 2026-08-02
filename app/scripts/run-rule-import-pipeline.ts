@@ -1,16 +1,20 @@
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 
-const inputPath = process.argv[2]
+const args = process.argv.slice(2)
+const inputPath = args.find((arg) => !arg.startsWith('--'))
 const writeToCms = process.argv.includes('--write')
 const publishToFrontend = process.argv.includes('--publish')
 const clearWarnings = process.argv.includes('--clear-warnings')
+const showCmsSummary = writeToCms && !process.argv.includes('--no-summary')
 const policyYearArgIndex = process.argv.indexOf('--policy-year')
 const policyYearArgs = policyYearArgIndex >= 0 ? ['--policy-year', process.argv[policyYearArgIndex + 1]].filter(Boolean) : []
 
 if (!inputPath) {
   throw new Error('请提供采集 JSON 文件，例如：npm run rules:pipeline -- ./data/hrwork.json --write')
 }
+
+const requiredInputPath = inputPath
 
 function runStep(label: string, commandArgs: string[]) {
   return new Promise<void>((resolve, reject) => {
@@ -32,7 +36,7 @@ function runStep(label: string, commandArgs: string[]) {
 }
 
 async function main() {
-  const normalizedInput = path.resolve(process.cwd(), inputPath)
+  const normalizedInput = path.resolve(process.cwd(), requiredInputPath)
   await runStep('校验采集 JSON', ['scripts/validate-rule-import.ts', normalizedInput])
   await runStep('审计规则质量', ['scripts/audit-rules.ts', normalizedInput])
   await runStep('预演 Payload 导入', ['scripts/import-rules.ts', normalizedInput, '--dry-run'])
@@ -45,6 +49,10 @@ async function main() {
   await runStep('写入 Payload CMS 草稿', ['scripts/import-rules.ts', normalizedInput])
 
   if (!publishToFrontend) {
+    if (showCmsSummary) {
+      await runStep('汇总 Payload 规则概览', ['scripts/cms-rules-summary.ts', ...policyYearArgs])
+    }
+
     console.log('\n已写入 Payload CMS 草稿。确认数据可用后追加 --publish 发布为前台有效规则。')
     return
   }
@@ -55,6 +63,10 @@ async function main() {
     ...(clearWarnings ? ['--clear-warnings'] : []),
     ...policyYearArgs,
   ])
+
+  if (showCmsSummary) {
+    await runStep('汇总 Payload 规则概览', ['scripts/cms-rules-summary.ts', ...policyYearArgs])
+  }
 }
 
 main().catch((error: unknown) => {

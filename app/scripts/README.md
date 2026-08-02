@@ -88,6 +88,8 @@ npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json
 npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json --write
 ```
 
+写入或发布后会自动输出一次 Payload CMS 规则概览，方便确认城市覆盖、政策状态、来源和 warning 数量。如果只想执行导入动作，可以追加 `--no-summary`。
+
 如果这批数据已经确认可用于前台，可以继续追加 `--publish`。Hrwork 数据会带第三方来源 warning；确认无误后用 `--clear-warnings` 清掉这类审核提示并发布：
 
 ```bash
