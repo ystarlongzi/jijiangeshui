@@ -1,0 +1,46 @@
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labelRow label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.control svg {
+  position: absolute;
+  left: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.control input {
+  width: 100%;
+  padding-left: 40px;
+}
+
+.control:focus-within input {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.invalid input {
+  border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong));
+  background: var(--orange-soft);
+}
