@@ -35,7 +35,7 @@
 
 | 场景 | 推荐命令 | 结果怎么看 |
 | --- | --- | --- |
-| 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
+| 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、未覆盖城市数量、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
 | 想检查当前已发布规则能不能给前台用 | `npm run rules:audit -- --cms --policy-year 2026 --summary` | 看前台可用城市、OK/warning/error 城市数。`error` 需要先修，`warning` 通常是来源或核对信息不完整。 |
 | 想采集 Hrwork 数据 | `npm run rules:crawl-hrwork -- --all --policy-year 2026 --effective-from 2026-01-01` | 默认由本地脚本采集。只有接口被限制时，再让人去浏览器控制台运行备用脚本。 |
 | 想把采集 JSON 跑完整流程 | `npm run rules:pipeline -- ./data/xxx.json` | 只做校验、审计和导入 dry-run，不写数据库。 |
@@ -66,7 +66,7 @@ npm run rules:audit
 
 真正写入数据库时去掉 `--dry-run`，也可以直接执行 `npm run rules:import-seed`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
 `rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。追加 `--cms` 可以直接审计 Payload CMS 当前已发布规则；追加 `--summary` 可以只看汇总和少量问题样例。
-`rules:cms-summary` 只读数据库，不校验每条规则数字是否合理；它用于回答“当前 CMS 覆盖了多少城市、多少 active、多少 pendingReview”。需要逐条质量审计时继续用 `rules:audit -- --cms`。
+`rules:cms-summary` 只读数据库，不校验每条规则数字是否合理；它用于回答“当前 CMS 覆盖了多少城市、多少 active、多少 pendingReview、还有多少启用城市没有 active 规则”。需要逐条质量审计时继续用 `rules:audit -- --cms`。
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
 
