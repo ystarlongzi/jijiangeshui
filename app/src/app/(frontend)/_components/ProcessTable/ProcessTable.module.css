@@ -29,10 +29,17 @@
   line-height: 1.6;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .section {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: 18px;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
   padding-top: 18px;
   border-top: 1px solid var(--line);
 }
@@ -41,39 +48,34 @@
   font-size: 15px;
 }
 
-.section dl {
-  display: grid;
-  gap: 0;
-  margin: 0;
+.tableWrap {
+  overflow-x: auto;
 }
 
-.section dl div {
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
-  gap: 18px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
+.table {
+  min-width: 380px;
 }
 
-.section dl div:first-child {
-  border-top: 0;
-  padding-top: 0;
+.table th {
+  padding: 0 0 10px;
+  text-align: left;
 }
 
-.section dt,
-.section dd {
-  margin: 0;
+.table td {
+  padding: 11px 0;
   font-size: 11px;
   line-height: 1.55;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
 }
 
-.section dt {
-  color: var(--muted);
+.table td:first-child {
+  padding-right: 16px;
 }
 
-.section dd {
-  color: var(--ink);
-  font-weight: 700;
+.table td:last-child {
+  font-weight: 600;
 }
 
 @media (max-width: 760px) {
@@ -83,16 +85,11 @@
     gap: 6px;
   }
 
-  .section,
-  .section dl div {
+  .grid {
     grid-template-columns: 1fr;
   }
 
-  .section {
-    gap: 10px;
-  }
-
-  .section dl div {
-    gap: 4px;
+  .table {
+    min-width: 340px;
   }
 }
