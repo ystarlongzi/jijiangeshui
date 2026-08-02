@@ -31,6 +31,22 @@
 
 ## 常用命令
 
+如果只是日常维护，优先按下面几种场景选择命令：
+
+| 场景 | 推荐命令 | 结果怎么看 |
+| --- | --- | --- |
+| 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
+| 想检查当前已发布规则能不能给前台用 | `npm run rules:audit -- --cms --policy-year 2026 --summary` | 看前台可用城市、OK/warning/error 城市数。`error` 需要先修，`warning` 通常是来源或核对信息不完整。 |
+| 想采集 Hrwork 数据 | `npm run rules:crawl-hrwork -- --all --policy-year 2026 --effective-from 2026-01-01` | 默认由本地脚本采集。只有接口被限制时，再让人去浏览器控制台运行备用脚本。 |
+| 想把采集 JSON 跑完整流程 | `npm run rules:pipeline -- ./data/xxx.json` | 只做校验、审计和导入 dry-run，不写数据库。 |
+| 想写入 CMS 草稿 | `npm run rules:pipeline -- ./data/xxx.json --write` | 写入 `pendingReview` 草稿，不会直接影响前台。 |
+| 想发布给前台使用 | `npm run rules:pipeline -- ./data/xxx.json --write --publish --clear-warnings --policy-year 2026` | 会发布为 `active`，前台城市规则优先读取 CMS。确认数据可信后再执行。 |
+| 想更新前台兜底规则 | `npm run rules:export-fallback -- ./data/fallback-rules.json` | 只在 CMS 数据已经稳定、需要同步兜底数据时使用。 |
+
+`rules:pipeline` 已经把 `validate -> audit -> import -> publish -> summary` 串起来了，所以手动导入 JSON 时不需要分 4 次执行。默认不加 `--write` 时只预演；加 `--write` 才写入 Payload CMS；再加 `--publish` 才发布给前台。
+
+需要连接 Payload CMS 的命令依赖 `.env` 或 `.env.local` 里的 `DATABASE_URI` 和 `PAYLOAD_SECRET`。只做 JSON 校验或 dry-run 时，通常不会被数据库环境卡住。
+
 ```bash
 npm run rules:validate -- ./data/city-rules-seed.json
 npm run rules:audit -- ./data/city-rules-seed.json
