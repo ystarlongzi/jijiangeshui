@@ -2,6 +2,11 @@ import { ruleCheckedDate } from '@/lib/site'
 import { formatDateOnly } from '../../_lib/date'
 import styles from './RuleSourcePanel.module.css'
 
+const officialRuleSource = {
+  label: '查看国家税务总局规则',
+  url: 'https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html',
+}
+
 type RuleSourcePanelProps = {
   title?: string
   description?: string
@@ -15,13 +20,14 @@ export default function RuleSourcePanel({
   title = '官方依据',
   description = '计算口径参考国家税务总局公开规则，政策变化后会更新规则版本和核对日期。',
   checkedAt = ruleCheckedDate,
-  sourceLabel = '查看国家税务总局规则',
-  sourceUrl = 'https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html',
+  sourceLabel = officialRuleSource.label,
+  sourceUrl = officialRuleSource.url,
   links,
 }: RuleSourcePanelProps) {
   const defaultSourceLinks = [{ label: sourceLabel, url: sourceUrl }]
-  const visibleLinks = (links || defaultSourceLinks).filter((link) => !isThirdPartyRuleLink(link))
-  const sourceLinks = visibleLinks.length > 0 ? visibleLinks : defaultSourceLinks
+  const visibleLinks = (links || defaultSourceLinks).filter((link) => !isHiddenFrontendRuleLink(link))
+  const fallbackLinks = defaultSourceLinks.filter((link) => !isHiddenFrontendRuleLink(link))
+  const sourceLinks = visibleLinks.length > 0 ? visibleLinks : fallbackLinks.length > 0 ? fallbackLinks : [officialRuleSource]
   const displayCheckedAt = formatDateOnly(checkedAt)
 
   return <section className={styles.section} aria-label="官方依据">
@@ -36,7 +42,7 @@ export default function RuleSourcePanel({
   </section>
 }
 
-function isThirdPartyRuleLink(link: { label: string; url: string }) {
+function isHiddenFrontendRuleLink(link: { label: string; url: string }) {
   const label = link.label.toLowerCase()
   const url = link.url.toLowerCase()
   return label.includes('hrwork') || label.includes('第三方') || url.includes('hrwork')
