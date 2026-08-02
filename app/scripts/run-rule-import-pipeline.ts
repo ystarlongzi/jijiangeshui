@@ -3,6 +3,10 @@ import path from 'node:path'
 
 const inputPath = process.argv[2]
 const writeToCms = process.argv.includes('--write')
+const publishToFrontend = process.argv.includes('--publish')
+const clearWarnings = process.argv.includes('--clear-warnings')
+const policyYearArgIndex = process.argv.indexOf('--policy-year')
+const policyYearArgs = policyYearArgIndex >= 0 ? ['--policy-year', process.argv[policyYearArgIndex + 1]].filter(Boolean) : []
 
 if (!inputPath) {
   throw new Error('请提供采集 JSON 文件，例如：npm run rules:pipeline -- ./data/hrwork.json --write')
@@ -39,6 +43,18 @@ async function main() {
   }
 
   await runStep('写入 Payload CMS 草稿', ['scripts/import-rules.ts', normalizedInput])
+
+  if (!publishToFrontend) {
+    console.log('\n已写入 Payload CMS 草稿。确认数据可用后追加 --publish 发布为前台有效规则。')
+    return
+  }
+
+  await runStep('发布前台有效规则', [
+    'scripts/publish-social-insurance-policies.ts',
+    '--write',
+    ...(clearWarnings ? ['--clear-warnings'] : []),
+    ...policyYearArgs,
+  ])
 }
 
 main().catch((error: unknown) => {

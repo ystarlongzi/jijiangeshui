@@ -21,6 +21,10 @@
    - 把校验后的 JSON 写入 Payload CMS。
    - 新导入的政策默认是 `pendingReview` 草稿，避免采集数据直接影响线上计算。
 
+5. `publish-social-insurance-policies.ts`
+   - 把确认可用的政策草稿发布为前台有效规则。
+   - 默认 dry-run；只有追加 `--write` 才会写数据库。
+
 ## 常用命令
 
 ```bash
@@ -28,6 +32,8 @@ npm run rules:validate -- ./data/city-rules-seed.json
 npm run rules:audit -- ./data/city-rules-seed.json
 npm run rules:import -- ./data/city-rules-seed.json --dry-run
 npm run rules:import-seed:dry-run
+npm run rules:publish -- --policy-year 2026
+npm run rules:publish -- --policy-year 2026 --write --clear-warnings
 npm run rules:sources
 npm run rules:sources -- --gaps
 
@@ -74,6 +80,12 @@ npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json
 npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json --write
 ```
 
+如果这批数据已经确认可用于前台，可以继续追加 `--publish`。Hrwork 数据会带第三方来源 warning；确认无误后用 `--clear-warnings` 清掉这类审核提示并发布：
+
+```bash
+npm run rules:pipeline -- ./data/hrwork-social-insurance-2026-08-01.json --write --publish --clear-warnings --policy-year 2026
+```
+
 如果本地脚本被 Hrwork 限制，再使用浏览器控制台备用方案：
 
 1. 在浏览器打开 `https://web.hrwork.com`。
@@ -99,7 +111,7 @@ const result = await crawlAllHrworkSocialInsuranceRules({
 })
 ```
 
-导入到 Payload 后会创建或更新 `社保公积金政策` 草稿，业务状态默认为 `pendingReview`。因为 Hrwork 是第三方聚合来源，导入脚本会自动给这些政策写入审核警告；人工确认城市官方口径后，再清理 warning 并发布为 `active`。
+导入到 Payload 后会创建或更新 `社保公积金政策` 草稿，业务状态默认为 `pendingReview`。因为 Hrwork 是第三方聚合来源，导入脚本会自动给这些政策写入审核警告；确认数据可用后，执行 `npm run rules:publish -- --policy-year 2026 --write --clear-warnings` 清理 warning 并发布为 `active`。
 
 这条链路的定位是“先批量初始化，再后台核对”，不是直接把第三方数据上线。
 

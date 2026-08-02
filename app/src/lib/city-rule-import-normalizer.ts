@@ -97,11 +97,12 @@ export function normalizeContributionItemRule(item: Record<string, unknown>, ind
   const systemType = stringOrUndefined(item.systemType)
   const explicitBaseType = stringOrUndefined(item.baseType)
   const normalizedSystemType = normalizeEnumValue(systemType, normalizedSystemTypes, 'social')
+  const itemName = stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`
 
   return {
     systemType: normalizedSystemType,
-    itemCode: stringOrUndefined(item.itemCode) || `unknown-${index + 1}`,
-    itemName: stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`,
+    itemCode: normalizeContributionItemCode(item, itemName, index),
+    itemName,
     baseType: normalizeEnumValue(
       explicitBaseType,
       normalizedItemBaseTypes,
@@ -119,6 +120,30 @@ export function normalizeContributionItemRule(item: Record<string, unknown>, ind
     },
     sortOrder: numberOrNull(item.sortOrder) ?? (index + 1) * 10,
   }
+}
+
+function normalizeContributionItemCode(item: Record<string, unknown>, itemName: string, index: number) {
+  const itemCode = stringOrUndefined(item.itemCode)
+
+  if (itemName.includes('补充医疗')) return 'supplementalMedical'
+  if (itemName.includes('大病')) return 'majorMedical'
+
+  return itemCode || `unknown-${index + 1}`
+}
+
+function ensureUniqueContributionItemCodes(itemRules: NormalizedContributionItemRule[]) {
+  const codeCounts = new Map<string, number>()
+
+  return itemRules.map((item, index) => {
+    const count = (codeCounts.get(item.itemCode) || 0) + 1
+    codeCounts.set(item.itemCode, count)
+    if (count === 1) return item
+
+    return {
+      ...item,
+      itemCode: `${item.itemCode}-${index + 1}`,
+    }
+  })
 }
 
 export function normalizePolicySource(policy: CrawlPolicy): NormalizedPolicySource {
@@ -142,7 +167,7 @@ export function normalizePolicyForCms(policy: CrawlPolicy): NormalizedCmsPolicy 
       baseMin: numberOrNull(rule.baseMin) ?? 0,
       baseMax: numberOrNull(rule.baseMax) ?? 0,
     })),
-    itemRules: (policy.itemRulesInfo?.list || []).map(normalizeContributionItemRule),
+    itemRules: ensureUniqueContributionItemCodes((policy.itemRulesInfo?.list || []).map(normalizeContributionItemRule)),
   }
 }
 
