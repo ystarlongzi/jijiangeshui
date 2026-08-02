@@ -101,7 +101,7 @@ export default function TaxRateTabs() {
     trackEvent('tax_rate_tab_change', { level: 'identity', group: activeGroup, type: activeType, identity: nextIdentity })
   }
 
-  const rateColumns = [{ key: 'level', header: '级数' }, { key: 'range', header: '应纳税所得额' }, { key: 'rate', header: '税率 / 预扣率' }, { key: 'quick', header: '速算扣除数' }]
+  const rateColumns = [{ key: 'level', header: '级数', align: 'left' as const }, { key: 'range', header: '应纳税所得额', align: 'left' as const }, { key: 'rate', header: '税率 / 预扣率', align: 'right' as const }, { key: 'quick', header: '速算扣除数', align: 'right' as const }]
   const rateRows = active.rows?.map((row, index) => ({
     key: `${activeType}-${identity}-${row.range}`,
     cells: { level: index + 1, range: row.range, rate: row.rate, quick: formatQuick(row.quick, money) },

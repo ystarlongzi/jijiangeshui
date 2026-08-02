@@ -951,10 +951,6 @@
   text-align: left;
 }
 
-.alignRight {
-  text-align: right;
-}
-
 .rateTable tbody tr:first-child td {
   border-top: 0;
 }

@@ -40,8 +40,35 @@
   white-space: nowrap;
 }
 
+.table tbody tr[data-tone='highlight'] td {
+  background: var(--accent-soft);
+  border-top-color: transparent;
+  font-weight: 600;
+}
+
+.table tbody tr[data-tone='subtotal'] td {
+  border-top-style: solid;
+  font-weight: 600;
+}
+
+.table tbody tr[data-tone='muted'] td {
+  background: var(--surface-muted);
+}
+
 .table tbody tr:hover td {
   background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface));
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
 }
 
 .emptyRow td {

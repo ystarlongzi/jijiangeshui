@@ -412,6 +412,7 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
   const tableRows = rows.map(({ currentMonth, inactive, salary, item }) => ({
     key: currentMonth,
     className: currentMonth === month ? 'current-month' : '',
+    tone: currentMonth === month ? 'highlight' as const : undefined,
     cells: {
       month: `${currentMonth} 月`,
       income: <><span className="take-home-value">{inactive ? '-' : money(item.takeHome, 0)}</span>{!inactive && <span className="before-tax-value">税前 {money(salary, 0)}</span>}</>,
@@ -431,10 +432,10 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, money 
 
 function RateTable({ money }: { money: (value: number, decimals?: number) => string }) {
   const columns = [
-    { key: 'level', header: '级数' },
-    { key: 'range', header: '累计预扣预缴应纳税所得额' },
-    { key: 'rate', header: '预扣率', className: styles.alignRight },
-    { key: 'quick', header: '速算扣除数', className: styles.alignRight },
+    { key: 'level', header: '级数', align: 'left' as const },
+    { key: 'range', header: '累计预扣预缴应纳税所得额', align: 'left' as const },
+    { key: 'rate', header: '预扣率', align: 'right' as const },
+    { key: 'quick', header: '速算扣除数', align: 'right' as const },
   ]
   const rows = taxBrackets.map((item, index) => ({
     key: item.rate,
