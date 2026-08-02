@@ -25,6 +25,10 @@
    - 把确认可用的政策草稿发布为前台有效规则。
    - 默认 dry-run；只有追加 `--write` 才会写数据库。
 
+6. `cms-rules-summary.ts`
+   - 只读 Payload CMS，汇总城市、政策状态、有效规则覆盖率、来源和警告数量。
+   - 适合导入或发布后快速确认数据库里到底有什么。
+
 ## 常用命令
 
 ```bash
@@ -36,6 +40,7 @@ npm run rules:import -- ./data/city-rules-seed.json --dry-run
 npm run rules:import-seed:dry-run
 npm run rules:publish -- --policy-year 2026
 npm run rules:publish -- --policy-year 2026 --write --clear-warnings
+npm run rules:cms-summary -- --policy-year 2026
 npm run rules:sources
 npm run rules:sources -- --gaps
 
@@ -45,6 +50,7 @@ npm run rules:audit
 
 真正写入数据库时去掉 `--dry-run`，也可以直接执行 `npm run rules:import-seed`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
 `rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。追加 `--cms` 可以直接审计 Payload CMS 当前已发布规则；追加 `--summary` 可以只看汇总和少量问题样例。
+`rules:cms-summary` 只读数据库，不校验每条规则数字是否合理；它用于回答“当前 CMS 覆盖了多少城市、多少 active、多少 pendingReview”。需要逐条质量审计时继续用 `rules:audit -- --cms`。
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
 

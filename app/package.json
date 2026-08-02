@@ -17,6 +17,7 @@
     "rules:import": "tsx scripts/import-rules.ts",
     "rules:pipeline": "tsx scripts/run-rule-import-pipeline.ts",
     "rules:publish": "tsx scripts/publish-social-insurance-policies.ts",
+    "rules:cms-summary": "tsx scripts/cms-rules-summary.ts",
     "rules:import-seed": "tsx scripts/import-rules.ts ./data/city-rules-seed.json",
     "rules:import-seed:dry-run": "tsx scripts/import-rules.ts ./data/city-rules-seed.json --dry-run",
     "rules:export-fallback": "tsx scripts/export-fallback-rules.ts",
