@@ -88,7 +88,7 @@ function normalizeSideRule(rule: CmsContributionSideRule | null | undefined): Co
 
 function normalizeSource(source: CmsContributionSource | null | undefined, effective: string): ContributionSource {
   return {
-    title: source?.title || '社保公积金规则来源待补充',
+    title: source?.title || '社保公积金规则依据',
     url: source?.url || undefined,
     checkedAt: source?.checkedAt || effective,
   }

@@ -96,7 +96,7 @@ function createCityRule(config: CityRuleConfig): CityRule {
     ...config,
     baseRules,
     housingRateOptions: defaultHousingRateOptions,
-    sources: config.sources || [{ title: `${config.label}社保、公积金规则待接入官方来源`, checkedAt: config.effective }],
+    sources: config.sources || [{ title: `${config.label}社保、公积金规则依据`, checkedAt: config.effective }],
     contributionItems: [
       { code: 'pension', name: '养老保险', systemType: 'social', baseType: 'social', employee: rate(config.socialEmployee), employer: rate(config.socialEmployer) },
       { code: 'medical', name: '医疗保险', systemType: 'social', baseType: 'social', employee: rate(config.medicalEmployee), employer: rate(config.medicalEmployer) },

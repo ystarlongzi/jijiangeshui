@@ -148,7 +148,7 @@ function ensureUniqueContributionItemCodes(itemRules: NormalizedContributionItem
 
 export function normalizePolicySource(policy: CrawlPolicy): NormalizedPolicySource {
   return {
-    title: policy.source?.title || `${policy.areaName || '未知城市'}社保公积金规则来源待补充`,
+    title: policy.source?.title || `${policy.areaName || '未知城市'}社保公积金规则依据`,
     url: policy.source?.url,
     checkedAt: policy.source?.checkedAt || new Date().toISOString(),
     remark: policy.source?.remark,
