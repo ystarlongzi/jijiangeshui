@@ -139,9 +139,10 @@ async function main() {
     const warningCount = policies.reduce((total, policy) => total + (policy.warnings?.length || 0), 0)
     const status = summarizeStatus(policies)
     const enabledCities = cities.filter((city) => city.enabled !== false)
-    const missingActiveCities = enabledCities
+    const missingActiveCityNames = enabledCities
       .filter((city) => !activeCityIds.has(String(city.id)))
       .map((city) => city.name || city.slug || String(city.id))
+    const missingActiveCities = missingActiveCityNames
       .slice(0, 20)
 
     const summary = {
@@ -151,6 +152,7 @@ async function main() {
       policies: policies.length,
       status,
       activePolicyCities: activeCityIds.size,
+      missingActiveCityCount: missingActiveCityNames.length,
       activeCoverageRate: enabledCities.length ? Number((activeCityIds.size / enabledCities.length).toFixed(4)) : 0,
       activeCoveragePercent: toPercent(activeCityIds.size, enabledCities.length),
       policiesWithSourceUrl: sourceCount,
@@ -183,7 +185,7 @@ async function main() {
     }
 
     if (missingActiveCities.length) {
-      console.log(`未覆盖有效规则城市示例：${missingActiveCities.join('、')}${enabledCities.length > missingActiveCities.length ? ' ...' : ''}`)
+      console.log(`未覆盖有效规则城市：${summary.missingActiveCityCount} 个，示例：${missingActiveCities.join('、')}${summary.missingActiveCityCount > missingActiveCities.length ? ' ...' : ''}`)
     }
   } finally {
     await payload.destroy()
