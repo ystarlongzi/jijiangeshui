@@ -2,6 +2,7 @@
   "name": "jijian-geshui",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --webpack --port 4000",
     "build": "next build",
@@ -34,6 +35,7 @@
     "payload": "3.86.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "server-only": "^0.0.1",
     "sharp": "0.34.5",
     "zod": "^4.4.3"
   },

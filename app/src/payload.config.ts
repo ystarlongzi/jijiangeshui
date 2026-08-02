@@ -20,6 +20,9 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: 'admins',
+    importMap: {
+      importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
+    },
     meta: {
       titleSuffix: ' · 极简个税',
       description: '极简个税内容与规则管理后台',

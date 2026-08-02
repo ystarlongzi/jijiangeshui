@@ -7,16 +7,16 @@ import {
 } from './city-rule-import-schema'
 
 type NormalizedContributionSideRule = {
-  calcMethod: string
+  calcMethod: NormalizedCalcMethod
   rate: number | null
   fixedAmount: number | null
 }
 
 type NormalizedContributionItemRule = {
-  systemType: string
+  systemType: NormalizedSystemType
   itemCode: string
   itemName: string
-  baseType: string
+  baseType: NormalizedItemBaseType
   employee: NormalizedContributionSideRule
   employer: NormalizedContributionSideRule
   sortOrder: number
@@ -34,7 +34,7 @@ export type NormalizedCmsPolicy = {
   effectiveFrom: string
   source: NormalizedPolicySource
   baseRules: Array<{
-    baseType: string
+    baseType: NormalizedBaseType
     baseMin: number
     baseMax: number
   }>
@@ -55,6 +55,20 @@ export function numberOrNull(value: unknown) {
 
 export function stringOrUndefined(value: unknown) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
+}
+
+const normalizedBaseTypes = ['social', 'housingFund', 'pension', 'medical', 'unemployment', 'injury', 'maternity'] as const
+const normalizedItemBaseTypes = [...normalizedBaseTypes, 'none'] as const
+const normalizedSystemTypes = ['social', 'housingFund', 'employerCost'] as const
+const normalizedCalcMethods = ['none', 'rate', 'fixed', 'ratePlusFixed'] as const
+
+type NormalizedBaseType = (typeof normalizedBaseTypes)[number]
+type NormalizedItemBaseType = (typeof normalizedItemBaseTypes)[number]
+type NormalizedSystemType = (typeof normalizedSystemTypes)[number]
+type NormalizedCalcMethod = (typeof normalizedCalcMethods)[number]
+
+function normalizeEnumValue<T extends readonly string[]>(value: unknown, options: T, fallback: T[number]) {
+  return options.includes(value as T[number]) ? (value as T[number]) : fallback
 }
 
 export function slugifyRuleEntity(city: CrawlCity | CrawlPolicy) {
@@ -82,19 +96,24 @@ export function normalizeContributionItemRule(item: Record<string, unknown>, ind
   // systemType 会影响默认基数类型：公积金使用 housingFund，企业成本不参与个人基数计算。
   const systemType = stringOrUndefined(item.systemType)
   const explicitBaseType = stringOrUndefined(item.baseType)
+  const normalizedSystemType = normalizeEnumValue(systemType, normalizedSystemTypes, 'social')
 
   return {
-    systemType: systemType || 'social',
+    systemType: normalizedSystemType,
     itemCode: stringOrUndefined(item.itemCode) || `unknown-${index + 1}`,
     itemName: stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`,
-    baseType: explicitBaseType || (systemType === 'housingFund' ? 'housingFund' : systemType === 'employerCost' ? 'none' : 'social'),
+    baseType: normalizeEnumValue(
+      explicitBaseType,
+      normalizedItemBaseTypes,
+      normalizedSystemType === 'housingFund' ? 'housingFund' : normalizedSystemType === 'employerCost' ? 'none' : 'social',
+    ),
     employee: {
-      calcMethod: stringOrUndefined(item.employeeCalcMethod) || 'none',
+      calcMethod: normalizeEnumValue(stringOrUndefined(item.employeeCalcMethod), normalizedCalcMethods, 'none'),
       rate: numberOrNull(item.employeeRate),
       fixedAmount: numberOrNull(item.employeeFixedAmount),
     },
     employer: {
-      calcMethod: stringOrUndefined(item.employerCalcMethod) || 'none',
+      calcMethod: normalizeEnumValue(stringOrUndefined(item.employerCalcMethod), normalizedCalcMethods, 'none'),
       rate: numberOrNull(item.employerRate),
       fixedAmount: numberOrNull(item.employerFixedAmount),
     },
@@ -119,7 +138,7 @@ export function normalizePolicyForCms(policy: CrawlPolicy): NormalizedCmsPolicy 
     effectiveFrom: policy.effectiveFrom || `${policy.policyYear || new Date().getFullYear()}-01-01`,
     source: normalizePolicySource(policy),
     baseRules: (policy.baseRulesInfo?.list || []).map((rule) => ({
-      baseType: stringOrUndefined(rule.baseType) || 'social',
+      baseType: normalizeEnumValue(stringOrUndefined(rule.baseType), normalizedBaseTypes, 'social'),
       baseMin: numberOrNull(rule.baseMin) ?? 0,
       baseMax: numberOrNull(rule.baseMax) ?? 0,
     })),

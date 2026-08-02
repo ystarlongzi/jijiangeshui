@@ -6,7 +6,8 @@ import {
   normalizePolicyForCms,
   slugifyRuleEntity,
 } from '../src/lib/city-rule-import-normalizer'
-import { crawlResultSchema } from '../src/lib/city-rule-import-schema'
+import { crawlResultSchema, type CrawlCity } from '../src/lib/city-rule-import-schema'
+import type { CollectionConfig } from 'payload'
 
 /**
  * 将采集或导出的城市社保公积金 JSON 写入 Payload CMS。
@@ -26,6 +27,9 @@ type ImportTriggerType = (typeof importTriggerTypes)[number]
 type ImportSourceType = (typeof importSourceTypes)[number]
 type PayloadInstance = Awaited<ReturnType<typeof import('payload').getPayload>>
 type ModuleWithDefault<T> = T | { default?: T }
+type CollectionModule = Record<string, CollectionConfig | undefined> & {
+  default?: Record<string, CollectionConfig | undefined>
+}
 
 const inputPath = process.argv[2]
 const dryRun = process.argv.includes('--dry-run')
@@ -40,6 +44,13 @@ function normalizeTriggerType(value: unknown): ImportTriggerType {
 
 function normalizeImportSource(value: unknown): ImportSourceType {
   return importSourceTypes.includes(value as ImportSourceType) ? (value as ImportSourceType) : 'manual'
+}
+
+function normalizePayloadRelationId(value: unknown) {
+  if (typeof value === 'number') return value
+  const numericValue = Number(value)
+  if (Number.isFinite(numericValue)) return numericValue
+  throw new Error(`无法识别 Payload 关系 id：${String(value)}`)
 }
 
 function createSourceReviewWarnings(sourceType: ImportSourceType) {
@@ -121,21 +132,25 @@ async function createPayloadClient(): Promise<PayloadInstance> {
   ])
   console.log('Payload 依赖加载完成，正在构建导入配置...')
 
-  const getExport = <T extends Record<string, unknown>, K extends keyof T>(moduleValue: ModuleWithDefault<T>, key: K) => {
-    return (moduleValue as T)[key] || (moduleValue as { default?: T }).default?.[key]
+  const getCollectionExport = (moduleValue: CollectionModule, key: string) => {
+    const collection = moduleValue[key] || moduleValue.default?.[key]
+    if (!collection) {
+      throw new Error(`无法从集合模块中读取 ${key}`)
+    }
+    return collection
   }
 
   const config = await buildConfig({
     admin: { user: 'admins' },
     collections: [
-      getExport(usersModule, 'Users'),
-      getExport(citiesModule, 'Cities'),
-      getExport(socialInsurancePoliciesModule, 'SocialInsurancePolicies'),
-      getExport(taxRateRulesModule, 'TaxRateRules'),
-      getExport(specialDeductionRulesModule, 'SpecialDeductionRules'),
-      getExport(articlesModule, 'Articles'),
-      getExport(faqsModule, 'FAQs'),
-      getExport(importJobsModule, 'ImportJobs'),
+      getCollectionExport(usersModule, 'Users'),
+      getCollectionExport(citiesModule, 'Cities'),
+      getCollectionExport(socialInsurancePoliciesModule, 'SocialInsurancePolicies'),
+      getCollectionExport(taxRateRulesModule, 'TaxRateRules'),
+      getCollectionExport(specialDeductionRulesModule, 'SpecialDeductionRules'),
+      getCollectionExport(articlesModule, 'Articles'),
+      getCollectionExport(faqsModule, 'FAQs'),
+      getCollectionExport(importJobsModule, 'ImportJobs'),
     ],
     cors: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
     csrf: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
@@ -159,7 +174,13 @@ async function main() {
   const source = crawlResultSchema.parse(JSON.parse(await fs.readFile(absolutePath, 'utf8')))
   const cities = source.cityInfo?.list || []
   const policies = (source.socialInsurancePolicy?.list || []).map(normalizePolicyEntry)
-  const cityByAreaId = new Map(cities.map((city) => [city.areaId ? String(city.areaId) : '', city]).filter(([areaId]) => areaId))
+  const cityEntries = cities
+    .map((city): [string, CrawlCity] | null => {
+      const areaId = city.areaId ? String(city.areaId) : ''
+      return areaId ? [areaId, city] : null
+    })
+    .filter((entry): entry is [string, CrawlCity] => Boolean(entry))
+  const cityByAreaId = new Map(cityEntries)
   const importSource = normalizeImportSource(source.crawlJob?.source)
   const payload = dryRun ? null : await createPayloadClient()
   let createdCities = 0
@@ -226,10 +247,10 @@ async function main() {
     ]
     const data = {
       policyTitle: `${policy.areaName} ${policy.policyYear} 年社保公积金规则`,
-      city: cityDoc.id,
+      city: dryRun ? 0 : normalizePayloadRelationId(cityDoc.id),
       policyYear: normalizedPolicy.policyYear,
       effectiveFrom: normalizedPolicy.effectiveFrom,
-      policyStatus: 'pendingReview',
+      policyStatus: 'pendingReview' as const,
       source: normalizedPolicy.source,
       baseRules: normalizedPolicy.baseRules,
       itemRules: normalizedPolicy.itemRules,
