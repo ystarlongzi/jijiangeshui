@@ -25,6 +25,9 @@
 .resultHeading p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
 .sectionTitle { color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; }
 .badge { padding: 7px 10px; border-radius: 7px; background: var(--accent-soft); color: var(--accent-deep); font-size: 11px; font-weight: 750; white-space: nowrap; }
+.ruleSourceStatus { display: inline-flex; align-items: center; gap: 8px; width: fit-content; margin: 10px 0 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-muted); color: var(--muted); font-size: 11px; line-height: 1.4; }
+.ruleSourceStatus strong { color: var(--ink); font-weight: 650; }
+.ruleSourceStatus em { color: var(--subtle); font-style: normal; }
 .required { display: grid; gap: 6px; margin: 28px 0 22px; padding: 20px; border-left: 3px solid var(--accent); background: var(--surface-muted); }
 .required span { color: var(--muted); font-size: 12px; }
 .required strong { color: var(--accent-deep); font-size: clamp(38px, 5vw, 56px); line-height: 1; letter-spacing: -.04em; }
