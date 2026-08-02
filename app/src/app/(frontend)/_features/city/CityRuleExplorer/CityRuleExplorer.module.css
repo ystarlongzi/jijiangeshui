@@ -187,6 +187,21 @@
   color: var(--subtle);
 }
 
+.ruleMeta em[data-freshness='fresh'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ruleMeta em[data-freshness='stale'] {
+  background: #fff4e8;
+  color: #d96b20;
+}
+
+.ruleMeta em[data-freshness='missing'] {
+  background: #fff0ef;
+  color: #c7392f;
+}
+
 .card strong {
   display: inline-flex;
   align-items: center;

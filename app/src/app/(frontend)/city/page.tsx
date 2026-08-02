@@ -6,7 +6,7 @@ import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
 import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
 import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/city-rule-service'
-import { getCityRuleStats, hasRuleSourceUrl } from '@/lib/city-rule-quality'
+import { getCityRuleStats, getPrimaryRuleSource, getRuleFreshnessLabel, getRuleFreshnessStatus, hasRuleSourceUrl } from '@/lib/city-rule-quality'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
 import { getCityRuleSourceBadgeLabel, getCityRuleSourceCoverage, getCityRuleSourceStatus } from '../_lib/cityRuleSource'
@@ -42,9 +42,14 @@ export default async function CityIndexPage() {
       ruleDatasetSummary: datasetSummary,
       ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
     })
+    const checkedAt = getPrimaryRuleSource(rule)?.checkedAt || rule.effective
+    const freshnessStatus = getRuleFreshnessStatus(checkedAt)
 
     return {
+      checkedAt,
       effective: rule.effective,
+      freshnessLabel: getRuleFreshnessLabel(freshnessStatus),
+      freshnessStatus,
       housingBaseRange: formatBaseRange(rule, 'housingFund'),
       key,
       label: rule.label,

@@ -6,7 +6,10 @@ import TrackedLink from '../../../_components/TrackedLink'
 import styles from './CityRuleExplorer.module.css'
 
 export type CityRuleExplorerItem = {
+  checkedAt: string
   effective: string
+  freshnessLabel: string
+  freshnessStatus: 'fresh' | 'stale' | 'missing'
   housingBaseRange: string
   key: string
   label: string
@@ -86,6 +89,7 @@ export default function CityRuleExplorer({ cities }: CityRuleExplorerProps) {
         <div className={styles.ruleMeta}>
           <em className={city.sourceType === 'payload' ? styles.cmsStatus : styles.fallbackStatus}>{city.sourceLabel}</em>
           <em>生效 {city.effective}</em>
+          <em data-freshness={city.freshnessStatus}>核对 {city.checkedAt} · {city.freshnessLabel}</em>
           <em className={city.sourceReady ? styles.okStatus : styles.warnStatus}>{city.sourceReady ? '已配置来源' : '来源待补'}</em>
         </div>
         <strong>查看城市规则 <ArrowRight size={14} /></strong>
