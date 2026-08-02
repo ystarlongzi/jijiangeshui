@@ -32,6 +32,7 @@ export default function SpecialDeductionsClient() {
     toggleGroup,
   } = useSpecialDeductionSelection({ initialExpandedGroups: ['children'] })
   const monthAmount = mode === 'manual' ? manualAmount : itemAmount
+  const displaySelectedItems = mode === 'items' ? selectedItems : []
 
   const selectItemOption = (group: string, option: string) => {
     selectOption(group, option)
@@ -90,10 +91,10 @@ export default function SpecialDeductionsClient() {
           <dl>
             <div><dt>全年可扣除</dt><dd>{money(monthAmount * 12)}</dd></div>
             <div><dt>结果来源</dt><dd>{mode === 'manual' ? '直接输入总额' : '按项目汇总'}</dd></div>
-            <div><dt>已选项目</dt><dd>{selectedItems.length} 项</dd></div>
+            <div><dt>已选项目</dt><dd>{displaySelectedItems.length} 项</dd></div>
           </dl>
-          {selectedItems.length > 0 && <div className={styles.selectedList}>
-            {selectedItems.map((item) => item && <div key={item.id}><span>{item.group}</span><strong>{item.label}</strong><b>{money(item.amount)} / 月</b></div>)}
+          {displaySelectedItems.length > 0 && <div className={styles.selectedList}>
+            {displaySelectedItems.map((item) => item && <div key={item.id}><span>{item.group}</span><strong>{item.label}</strong><b>{money(item.amount)} / 月</b></div>)}
           </div>}
           <div className={styles.actions}>
             <ButtonLink variant="primary" href={createDeductionHref('/calculator', monthAmount, '#deduction')}>带入工资计算器 <ArrowRight size={16} /></ButtonLink>
