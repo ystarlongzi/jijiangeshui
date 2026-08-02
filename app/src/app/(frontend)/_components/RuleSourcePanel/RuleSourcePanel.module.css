@@ -32,6 +32,10 @@
   font-size: 12px;
 }
 
+.links span {
+  color: var(--subtle);
+}
+
 @media (max-width: 760px) {
   .section {
     align-items: start;

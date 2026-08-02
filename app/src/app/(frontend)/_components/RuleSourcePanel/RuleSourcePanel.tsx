@@ -27,7 +27,7 @@ export default function RuleSourcePanel({
       <p className={styles.date}>规则核对日期：{checkedAt}</p>
     </div>
     <div className={styles.links}>
-      {sourceLinks.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}
+      {sourceLinks.length > 0 ? sourceLinks.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>) : <span>暂无来源链接</span>}
     </div>
   </section>
 }
