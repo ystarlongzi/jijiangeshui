@@ -13,6 +13,7 @@ export type DataTableCell = ReactNode | {
   content: ReactNode
   className?: string
   title?: string
+  tone?: 'strong' | 'muted' | 'accent'
 }
 
 export type DataTableRow = {
@@ -63,7 +64,9 @@ export default function DataTable({
                 const cell = normalizeCell(row.cells[column.key])
                 return (
                   <td className={[getColumnClassName(column), cell.className].filter(Boolean).join(' ')} key={column.key} title={cell.title}>
-                    {cell.content}
+                    <span data-cell-tone={cell.tone}>
+                      {cell.content}
+                    </span>
                   </td>
                 )
               })}

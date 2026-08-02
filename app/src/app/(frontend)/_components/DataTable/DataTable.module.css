@@ -67,6 +67,19 @@
   background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface));
 }
 
+.table td [data-cell-tone='strong'] {
+  font-weight: 600;
+}
+
+.table td [data-cell-tone='muted'] {
+  color: var(--muted);
+}
+
+.table td [data-cell-tone='accent'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .align-left {
   text-align: left;
 }

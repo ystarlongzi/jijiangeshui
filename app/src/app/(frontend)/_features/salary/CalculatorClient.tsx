@@ -448,8 +448,8 @@ function RateTable({ money }: { money: (value: number, decimals?: number) => str
     cells: {
       level: index + 1,
       range: rateRanges[index],
-      rate: `${Math.round(item.rate * 100)}%`,
-      quick: money(item.quick, 0).replace('¥', ''),
+      rate: { content: `${Math.round(item.rate * 100)}%`, tone: 'strong' as const },
+      quick: { content: money(item.quick, 0).replace('¥', ''), tone: 'strong' as const },
     },
   }))
 

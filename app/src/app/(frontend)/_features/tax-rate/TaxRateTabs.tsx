@@ -104,7 +104,12 @@ export default function TaxRateTabs() {
   const rateColumns = [{ key: 'level', header: '级数', align: 'left' as const }, { key: 'range', header: '应纳税所得额', align: 'left' as const }, { key: 'rate', header: '税率 / 预扣率', align: 'right' as const }, { key: 'quick', header: '速算扣除数', align: 'right' as const }]
   const rateRows = active.rows?.map((row, index) => ({
     key: `${activeType}-${identity}-${row.range}`,
-    cells: { level: index + 1, range: row.range, rate: row.rate, quick: formatQuick(row.quick, money) },
+    cells: {
+      level: index + 1,
+      range: row.range,
+      rate: { content: row.rate, tone: 'strong' as const },
+      quick: { content: formatQuick(row.quick, money), tone: 'strong' as const },
+    },
   })) ?? []
 
   return <section className={styles.tabsSection} aria-label="个人所得税税率表">
