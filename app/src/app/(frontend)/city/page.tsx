@@ -55,8 +55,8 @@ export default async function CityIndexPage() {
     <section className={styles.coveragePanel} aria-label="城市规则覆盖状态">
       <div><span>前台规则来源</span><strong className={styles.sourceValue}>{datasetSummary.sourceLabel}</strong><small>{datasetSummary.sourceDetail}</small></div>
       <div><span>CMS 有效城市</span><strong>{cmsCoverage}</strong></div>
-      <div><span>已合并城市</span><strong>{mergedCities}</strong></div>
-      <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong></div>
+      <div><span>前台可用城市</span><strong>{cityStats.usableRules}</strong><small>已合并 {mergedCities} 个</small></div>
+      <div><span>来源待补</span><strong>{cityStats.missingSourceUrl}</strong><small>URL 覆盖率 {cityStats.sourceUrlCoverageRate}%</small></div>
     </section>
 
     <CityRuleExplorer cities={cityExplorerItems} />

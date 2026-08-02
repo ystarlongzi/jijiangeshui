@@ -15,8 +15,10 @@ export type RuleQualityStatus = 'ok' | 'warning' | 'error'
 export type CityRuleStats = {
   total: number
   currentYearRules: number
+  usableRules: number
   withSourceUrl: number
   missingSourceUrl: number
+  sourceUrlCoverageRate: number
   errors: number
   warnings: number
 }
@@ -71,13 +73,16 @@ export function auditCityRule(code: string, rule: CityRule): RuleQualityIssue[] 
 
 export function getCityRuleStats(cities: Array<[string, CityRule]>, year: number): CityRuleStats {
   const issues = cities.flatMap(([code, rule]) => auditCityRule(code, rule))
+  const usableRules = cities.filter(([code, rule]) => getRuleQualityStatus(auditCityRule(code, rule)) !== 'error').length
   const withSourceUrl = cities.filter(([, rule]) => hasRuleSourceUrl(rule)).length
 
   return {
     total: cities.length,
     currentYearRules: cities.filter(([, rule]) => rule.effective.startsWith(String(year))).length,
+    usableRules,
     withSourceUrl,
     missingSourceUrl: cities.length - withSourceUrl,
+    sourceUrlCoverageRate: cities.length > 0 ? Math.round((withSourceUrl / cities.length) * 100) : 0,
     errors: issues.filter((issue) => issue.severity === 'error').length,
     warnings: issues.filter((issue) => issue.severity === 'warning').length,
   }

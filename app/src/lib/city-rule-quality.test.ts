@@ -31,7 +31,9 @@ test('城市规则统计：汇总当年规则和来源覆盖情况', () => {
 
   assert.equal(stats.total, 5)
   assert.equal(stats.currentYearRules, 5)
+  assert.equal(stats.usableRules, 5)
   assert.equal(stats.withSourceUrl, 0)
   assert.equal(stats.missingSourceUrl, 5)
+  assert.equal(stats.sourceUrlCoverageRate, 0)
   assert.equal(stats.warnings, 5)
 })
