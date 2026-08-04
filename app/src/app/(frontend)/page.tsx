@@ -24,9 +24,8 @@ import SiteHeader from './_components/SiteHeader'
 import SiteFooter from './_components/SiteFooter'
 import SectionHeading from './_components/SectionHeading'
 import PrimaryActionLink from './_components/PrimaryActionLink'
-import { getAvailableCityRuleDataset, getCityRuleDatasetSummary } from '@/lib/city-rule-service'
+import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
-import { getPreferredCityRuleLinks } from './_lib/cityRuleSource'
 
 export const metadata = {
   title: `工资到手与个税计算器｜${siteName}`,
@@ -60,14 +59,13 @@ const highlights = [
 const preferredCityKeys = ['beijing', 'shanghai', 'shenzhen', 'guangzhou', 'hangzhou']
 
 export default async function HomePage() {
-  const cityRuleDataset = await getAvailableCityRuleDataset()
-  const ruleDatasetSummary = getCityRuleDatasetSummary(cityRuleDataset)
-  const popularCities = getPreferredCityRuleLinks({
-    preferredCityKeys,
-    ruleDatasetSummary,
-    ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
-    rules: cityRuleDataset.rules,
-  })
+  const rules = await getAvailableCityRules()
+  const popularCities = preferredCityKeys
+    .map((key) => {
+      const rule = rules[key]
+      return rule ? { key, label: rule.label } : null
+    })
+    .filter((city): city is { key: string; label: string } => Boolean(city))
   const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年预扣个税。` }
   return <div className="app-shell">
     <SiteHeader active="home" />

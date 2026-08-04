@@ -25,11 +25,6 @@ export type CityRuleDataset = {
   fallbackReason?: string
 }
 
-export type CityRuleDatasetSummary = {
-  sourceLabel: string
-  sourceDetail: string
-}
-
 type CmsCityDoc = {
   id: string | number
   name?: string | null
@@ -78,20 +73,6 @@ export async function getAvailableCityRuleDataset(): Promise<CityRuleDataset> {
 export async function getAvailableCityRule(slug: string): Promise<CityRule | undefined> {
   const rules = await getAvailableCityRules()
   return rules[slug]
-}
-
-export function getCityRuleDatasetSummary(dataset: CityRuleDataset): CityRuleDatasetSummary {
-  if (dataset.source === 'payload') {
-    return {
-      sourceLabel: '城市规则',
-      sourceDetail: dataset.pendingIncluded ? '已收录城市规则' : '已启用城市规则',
-    }
-  }
-
-  return {
-    sourceLabel: '默认规则',
-    sourceDetail: getFallbackReasonLabel(dataset.fallbackReason),
-  }
 }
 
 async function readCachedCityRulesFromPayload() {
@@ -188,12 +169,6 @@ function createFallbackDataset(fallbackReason: string): CityRuleDataset {
     pendingIncluded: false,
     fallbackReason,
   }
-}
-
-function getFallbackReasonLabel(reason?: string) {
-  if (reason === 'missing-database-uri') return '暂未连接城市规则库'
-  if (reason === 'payload-read-failed') return '暂时使用默认城市规则'
-  return '使用默认城市规则'
 }
 
 function getRelationId(value: CmsPolicyDoc['city']) {

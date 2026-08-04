@@ -19,7 +19,6 @@ import styles from './ReverseTaxClient.module.css'
 import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSelector'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
-import type { FrontendCityRuleDatasetSummary, FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { formatDateOnly } from '../../_lib/date'
 import { calculateReverseTax } from '@/lib/reverse-tax'
 import { currentYear } from '@/lib/site'
@@ -29,8 +28,6 @@ import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
 
 type ReverseTaxClientProps = {
   rules?: Record<string, CityRule>
-  ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
-  ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
 export default function ReverseTaxClient({ rules = fallbackCityRules }: ReverseTaxClientProps) {

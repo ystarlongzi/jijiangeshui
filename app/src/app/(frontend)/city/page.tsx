@@ -5,7 +5,7 @@ import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import SectionHeading from '../_components/SectionHeading'
 import { getContributionBaseRule, type CityRule } from '@/lib/tax-rules'
-import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
 import styles from './CityPages.module.css'
@@ -17,8 +17,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CityIndexPage() {
-  const cityRuleDataset = await getAvailableCityRuleDataset()
-  const cityRules = cityRuleDataset.rules
+  const cityRules = await getAvailableCityRules()
   const cities = Object.entries(cityRules).sort(([, prev], [, next]) => {
     const provinceOrder = prev.province.localeCompare(next.province, 'zh-CN')
     if (provinceOrder !== 0) return provinceOrder

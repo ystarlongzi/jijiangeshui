@@ -26,7 +26,6 @@ import ValidationPanel from '../../_components/ValidationPanel'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
 import { trackEvent } from '../../_lib/analytics'
-import type { FrontendCityRuleDatasetSummary, FrontendCityRuleSource } from '../../_lib/cityRuleSource'
 import { downloadCsv } from '../../_lib/csv'
 import { formatDateOnly } from '../../_lib/date'
 import styles from './CalculatorClient.module.css'
@@ -35,8 +34,6 @@ const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', 
 
 type CalculatorClientProps = {
   rules?: Record<string, CityRule>
-  ruleSourcesByCity?: Record<string, FrontendCityRuleSource>
-  ruleDatasetSummary?: FrontendCityRuleDatasetSummary
 }
 
 export default function CalculatorClient({ rules = fallbackCityRules }: CalculatorClientProps) {
@@ -70,7 +67,6 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
   const cityHousingRateOptions = getHousingRateOptions(rule)
   const ruleQualityIssues = useMemo(() => auditCityRule(city, rule), [city, rule])
-  const ruleQualityErrors = ruleQualityIssues.filter((issue) => issue.severity === 'error')
   const hasRuleQualityErrors = getRuleQualityStatus(ruleQualityIssues) === 'error'
   const deduction = deductionAmount
   const selectedDeductionItems = Object.values(deductionSelections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
@@ -102,7 +98,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const isHousingBaseInvalid = housingBase < housingBaseRule.min || housingBase > housingBaseRule.max
   const isDeductionInvalid = deductionAmount > activeSalary
   const validationMessages = [
-    hasRuleQualityErrors ? `${rule.label} 当前规则不完整：${ruleQualityErrors.map((issue) => issue.message).join('；')}。请先核对城市规则后再使用结果。` : '',
+    hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠测算，请稍后再试或查看城市规则。` : '',
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
     isSocialBaseInvalid ? `社保缴费基数需要在 ${wholeMoney(socialBaseRule.min)} - ${wholeMoney(socialBaseRule.max)} 之间。` : '',

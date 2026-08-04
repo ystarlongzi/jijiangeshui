@@ -45,5 +45,6 @@ export default function RuleSourcePanel({
 function isHiddenFrontendRuleLink(link: { label: string; url: string }) {
   const label = link.label.toLowerCase()
   const url = link.url.toLowerCase()
-  return label.includes('hrwork') || label.includes('第三方') || url.includes('hrwork')
+  const internalTerms = ['hrwork', '第三方', 'payload', 'cms', '内置规则', '默认规则']
+  return internalTerms.some((term) => label.includes(term) || url.includes(term))
 }

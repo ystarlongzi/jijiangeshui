@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
 import { getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
-import { getAvailableCityRule, getAvailableCityRuleDataset, getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCityRule, getAvailableCityRules } from '@/lib/city-rule-service'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../_components/SiteHeader'
@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
 
 export default async function CityPage({ params }: CityPageProps) {
   const { city } = await params
-  const cityRuleDataset = await getAvailableCityRuleDataset()
-  const rule = cityRuleDataset.rules[city]
+  const rules = await getAvailableCityRules()
+  const rule = rules[city]
   if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
   const exampleSalary = 20000
   const socialBaseRule = getContributionBaseRule(rule, 'social')
