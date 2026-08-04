@@ -35,6 +35,7 @@ import { cityRules, selectEffectiveCityRule, type CityRule } from '../src/lib/ta
  * - npm run rules:audit -- ./data/hrwork.json   审计采集或导出的 JSON 文件
  * - npm run rules:audit -- --cms --policy-year 2026
  * - npm run rules:audit -- --cms --policy-year 2026 --summary
+ * - npm run rules:audit -- --cms --policy-year 2026 --city beijing --summary
  * - npm run rules:audit -- --cms --policy-year 2026 --stale
  * - npm run rules:audit -- --cms --policy-year 2026 --stale --stale-days 90
  * - npm run rules:audit -- ./data/hrwork.json --strict
@@ -70,6 +71,7 @@ const staleOnly = process.argv.includes('--stale')
 const strict = process.argv.includes('--strict')
 const useCms = process.argv.includes('--cms')
 const inputPath = getInputPath()
+const cityFilter = getFlagValue('--city')?.trim() || undefined
 const staleDays = parsePositiveInteger(getFlagValue('--stale-days'), '--stale-days') || 180
 let currentIssues: RuleQualityIssue[] = []
 
@@ -96,7 +98,7 @@ function getFlagValue(name: string) {
 }
 
 function getInputPath() {
-  const valueFlags = new Set(['--policy-year', '--stale-days'])
+  const valueFlags = new Set(['--city', '--policy-year', '--stale-days'])
 
   for (let index = 2; index < process.argv.length; index += 1) {
     const arg = process.argv[index]
@@ -164,6 +166,21 @@ function getRelationId(value: CmsPolicyDoc['city']) {
 
 function hasSlug(city: CmsCityDoc): city is CmsCityDoc & { slug: string } {
   return typeof city.slug === 'string' && city.slug.trim() !== ''
+}
+
+function filterEntriesByCity(entries: Array<[string, CityRule]>, filter: string | undefined) {
+  if (!filter) return entries
+
+  const normalizedFilter = filter.toLowerCase()
+  const matchedEntries = entries.filter(([code, rule]) =>
+    [code, rule.label].some((value) => value.trim().toLowerCase() === normalizedFilter),
+  )
+
+  if (!matchedEntries.length) {
+    throw new Error(`未找到城市规则：${filter}。请使用城市 slug（例如 beijing）或城市名称。`)
+  }
+
+  return matchedEntries
 }
 
 async function loadAuditSource(): Promise<AuditSource> {
@@ -278,8 +295,10 @@ function printIssueGroup(category: RuleQualityCategory, label: string) {
 
 async function main() {
   const source = await loadAuditSource()
-  currentIssues = source.entries.flatMap(([code, rule]) => auditCityRule(code, rule))
-  const rows = source.entries.map(([code, rule]) =>
+  const entries = filterEntriesByCity(source.entries, cityFilter)
+  const sourceLabel = cityFilter ? `${source.label}（城市：${cityFilter}）` : source.label
+  currentIssues = entries.flatMap(([code, rule]) => auditCityRule(code, rule))
+  const rows = entries.map(([code, rule]) =>
     createRow(
       code,
       rule,
@@ -296,7 +315,7 @@ async function main() {
     },
     { ok: 0, warning: 0, error: 0 } satisfies Record<AuditRow['status'], number>,
   )
-  const sourceUrlCount = source.entries.filter(([, rule]) => hasRuleSourceUrl(rule)).length
+  const sourceUrlCount = entries.filter(([, rule]) => hasRuleSourceUrl(rule)).length
   const categorySummary = currentIssues.reduce(
     (summary, issue) => {
       summary[issue.category] += 1
@@ -306,7 +325,8 @@ async function main() {
   )
 
   const summary = {
-    source: source.label,
+    source: sourceLabel,
+    cityFilter,
     cities: rows.length,
     displayedCities: displayRows.length,
     usableCities: rows.length - statusSummary.error,
@@ -351,7 +371,7 @@ async function main() {
       console.log(`还有 ${currentIssues.length - 20} 条问题未展示，可去掉 --summary 查看完整明细。`)
     }
   } else {
-    console.log(`审计来源：${source.label}`)
+    console.log(`审计来源：${sourceLabel}`)
     if (staleOnly) console.log(`仅展示需要复核或缺少核对日期的城市：${displayRows.length} 个（阈值 ${staleDays} 天）`)
     console.table(displayRows)
     if (currentIssues.length) {

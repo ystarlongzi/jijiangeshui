@@ -37,6 +37,7 @@
 | --- | --- | --- |
 | 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、未覆盖城市数量、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
 | 想检查当前已发布规则能不能给前台用 | `npm run rules:audit -- --cms --policy-year 2026 --summary` | 看前台可用城市、OK/warning/error 城市数。`error` 需要先修，`warning` 通常是来源或核对信息不完整。 |
+| 只核对一个城市的 CMS 规则 | `npm run rules:audit -- --cms --policy-year 2026 --city beijing --summary` | 支持城市 slug 或城市名称；适合先核对单个城市的基数、缴费项目、来源和生效日期。 |
 | 想找出需要复核的城市 | `npm run rules:audit -- --cms --policy-year 2026 --stale --summary` | 只展示缺少核对日期或核对日期超过阈值的城市，默认阈值 180 天，适合做下一轮数据维护清单。 |
 | 想临时收紧复核口径 | `npm run rules:audit -- --cms --policy-year 2026 --stale --stale-days 90 --summary` | 把“偏旧”阈值改为 90 天，适合政策密集更新期排查。 |
 | 想采集 Hrwork 数据 | `npm run rules:crawl-hrwork -- --all --policy-year 2026 --effective-from 2026-01-01` | 默认由本地脚本采集。只有接口被限制时，再让人去浏览器控制台运行备用脚本。 |
@@ -54,6 +55,7 @@ npm run rules:validate -- ./data/city-rules-seed.json
 npm run rules:audit -- ./data/city-rules-seed.json
 npm run rules:audit -- --cms --policy-year 2026
 npm run rules:audit -- --cms --policy-year 2026 --summary
+npm run rules:audit -- --cms --policy-year 2026 --city beijing --summary
 npm run rules:audit -- --cms --policy-year 2026 --stale --summary
 npm run rules:audit -- --cms --policy-year 2026 --stale --stale-days 90 --summary
 npm run rules:import -- ./data/city-rules-seed.json --dry-run
@@ -69,7 +71,7 @@ npm run rules:audit
 ```
 
 真正写入数据库时去掉 `--dry-run`，也可以直接执行 `npm run rules:import-seed`。导入脚本只有在非 dry-run 时才会加载 Payload，避免本地预览被数据库环境变量卡住。
-`rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。追加 `--cms` 可以直接审计 Payload CMS 当前已发布规则；追加 `--summary` 可以只看汇总和少量问题样例；追加 `--stale` 会过滤出缺少核对日期或核对日期偏旧的城市，默认超过 180 天算偏旧；追加 `--stale-days 90` 可以临时调整复核阈值。
+`rules:audit` 默认只把 error 视为失败；加 `--strict` 后，warning 也会让命令失败，适合接入 CI。追加 `--cms` 可以直接审计 Payload CMS 当前已发布规则；追加 `--city beijing` 可以只审计一个城市，也可以传入城市中文名称；如果没有匹配城市，命令会直接失败，避免把空结果误认为验证通过。追加 `--summary` 可以只看汇总和少量问题样例；追加 `--stale` 会过滤出缺少核对日期或核对日期偏旧的城市，默认超过 180 天算偏旧；追加 `--stale-days 90` 可以临时调整复核阈值。
 `rules:cms-summary` 只读数据库，不校验每条规则数字是否合理；它用于回答“当前 CMS 覆盖了多少城市、多少 active、多少 pendingReview、还有多少启用城市没有 active 规则”。需要逐条质量审计时继续用 `rules:audit -- --cms`。
 
 `data/city-rules-seed.json` 是当前首批可导入规则种子，来自前台内置兜底规则。它用于先跑通 Payload 导入和后台审核链路；后续逐城补齐官方来源 URL、核对日期和更精细的政策版本后，再替换为官方核验数据。
