@@ -26,6 +26,7 @@ type CityOption = {
 
 export default function CitySelect({ action, className, id, invalid = false, label, onChange, rules, value }: CitySelectProps) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const options = useMemo(() => Object.entries(rules).map(([key, rule]) => ({
     key,
     label: rule.label,
@@ -78,6 +79,7 @@ export default function CitySelect({ action, className, id, invalid = false, lab
     onChange(option.key)
     setQuery(option.label)
     setOpen(false)
+    inputRef.current?.blur()
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -117,6 +119,7 @@ export default function CitySelect({ action, className, id, invalid = false, lab
         aria-expanded={open}
         autoComplete="off"
         id={id}
+        ref={inputRef}
         role="combobox"
         value={query}
         onFocus={() => setOpen(true)}
