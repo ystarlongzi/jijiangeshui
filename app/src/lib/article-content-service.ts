@@ -63,6 +63,27 @@ export async function getPublishedArticle(slug: string): Promise<PublicArticle |
   return articles.find((article) => article.slug === slug) ?? null
 }
 
+export async function getPreviewArticle(slug: string): Promise<PublicArticle | null> {
+  if (!process.env.DATABASE_URI) {
+    return null
+  }
+
+  try {
+    const payload = await getPayload({ config })
+    const result = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      draft: true,
+      limit: 1,
+      where: { slug: { equals: slug } },
+    })
+
+    return result.docs[0] ? toPublicArticle(result.docs[0]) : null
+  } catch {
+    return null
+  }
+}
+
 export async function getIndexableArticles(limit?: number): Promise<PublicArticle[]> {
   const articles = await getPublishedArticles()
   const indexableArticles = articles.filter(isIndexableArticle)

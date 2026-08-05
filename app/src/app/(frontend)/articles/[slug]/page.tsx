@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { cookies, draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 
-import { getArticleCanonicalUrl, getPublishedArticle, getPublishedArticles } from '@/lib/article-content-service'
+import { getArticleCanonicalUrl, getPreviewArticle, getPublishedArticle, getPublishedArticles } from '@/lib/article-content-service'
+import { ARTICLE_PREVIEW_COOKIE, isArticlePreviewSessionValid } from '@/lib/article-preview'
 import { siteName, siteUrl } from '@/lib/site'
 import JsonLd from '../../_components/JsonLd'
 import SiteFooter from '../../_components/SiteFooter'
@@ -14,6 +16,8 @@ import styles from './ArticleDetailPage.module.css'
 
 type ArticleDetailPageProps = { params: Promise<{ slug: string }> }
 
+export const dynamicParams = true
+
 export async function generateStaticParams() {
   const articles = await getPublishedArticles()
   return articles.map((article) => ({ slug: article.slug }))
@@ -21,7 +25,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
   const { slug } = await params
-  const article = await getPublishedArticle(slug)
+  const isPreview = await isPreviewSession()
+  const article = isPreview ? await getPreviewArticle(slug) : await getPublishedArticle(slug)
 
   if (!article) {
     return { title: `文章未找到｜${siteName}`, robots: { index: false, follow: false } }
@@ -34,7 +39,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
     title: article.seo.title || `${article.title}｜${siteName}`,
     description,
     alternates: { canonical },
-    robots: { index: !article.seo.noIndex, follow: !article.seo.noIndex },
+    robots: { index: !isPreview && !article.seo.noIndex, follow: !isPreview && !article.seo.noIndex },
     openGraph: {
       type: 'article',
       title: article.seo.title || article.title,
@@ -48,7 +53,8 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const { slug } = await params
-  const article = await getPublishedArticle(slug)
+  const isPreview = await isPreviewSession()
+  const article = isPreview ? await getPreviewArticle(slug) : await getPublishedArticle(slug)
 
   if (!article) {
     notFound()
@@ -72,6 +78,10 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
       }} />
 
       <article>
+        {isPreview && <aside className={styles.previewNotice} role="status">
+          <span>预览模式 · 当前内容尚未发布</span>
+          <Link href="/api/preview/disable">退出预览</Link>
+        </aside>}
         <header className={styles.header}>
           <Link className={styles.backLink} href="/articles"><ArrowLeft size={15} />全部文章</Link>
           <div className={styles.meta}><span>{article.categoryLabel}</span><time dateTime={article.updatedAt}><CalendarDays size={14} />{formatDateOnly(article.updatedAt)} 更新</time></div>
@@ -90,4 +100,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
       <SiteFooter />
     </main>
   </div>
+}
+
+async function isPreviewSession(): Promise<boolean> {
+  const [{ isEnabled }, cookieStore] = await Promise.all([draftMode(), cookies()])
+  return isEnabled && isArticlePreviewSessionValid(cookieStore.get(ARTICLE_PREVIEW_COOKIE)?.value)
 }

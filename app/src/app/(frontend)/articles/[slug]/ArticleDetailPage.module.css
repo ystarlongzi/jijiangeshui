@@ -9,6 +9,26 @@
   border-bottom: 1px solid var(--line);
 }
 
+.previewNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 12px 14px;
+  border: 1px solid #e9b949;
+  border-radius: 6px;
+  background: #fff8df;
+  color: #76580d;
+  font-size: 13px;
+}
+
+.previewNotice a {
+  color: inherit;
+  font-weight: 750;
+  text-underline-offset: 3px;
+}
+
 .backLink {
   display: inline-flex;
   align-items: center;
@@ -173,6 +193,11 @@
 
   .meta {
     margin-top: 32px;
+  }
+
+  .previewNotice {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .header h1 {

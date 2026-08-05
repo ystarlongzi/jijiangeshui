@@ -1,4 +1,17 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+
+import { revalidateArticleContent } from '../lib/article-cache'
+import { getArticlePreviewUrl } from '../lib/article-preview'
+
+const revalidateAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
+  await revalidateArticleContent({ slug: doc.slug, previousSlug: previousDoc?.slug })
+  return doc
+}
+
+const revalidateAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
+  await revalidateArticleContent({ slug: doc.slug })
+  return doc
+}
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
@@ -13,6 +26,11 @@ export const Articles: CollectionConfig = {
     defaultColumns: ['title', 'category', 'slug', '_status', 'updatedAt'],
     listSearchableFields: ['title', 'excerpt', 'slug', 'seo.title', 'seo.description'],
     description: '维护税务知识、城市政策、计算案例等可收录内容。',
+    preview: (doc) => getArticlePreviewUrl(doc.slug),
+  },
+  hooks: {
+    afterChange: [revalidateAfterChange],
+    afterDelete: [revalidateAfterDelete],
   },
   versions: { drafts: true, maxPerDoc: 30 },
   fields: [
