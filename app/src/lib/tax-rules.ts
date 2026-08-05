@@ -156,6 +156,20 @@ export function getCityRuleForMonthStrict(rule: CityRule, year: number, month: n
   )
 }
 
+/**
+ * 解析一个月份实际使用的城市规则。
+ *
+ * 如果 CMS 还没有补齐历史月份，先使用同一城市最新的可用版本继续测算；
+ * 调用方必须根据 usedFallback 展示提示，不能把兜底规则伪装成精确历史规则。
+ */
+export function resolveCityRuleForMonth(rule: CityRule, year: number, month: number) {
+  const exactRule = getCityRuleForMonthStrict(rule, year, month)
+  return {
+    rule: exactRule || getCityRuleForMonth(rule, year, month),
+    usedFallback: !exactRule,
+  }
+}
+
 export function selectEffectiveCityRule(rules: CityRule[], targetDate: string, options: { allowNearest?: boolean } = {}) {
   const sortedRules = [...rules]
     .filter((rule) => rule.effective)

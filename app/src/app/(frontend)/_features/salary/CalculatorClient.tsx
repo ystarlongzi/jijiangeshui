@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Copy, Download } from 'lucide-react'
-import { cityRules as fallbackCityRules, getCityRuleForMonth, getCityRuleForMonthStrict, getContributionBaseRule, taxBrackets as fallbackTaxBrackets, type CityRule } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getCityRuleForMonth, getCityRuleForMonthStrict, getContributionBaseRule, resolveCityRuleForMonth, taxBrackets as fallbackTaxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
 import { getValidatedHousingRateOptions, validateCityRuleInputs } from '@/lib/city-rule-validation'
@@ -79,8 +79,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     missingReasons: [`${taxYear} 年税率和专项附加扣除规则尚未加载。`],
   }
   // 严格按用户选择的年度和月份找政策；找不到时只用于渲染表单，后面的校验会阻止计算。
-  const strictRule = getCityRuleForMonthStrict(selectedCityRule, taxYear, month)
-  const rule = strictRule || getCityRuleForMonth(selectedCityRule, taxYear, month)
+  const cityRuleResolution = resolveCityRuleForMonth(selectedCityRule, taxYear, month)
+  const rule = cityRuleResolution.rule
   const cityRuleLoaded = !cityRuleStatus || (cityRuleStatus.source === 'payload' && cityRuleStatus.ruleSourcesByCity[city] === 'payload')
   const ruleSourceDate = yearRules.checkedAt || rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const displayRuleSourceDate = formatDateOnly(ruleSourceDate)
@@ -118,7 +118,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
 
   const insuranceByMonth = useMemo(() => Array.from({ length: 12 }, (_, index) => {
     const currentMonth = index + 1
-    const monthRule = getCityRuleForMonth(selectedCityRule, taxYear, currentMonth)
+    // 历史月份规则缺失时沿用 2026 年已录入的最近规则，同时在页面上明确标注为估算。
+    const monthRule = resolveCityRuleForMonth(selectedCityRule, taxYear, currentMonth).rule
     const monthSalary = salaryMode === 'fixed' ? salary : monthlySalaries[index] || 0
     const monthSocialBaseRule = getContributionBaseRule(monthRule, 'social')
     const monthHousingBaseRule = getContributionBaseRule(monthRule, 'housingFund')
@@ -160,10 +161,16 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   const housingRateOptionsText = cityHousingRateOptions.map((rate) => `${rate}%`).join('、')
   const missingCityRuleMonths = useMemo(() => Array.from({ length: Math.max(0, month - startMonth + 1) }, (_, index) => startMonth + index)
     .filter((targetMonth) => !getCityRuleForMonthStrict(selectedCityRule, taxYear, targetMonth)), [selectedCityRule, taxYear, month, startMonth])
-  const ruleAvailabilityMessages = [
-    missingCityRuleMonths.length > 0 ? `${taxYear} 年 ${missingCityRuleMonths.join('、')} 月缺少城市缴费规则，无法可靠计算累计预扣。` : !strictRule ? `${taxYear} 年 ${month} 月没有可用的城市缴费规则，暂时无法可靠测算。` : '',
+  const cityRuleFallbackMessage = missingCityRuleMonths.length > 0 || cityRuleResolution.usedFallback
+    ? `${taxYear} 年${missingCityRuleMonths.length > 0 ? ` ${missingCityRuleMonths.join('、')} 月` : ` ${month} 月`}尚无单独的城市缴费规则，当前按 ${formatDateOnly(rule.effective)} 起的最近可用规则估算。`
+    : ''
+  const blockingRuleMessages = [
     !cityRuleLoaded ? `当前城市规则没有从 CMS 成功加载${cityRuleStatus?.fallbackReason ? `（${cityRuleStatus.fallbackReason}）` : ''}，暂时无法可靠测算。` : '',
     ...yearRules.missingReasons,
+  ].filter(Boolean)
+  const ruleAvailabilityMessages = [
+    cityRuleFallbackMessage,
+    ...blockingRuleMessages,
   ].filter(Boolean)
   const validationMessages = [
     ...ruleAvailabilityMessages,
@@ -176,7 +183,6 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     isEmployerHousingRateInvalid ? cityHousingRateOptions.length > 0 ? `公积金单位比例需从 ${housingRateOptionsText} 中选择。` : '当前城市暂无可用的公积金缴费比例规则，暂时无法可靠测算。' : '',
     isDeductionInvalid ? '专项附加扣除已超过税前月薪，请确认是否填入了月度扣除额。' : '',
   ].filter(Boolean)
-  const hasValidationMessages = validationMessages.length > 0
   const socialSalaryOutsideRange = !editingSocial && activeSalary > 0 && (activeSalary < socialBaseRule.min || activeSalary > socialBaseRule.max)
   const housingSalaryOutsideRange = !editingHousing && activeSalary > 0 && (activeSalary < housingBaseRule.min || activeSalary > housingBaseRule.max)
   const boundaryMessages = [
@@ -195,7 +201,17 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
           ? `公积金缴费基数已达到城市允许的最高值 ${wholeMoney(housingBaseRule.max)}。`
           : '',
   ].filter(Boolean)
-  const calculationBlocked = hasValidationMessages
+  const calculationBlocked = [
+    ...blockingRuleMessages,
+    hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠测算，请稍后再试或查看城市规则。` : '',
+    isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
+    isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
+    isSocialBaseInvalid ? '社保缴费基数超出允许范围。' : '',
+    isHousingBaseInvalid ? '公积金缴费基数超出允许范围。' : '',
+    isEmployeeHousingRateInvalid ? '公积金个人比例不在当前城市规则范围内。' : '',
+    isEmployerHousingRateInvalid ? '公积金单位比例不在当前城市规则范围内。' : '',
+    isDeductionInvalid ? '专项附加扣除已超过税前月薪。' : '',
+  ].filter(Boolean).length > 0
   const flowWidth = (value: number) => `${Math.max(0, Math.min(100, value / flowTotal * 100))}%`
 
   const notify = (message: string) => {
@@ -286,7 +302,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     setMonthlySalaries((current) => current.map((item, index) => index === targetMonth - 1 ? value : item))
   }
   const calculate = () => {
-    if (hasValidationMessages) {
+    if (calculationBlocked) {
       trackEvent('calculate_blocked', { calculator: 'salary', city, month, salaryMode, ruleQualityStatus: getRuleQualityStatus(ruleQualityIssues) })
       notify('请先修正输入提示')
       return
@@ -384,14 +400,14 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button className={styles.formTextAction} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : ''} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
           <RuleBoundaryNotice messages={boundaryMessages} title="边界提醒" />
-          <div className={styles.formActions}><Button variant="primary" type="submit" disabled={hasValidationMessages}>开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className={styles.formFootnote}>结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
+          <div className={styles.formActions}><Button variant="primary" type="submit" disabled={calculationBlocked}>开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className={styles.formFootnote}>结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </Panel>
 
         <div className="results-column">
           {calculationBlocked ? <RuleUnavailablePanel messages={validationMessages} /> : <>
             <Panel as="section" className="result-panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {taxYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
               <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
-              <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{yearRules.taxBrackets.map((item) => Math.round(item.rate * 100)).map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><ResultActions><ResultActionButton onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></ResultActionButton><ResultActionButton onClick={copyPayslip}><Copy size={14} />复制工资条</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>累计应预扣税额</span><strong>{wholeMoney(result.cumulativeTax)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</Panel>
+              {cityRuleFallbackMessage && <RuleBoundaryNotice messages={[cityRuleFallbackMessage]} title="城市规则估算口径" />}<div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{yearRules.taxBrackets.map((item) => Math.round(item.rate * 100)).map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><ResultActions><ResultActionButton onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></ResultActionButton><ResultActionButton onClick={copyPayslip}><Copy size={14} />复制工资条</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>累计应预扣税额</span><strong>{wholeMoney(result.cumulativeTax)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</Panel>
             <InsuranceTable insurance={insurance} month={month} year={taxYear} money={money} />
           </>}
         </div>

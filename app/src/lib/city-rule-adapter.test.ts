@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
-import { cityRules, getCityRuleForMonth, selectEffectiveCityRule, type CityRule } from './tax-rules'
+import { cityRules, getCityRuleForMonth, resolveCityRuleForMonth, selectEffectiveCityRule, type CityRule } from './tax-rules'
 
 test('Payload 社保规则：小数比例转换为前端计算使用的百分数', () => {
   const rule = adaptCmsPolicyToCityRule(
@@ -81,4 +81,12 @@ test('城市规则版本：没有命中日期时回退到最新政策', () => {
   const newRule: CityRule = { ...cityRules.beijing, effective: '2026-07-01' }
 
   assert.equal(selectEffectiveCityRule([oldRule, newRule], '2024-01-01')?.effective, '2026-07-01')
+})
+
+test('城市规则版本：历史月份缺失时按最近可用规则继续估算并标记兜底', () => {
+  const latestRule: CityRule = { ...cityRules.beijing, effective: '2026-07-01' }
+  const resolved = resolveCityRuleForMonth({ ...latestRule, policyVersions: [latestRule] }, 2026, 1)
+
+  assert.equal(resolved.rule.effective, '2026-07-01')
+  assert.equal(resolved.usedFallback, true)
 })

@@ -16,6 +16,7 @@ import TrackedLink from '../../_components/TrackedLink'
 import { useMoneyFormat } from '../../_components/MoneyFormatProvider'
 import MetricGrid from '../../_components/MetricGrid'
 import ValidationPanel from '../../_components/ValidationPanel'
+import RuleBoundaryNotice from '../../_components/RuleBoundaryNotice'
 import styles from './ReverseTaxClient.module.css'
 import SpecialDeductionSelector from '../special-deductions/SpecialDeductionSelector'
 import ResultActions, { ResultActionButton, ResultActionLink } from '../../_components/ResultActions/ResultActions'
@@ -25,7 +26,7 @@ import { calculateReverseTax } from '@/lib/reverse-tax'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
 import { getValidatedHousingRateOptions, validateHousingRateInputs } from '@/lib/city-rule-validation'
 import { currentYear } from '@/lib/site'
-import { cityRules as fallbackCityRules, getCityRuleForMonth, getCityRuleForMonthStrict, type CityRule } from '@/lib/tax-rules'
+import { cityRules as fallbackCityRules, getCityRuleForMonth, getCityRuleForMonthStrict, resolveCityRuleForMonth, type CityRule } from '@/lib/tax-rules'
 import { specialDeductionGroups as fallbackDeductionGroups, specialDeductionItems as fallbackDeductionItems } from '@/lib/special-deductions'
 import type { IncomeTaxRuleDataset, IncomeTaxYearRules } from '@/lib/income-tax-rule-types'
 import { parseAmountParam, parseIntegerParam } from '@/lib/url-params'
@@ -97,8 +98,8 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, incomeTaxR
     source: 'unavailable',
     missingReasons: [`${taxYear} 年税率和专项附加扣除规则尚未加载。`],
   }
-  const strictRule = getCityRuleForMonthStrict(selectedCityRule, taxYear, month)
-  const rule = strictRule || getCityRuleForMonth(selectedCityRule, taxYear, month)
+  const cityRuleResolution = resolveCityRuleForMonth(selectedCityRule, taxYear, month)
+  const rule = cityRuleResolution.rule
   const cityRuleLoaded = !cityRuleStatus || (cityRuleStatus.source === 'payload' && cityRuleStatus.ruleSourcesByCity[city] === 'payload')
   const ruleSourceDate = rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const displayRuleSourceDate = formatDateOnly(ruleSourceDate)
@@ -111,17 +112,30 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, incomeTaxR
   const housingRateOptionsText = cityHousingRateOptions.map((rate) => `${rate}%`).join('、')
   const missingCityRuleMonths = useMemo(() => Array.from({ length: Math.max(0, month - startMonth + 1) }, (_, index) => startMonth + index)
     .filter((targetMonth) => !getCityRuleForMonthStrict(selectedCityRule, taxYear, targetMonth)), [selectedCityRule, taxYear, month, startMonth])
-  const validationMessages = [
-    missingCityRuleMonths.length > 0 ? `${taxYear} 年 ${missingCityRuleMonths.join('、')} 月缺少城市缴费规则，无法可靠反推累计预扣。` : !strictRule ? `${taxYear} 年 ${month} 月没有可用的城市缴费规则，暂时无法可靠反推。` : '',
+  const cityRuleFallbackMessage = missingCityRuleMonths.length > 0 || cityRuleResolution.usedFallback
+    ? `${taxYear} 年${missingCityRuleMonths.length > 0 ? ` ${missingCityRuleMonths.join('、')} 月` : ` ${month} 月`}尚无单独的城市缴费规则，当前按 ${formatDateOnly(rule.effective)} 起的最近可用规则估算。`
+    : ''
+  const blockingRuleMessages = [
     !cityRuleLoaded ? `当前城市规则没有从 CMS 成功加载${cityRuleStatus?.fallbackReason ? `（${cityRuleStatus.fallbackReason}）` : ''}，暂时无法可靠反推。` : '',
     ...yearRules.missingReasons,
+  ].filter(Boolean)
+  const validationMessages = [
+    cityRuleFallbackMessage,
+    ...blockingRuleMessages,
     hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠反推，请稍后再试或查看城市规则。` : '',
     isTargetInvalid ? '期望到手工资需要大于 0，才能进行税前工资反推。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
     !housingRateValidation.employeeHousingRate.valid ? cityHousingRateOptions.length > 0 ? `公积金个人比例需从 ${housingRateOptionsText} 中选择。` : '当前城市暂无可用的公积金缴费比例规则，暂时无法可靠反推。' : '',
     !housingRateValidation.employerHousingRate.valid ? cityHousingRateOptions.length > 0 ? `公积金单位比例需从 ${housingRateOptionsText} 中选择。` : '当前城市暂无可用的公积金缴费比例规则，暂时无法可靠反推。' : '',
   ].filter(Boolean)
-  const calculationBlocked = validationMessages.length > 0
+  const calculationBlocked = [
+    ...blockingRuleMessages,
+    hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠反推，请稍后再试或查看城市规则。` : '',
+    isTargetInvalid ? '期望到手工资需要大于 0。' : '',
+    isMonthInvalid ? '计算月份不能早于入职月份。' : '',
+    !housingRateValidation.employeeHousingRate.valid ? '公积金个人比例不在当前城市规则范围内。' : '',
+    !housingRateValidation.employerHousingRate.valid ? '公积金单位比例不在当前城市规则范围内。' : '',
+  ].filter(Boolean).length > 0
   const selectedDeductionItems = Object.values(deductions).map((id) => yearRules.specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
   const result = useMemo(() => calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction: deductionAmount, employeeHousingRate, employerHousingRate, taxBrackets: yearRules.taxBrackets }), [targetTakeHome, rule, month, startMonth, deductionAmount, employeeHousingRate, employerHousingRate, yearRules.taxBrackets])
   const employeeInsurance = result.insurance.reduce((sum, item) => sum + item.employee, 0)
@@ -207,7 +221,7 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, incomeTaxR
         <ValidationPanel messages={validationMessages} title="请确认输入" />
         <div className={styles.formActions}><Button variant="primary" type="submit">更新结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>
-      {calculationBlocked ? <Panel as="section" className={styles.result} aria-live="polite"><ValidationPanel messages={validationMessages} title="暂时无法反推" /><p className={styles.resultExplain}>规则未完成加载前，不展示一个看似精确的税前工资。请先补齐对应年度的 CMS 规则后再试。</p></Panel> : <Panel as="section" className={styles.result} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>反推结果</span><p>{rule.label} · {taxYear} 年 {month} 月</p></div><span className={styles.badge}>累计预扣</span></div><div className={styles.required}><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><MetricGrid items={[{ label: '预计到手', value: money(result.result.takeHome, 2) }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '个人五险一金', value: money(employeeInsurance, 2) }, { label: '适用预扣率', value: `${rate}%` }]} /><div className={styles.resultExplain}><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><ResultActions><ResultActionLink href="/calculator">进入工资计算器 <span>→</span></ResultActionLink><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></Panel>}
+      {calculationBlocked ? <Panel as="section" className={styles.result} aria-live="polite"><ValidationPanel messages={validationMessages} title="暂时无法反推" /><p className={styles.resultExplain}>规则未完成加载前，不展示一个看似精确的税前工资。请先补齐对应年度的 CMS 规则后再试。</p></Panel> : <Panel as="section" className={styles.result} aria-live="polite"><div className={styles.resultHeading}><div><span className={styles.sectionTitle}>反推结果</span><p>{rule.label} · {taxYear} 年 {month} 月</p></div><span className={styles.badge}>累计预扣</span></div><div className={styles.required}><span>预计税前月薪</span><strong>{money(result.salary)}</strong><p>若想本月到手约 {money(targetTakeHome)}，税前月薪需要约 {money(result.salary)}。</p></div><MetricGrid items={[{ label: '预计到手', value: money(result.result.takeHome, 2) }, { label: '本月个税', value: money(result.result.currentTax, 2) }, { label: '个人五险一金', value: money(employeeInsurance, 2) }, { label: '适用预扣率', value: `${rate}%` }]} />{cityRuleFallbackMessage && <RuleBoundaryNotice messages={[cityRuleFallbackMessage]} title="城市规则估算口径" />}<div className={styles.resultExplain}><h3>怎么反推出来？</h3><p>系统会尝试不同税前工资，并按 {rule.label} 社保公积金规则和累计预扣法计算到手工资，直到结果接近期望到手。</p><dl><div><dt>社保缴费基数</dt><dd>{money(result.socialBase)}</dd></div><div><dt>公积金缴费基数</dt><dd>{money(result.housingBase)}</dd></div><div><dt>到手偏差</dt><dd>{money(result.gap, 2)}</dd></div></dl></div><ResultActions><ResultActionLink href="/calculator">进入工资计算器 <span>→</span></ResultActionLink><ResultActionButton onClick={copyResult}><Copy size={14} />复制结果</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions></Panel>}
     </section>
     {!calculationBlocked && <ReverseProcess result={result} targetTakeHome={targetTakeHome} employeeInsurance={employeeInsurance} />}
     <section className={styles.explain}><div><h2>结果怎么使用？</h2><p>反推结果适合用于谈薪、核对 offer 和预算估算。实际工资条可能受到奖金、补发工资、单位缴费口径等因素影响。</p></div><a href="/calculator">进入工资薪金计算器 <ArrowRight size={15} /></a></section>
