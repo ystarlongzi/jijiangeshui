@@ -382,7 +382,7 @@
   grid-template-columns: 22px 1fr auto;
   align-items: center;
   gap: 9px;
-  padding: 20px 0;
+  padding: 20px 24px 20px 0;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
   font-size: 13px;

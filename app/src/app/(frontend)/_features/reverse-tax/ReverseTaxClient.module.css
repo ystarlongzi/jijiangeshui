@@ -13,6 +13,7 @@
 .textButton { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1.4; text-decoration: none; }
 .compactField { margin-bottom: 0; }
 .fieldGrid, .ratioGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ratioGrid { margin-top: 18px; }
 .field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field :global(.money-input) { min-height: 50px; }
 .field :global(.money-input) input { font-size: 20px; }
@@ -36,7 +37,7 @@
 .resultExplain dl div { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .resultExplain dt, .resultExplain dd { margin: 0; font-size: 11px; }
 .resultExplain dt { color: var(--muted); }
-.resultExplain dd { color: var(--ink); font-weight: 750; }
+.resultExplain dd { color: var(--ink); font-weight: 600; }
 .explain { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding: 28px 0; border-top: 1px solid var(--line); }
 .explain h2 { margin-bottom: 8px; font-size: 22px; }
 .explain p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
