@@ -20,6 +20,8 @@
     "rules:cms-summary": "tsx scripts/cms-rules-summary.ts",
     "rules:import-seed": "tsx scripts/import-rules.ts ./data/city-rules-seed.json",
     "rules:import-seed:dry-run": "tsx scripts/import-rules.ts ./data/city-rules-seed.json --dry-run",
+    "rules:import-income-tax": "tsx scripts/import-income-tax-rules.ts",
+    "rules:import-income-tax:dry-run": "tsx scripts/import-income-tax-rules.ts --dry-run",
     "rules:export-fallback": "tsx scripts/export-fallback-rules.ts",
     "rules:validate": "tsx scripts/validate-rule-import.ts",
     "rules:audit": "tsx scripts/audit-rules.ts",

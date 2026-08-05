@@ -11,14 +11,23 @@ import { useMoneyFormat } from '../../_components/MoneyFormatProvider'
 import SpecialDeductionGroupList from './SpecialDeductionGroupList'
 import useSpecialDeductionSelection from './useSpecialDeductionSelection'
 import RuleSourcePanel from '../../_components/RuleSourcePanel'
+import RuleBoundaryNotice from '../../_components/RuleBoundaryNotice'
 import styles from './SpecialDeductionsClient.module.css'
 import { currentYear } from '@/lib/site'
 import { createDeductionHref } from '@/lib/url-params'
+import { specialDeductionGroups as fallbackGroups, specialDeductionItems as fallbackItems, type SpecialDeductionGroup, type SpecialDeductionItem } from '@/lib/special-deductions'
+import type { IncomeTaxYearRules } from '@/lib/income-tax-rule-types'
 
 type Mode = 'items' | 'manual'
 
-export default function SpecialDeductionsClient() {
+type SpecialDeductionsClientProps = {
+  deductionRules?: IncomeTaxYearRules
+}
+
+export default function SpecialDeductionsClient({ deductionRules }: SpecialDeductionsClientProps) {
   const { money } = useMoneyFormat()
+  const groups: SpecialDeductionGroup[] = deductionRules?.specialDeductionGroups || fallbackGroups
+  const items: SpecialDeductionItem[] = deductionRules?.specialDeductionItems || fallbackItems
   const [mode, setMode] = useState<Mode>('items')
   const [manualOpen, setManualOpen] = useState(false)
   const [manualAmount, setManualAmount] = useState(0)
@@ -30,7 +39,7 @@ export default function SpecialDeductionsClient() {
     selectedItems,
     selections,
     toggleGroup,
-  } = useSpecialDeductionSelection({ initialExpandedGroups: ['children'] })
+  } = useSpecialDeductionSelection({ items, initialExpandedGroups: ['children'] })
   const monthAmount = mode === 'manual' ? manualAmount : itemAmount
   const displaySelectedItems = mode === 'items' ? selectedItems : []
 
@@ -74,8 +83,11 @@ export default function SpecialDeductionsClient() {
             <label className={styles.field} htmlFor="manualDeduction"><span>本月专项附加扣除总额</span><MoneyInput id="manualDeduction" value={manualAmount} onChange={updateManualAmount} /></label>
             <p>如果你已经在个税 APP 或工资条里看到扣除总额，可以直接填写这里。</p>
           </div> : <div className={styles.groups}>
+            <RuleBoundaryNotice messages={deductionRules?.missingReasons || []} title="当前年度规则待补充" tone="error" />
             <SpecialDeductionGroupList
               className={styles.deductionPageList}
+              groups={groups}
+              items={items}
               selections={selections}
               expandedGroups={expandedGroups}
               emptyText="大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月工资预扣计算。"

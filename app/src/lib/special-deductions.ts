@@ -4,6 +4,10 @@ export type SpecialDeductionOption = {
   amount: number
 }
 
+export type SpecialDeductionItem = SpecialDeductionOption & {
+  group: string
+}
+
 export type SpecialDeductionGroup = {
   key: string
   title: string
@@ -81,7 +85,11 @@ export const specialDeductionGroups: SpecialDeductionGroup[] = [
   },
 ]
 
-export const specialDeductionItems = specialDeductionGroups.flatMap((group) => group.options.map((option) => ({ ...option, group: group.title })))
+export function createSpecialDeductionItems(groups: SpecialDeductionGroup[]): SpecialDeductionItem[] {
+  return groups.flatMap((group) => group.options.map((option) => ({ ...option, group: group.title })))
+}
 
-export const sumSpecialDeductions = (selections: Record<string, string>) =>
-  Object.values(selections).reduce((sum, id) => sum + (specialDeductionItems.find((item) => item.id === id)?.amount || 0), 0)
+export const specialDeductionItems = createSpecialDeductionItems(specialDeductionGroups)
+
+export const sumSpecialDeductions = (selections: Record<string, string>, items: SpecialDeductionItem[] = specialDeductionItems) =>
+  Object.values(selections).reduce((sum, id) => sum + (items.find((item) => item.id === id)?.amount || 0), 0)

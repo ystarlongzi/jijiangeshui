@@ -21,6 +21,19 @@ export type ContributionSideRule = {
   fixedAmount?: number
 }
 
+/**
+ * 年度税率规则的最小前台结构。
+ *
+ * 这里不直接复用 Payload 文档类型，避免客户端组件依赖 CMS 实现；
+ * CMS 规则会先转换成这个结构，再传给计算器。
+ */
+export type TaxBracket = {
+  ceiling: number
+  rate: number
+  quick: number
+  rangeLabel?: string
+}
+
 export type ContributionBaseRule = {
   type: ContributionBaseType
   label: string
@@ -128,15 +141,31 @@ export function getCityRuleForMonth(rule: CityRule, year: number, month: number)
   return selectEffectiveCityRule([rule, ...(rule.policyVersions || [])], `${year}-${String(normalizedMonth).padStart(2, '0')}-01`) || rule
 }
 
-export function selectEffectiveCityRule(rules: CityRule[], targetDate: string) {
+/**
+ * 严格查找指定月份的城市政策版本。
+ *
+ * 与 getCityRuleForMonth 的“找不到时取最近版本”不同，计算器在用户主动选择历史年度时
+ * 必须知道该年度是否真的有规则，不能把别的年度政策伪装成当前年度结果。
+ */
+export function getCityRuleForMonthStrict(rule: CityRule, year: number, month: number) {
+  const normalizedMonth = Math.max(1, Math.min(12, Math.trunc(month || 1)))
+  return selectEffectiveCityRule(
+    [rule, ...(rule.policyVersions || [])],
+    `${year}-${String(normalizedMonth).padStart(2, '0')}-01`,
+    { allowNearest: false },
+  )
+}
+
+export function selectEffectiveCityRule(rules: CityRule[], targetDate: string, options: { allowNearest?: boolean } = {}) {
   const sortedRules = [...rules]
     .filter((rule) => rule.effective)
     .sort((a, b) => b.effective.localeCompare(a.effective))
 
-  return sortedRules.find((rule) => rule.effective <= targetDate && (!rule.effectiveTo || rule.effectiveTo >= targetDate)) || sortedRules[0]
+  return sortedRules.find((rule) => rule.effective <= targetDate && (!rule.effectiveTo || rule.effectiveTo >= targetDate))
+    || (options.allowNearest === false ? undefined : sortedRules[0])
 }
 
-export const taxBrackets = [
+export const taxBrackets: TaxBracket[] = [
   { ceiling: 36000, rate: 0.03, quick: 0 },
   { ceiling: 144000, rate: 0.1, quick: 2520 },
   { ceiling: 300000, rate: 0.2, quick: 16920 },

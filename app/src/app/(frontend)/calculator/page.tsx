@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import CalculatorClient from '../_features/salary/CalculatorClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd from '../_components/JsonLd'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 
 export const metadata: Metadata = {
   title: `工资薪金个税计算器｜${currentYear}年五险一金与全年预扣明细｜${siteName}`,
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
 }
 
 export default async function CalculatorPage() {
-  const rules = await getAvailableCityRules()
+  const [cityRuleDataset, incomeTaxRules] = await Promise.all([
+    getAvailableCityRuleDataset(),
+    getIncomeTaxRuleDataset(),
+  ])
 
   return <>
     <JsonLd data={{
@@ -25,6 +29,14 @@ export default async function CalculatorPage() {
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'CNY' },
       publisher: { '@type': 'Organization', name: siteName },
     }} />
-    <CalculatorClient rules={rules} />
+    <CalculatorClient
+      rules={cityRuleDataset.rules}
+      cityRuleStatus={{
+        source: cityRuleDataset.source,
+        ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
+        fallbackReason: cityRuleDataset.fallbackReason,
+      }}
+      incomeTaxRules={incomeTaxRules}
+    />
   </>
 }

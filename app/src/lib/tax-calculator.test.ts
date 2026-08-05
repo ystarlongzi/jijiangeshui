@@ -56,6 +56,25 @@ test('逐月不同工资会按实际月份收入累计预扣', () => {
   assert.equal(result.takeHome, 47670)
 })
 
+test('逐月社保变化会进入累计扣除和当月到手计算', () => {
+  const firstMonthInsurance = [{ name: '社保', employee: 100, employer: 100, employeeFormula: '100', employerFormula: '100', subtotal: 200 }]
+  const secondMonthInsurance = [{ name: '社保', employee: 200, employer: 200, employeeFormula: '200', employerFormula: '200', subtotal: 400 }]
+  const result = calculateMonthFromSeries(
+    [10000, 10000, ...Array.from({ length: 10 }, () => 0)],
+    2,
+    1,
+    0,
+    firstMonthInsurance,
+    { insuranceByMonth: [firstMonthInsurance, secondMonthInsurance] },
+  )
+
+  assert.equal(result.employeeInsurance, 200)
+  assert.equal(result.cumulativeInsurance, 300)
+  assert.equal(result.taxable, 9700)
+  assert.equal(result.currentTax, 144)
+  assert.equal(result.takeHome, 9656)
+})
+
 test('公积金比例可在 3% 到 12% 间改变个人缴费', () => {
   const lowHousing = calculateInsurance(cityRules.beijing, 20000, 20000, 3, 12)
   const highHousing = calculateInsurance(cityRules.beijing, 20000, 20000, 12, 12)

@@ -1,11 +1,13 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { specialDeductionGroups, specialDeductionItems } from '@/lib/special-deductions'
+import { specialDeductionGroups as defaultGroups, specialDeductionItems as defaultItems, type SpecialDeductionGroup, type SpecialDeductionItem } from '@/lib/special-deductions'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import styles from './SpecialDeductionGroupList.module.css'
 
 type SpecialDeductionGroupListProps = {
+  groups?: SpecialDeductionGroup[]
+  items?: SpecialDeductionItem[]
   selections: Record<string, string>
   expandedGroups: string[]
   emptyText?: string
@@ -15,6 +17,8 @@ type SpecialDeductionGroupListProps = {
 }
 
 export default function SpecialDeductionGroupList({
+  groups = defaultGroups,
+  items = defaultItems,
   selections,
   expandedGroups,
   emptyText = '大病医疗通常在年度汇算时按实际发生额扣除，暂不参与本月预扣计算。',
@@ -27,8 +31,8 @@ export default function SpecialDeductionGroupList({
   const listClassName = [styles.list, className].filter(Boolean).join(' ')
 
   return <div className={listClassName}>
-    {specialDeductionGroups.map((group) => {
-      const selectedOption = specialDeductionItems.find((item) => item.id === selections[group.key])
+    {groups.map((group) => {
+      const selectedOption = items.find((item) => item.id === selections[group.key])
       const expanded = expandedGroups.includes(group.key)
 
       return <div className={`${styles.group}${group.options.length === 0 ? ` ${styles.disabled}` : ''}`} key={group.key}>

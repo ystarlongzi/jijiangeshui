@@ -1,9 +1,10 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import { specialDeductionItems, sumSpecialDeductions } from '@/lib/special-deductions'
+import { specialDeductionItems as defaultItems, sumSpecialDeductions, type SpecialDeductionItem } from '@/lib/special-deductions'
 
 type SpecialDeductionSelectionOptions = {
+  items?: SpecialDeductionItem[]
   initialSelections?: Record<string, string>
   initialExpandedGroups?: string[]
   onGroupToggle?: (group: string, expanded: boolean) => void
@@ -11,6 +12,7 @@ type SpecialDeductionSelectionOptions = {
 }
 
 export default function useSpecialDeductionSelection({
+  items = defaultItems,
   initialSelections = {},
   initialExpandedGroups = [],
   onGroupToggle,
@@ -18,8 +20,8 @@ export default function useSpecialDeductionSelection({
 }: SpecialDeductionSelectionOptions = {}) {
   const [selections, setSelections] = useState<Record<string, string>>(initialSelections)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(initialExpandedGroups)
-  const amount = useMemo(() => sumSpecialDeductions(selections), [selections])
-  const selectedItems = useMemo(() => Object.values(selections).map((id) => specialDeductionItems.find((item) => item.id === id)).filter(Boolean), [selections])
+  const amount = useMemo(() => sumSpecialDeductions(selections, items), [items, selections])
+  const selectedItems = useMemo(() => Object.values(selections).map((id) => items.find((item) => item.id === id)).filter(Boolean), [items, selections])
 
   const toggleGroup = useCallback((group: string) => {
     setExpandedGroups((current) => {

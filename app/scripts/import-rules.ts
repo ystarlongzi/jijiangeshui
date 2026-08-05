@@ -159,6 +159,8 @@ async function createPayloadClient(): Promise<PayloadInstance> {
     db: postgresAdapter({
       pool: {
         connectionString: process.env.DATABASE_URI,
+        // 导入脚本与应用使用同一连接上限，避免脚本和开发服务器同时运行时耗尽连接。
+        max: Number(process.env.PAYLOAD_DB_POOL_MAX) || 3,
       },
     }),
     sharp,

@@ -16,6 +16,8 @@ import { Users } from './collections/Users'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const configuredPoolMax = Number(process.env.PAYLOAD_DB_POOL_MAX)
+const databasePoolMax = Number.isFinite(configuredPoolMax) && configuredPoolMax > 0 ? Math.floor(configuredPoolMax) : 3
 
 export default buildConfig({
   admin: {
@@ -36,6 +38,8 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
+      // Next 构建会并行执行多个页面；限制每个 Payload 实例的连接数，避免把本地 Postgres 撞到 max_connections。
+      max: databasePoolMax,
     },
   }),
   sharp,

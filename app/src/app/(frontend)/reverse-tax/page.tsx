@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import ReverseTaxClient from '../_features/reverse-tax/ReverseTaxClient'
 import { currentYear, siteName } from '@/lib/site'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 
 export const metadata: Metadata = {
   title: `税后反推税前工资｜${currentYear}年个税计算｜${siteName}`,
@@ -10,7 +11,18 @@ export const metadata: Metadata = {
 }
 
 export default async function ReverseTaxPage() {
-  const rules = await getAvailableCityRules()
+  const [cityRuleDataset, incomeTaxRules] = await Promise.all([
+    getAvailableCityRuleDataset(),
+    getIncomeTaxRuleDataset(),
+  ])
 
-  return <ReverseTaxClient rules={rules} />
+  return <ReverseTaxClient
+    rules={cityRuleDataset.rules}
+    incomeTaxRules={incomeTaxRules}
+    cityRuleStatus={{
+      source: cityRuleDataset.source,
+      ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
+      fallbackReason: cityRuleDataset.fallbackReason,
+    }}
+  />
 }

@@ -1,5 +1,5 @@
 import { calculateInsurance, calculateMonth, clamp, roundMoney } from './tax-calculator'
-import type { CityRule } from './tax-rules'
+import type { CityRule, TaxBracket } from './tax-rules'
 
 type ReverseTaxInput = {
   targetTakeHome: number
@@ -9,14 +9,15 @@ type ReverseTaxInput = {
   deduction: number
   employeeHousingRate: number
   employerHousingRate: number
+  taxBrackets?: TaxBracket[]
 }
 
-export function calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction, employeeHousingRate, employerHousingRate }: ReverseTaxInput) {
+export function calculateReverseTax({ targetTakeHome, rule, month, startMonth, deduction, employeeHousingRate, employerHousingRate, taxBrackets }: ReverseTaxInput) {
   const evaluate = (salary: number) => {
     const socialBase = clamp(salary, rule.socialMin, rule.socialMax)
     const housingBase = clamp(salary, rule.housingMin, rule.housingMax)
     const insurance = calculateInsurance(rule, socialBase, housingBase, employeeHousingRate, employerHousingRate)
-    const result = calculateMonth(salary, month, startMonth, deduction, insurance)
+    const result = calculateMonth(salary, month, startMonth, deduction, insurance, { taxBrackets })
     return { salary, socialBase, housingBase, insurance, result }
   }
 

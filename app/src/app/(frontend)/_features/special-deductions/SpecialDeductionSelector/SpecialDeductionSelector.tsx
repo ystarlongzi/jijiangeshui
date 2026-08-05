@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
+import type { SpecialDeductionGroup, SpecialDeductionItem } from '@/lib/special-deductions'
 import { Button } from '../../../_components/Button'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import Modal from '../../../_components/Modal'
@@ -11,6 +12,8 @@ import { trackEvent } from '../../../_lib/analytics'
 import styles from './SpecialDeductionSelector.module.css'
 
 type SpecialDeductionSelectorProps = {
+  groups?: SpecialDeductionGroup[]
+  items?: SpecialDeductionItem[]
   open: boolean
   value: Record<string, string>
   description?: string
@@ -20,6 +23,8 @@ type SpecialDeductionSelectorProps = {
 }
 
 export default function SpecialDeductionSelector({
+  groups,
+  items,
   open,
   value,
   description = '选择后会按月扣除额汇总，并回填到输入框内。',
@@ -43,6 +48,7 @@ export default function SpecialDeductionSelector({
     selections: draftValue,
     toggleGroup,
   } = useSpecialDeductionSelection({
+    items,
     onGroupToggle: trackGroupToggle,
     onOptionToggle: trackOptionToggle,
   })
@@ -82,6 +88,8 @@ export default function SpecialDeductionSelector({
     </div>}
   >
     <SpecialDeductionGroupList
+      groups={groups}
+      items={items}
       selections={draftValue}
       expandedGroups={expandedGroups}
       emptyText={emptyText}

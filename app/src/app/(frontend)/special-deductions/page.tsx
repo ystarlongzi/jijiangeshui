@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { currentYear, siteName } from '@/lib/site'
 import SpecialDeductionsClient from '../_features/special-deductions/SpecialDeductionsClient'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 
 export const metadata: Metadata = {
   title: `专项附加扣除计算器｜${currentYear}年子女教育、住房租金、赡养老人扣除标准｜${siteName}`,
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/special-deductions' },
 }
 
-export default function SpecialDeductionsPage() {
-  return <SpecialDeductionsClient />
+export default async function SpecialDeductionsPage() {
+  const dataset = await getIncomeTaxRuleDataset()
+  const deductionRules = dataset.rulesByYear[String(currentYear)]
+  return <SpecialDeductionsClient deductionRules={deductionRules} />
 }
