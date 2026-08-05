@@ -473,63 +473,6 @@
   font-size: 18px;
 }
 
-.provinceSection {
-  padding: 12px 0 34px;
-}
-
-.provinceList {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.provinceCard {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-muted);
-}
-
-.provinceCard strong {
-  font-size: 15px;
-}
-
-.provinceCard div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.provinceCard .cityLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.cityLink small {
-  padding: 2px 5px;
-  border-radius: 999px;
-  background: var(--surface-muted);
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.cityLink small[data-source='payload'] {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
 @media (max-width: 680px) {
   .page {
     width: min(100% - 28px, 600px);
@@ -596,7 +539,6 @@
   }
 
   .indexGrid,
-  .provinceList,
   .coveragePanel {
     grid-template-columns: 1fr;
   }
