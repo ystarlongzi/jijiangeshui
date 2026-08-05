@@ -46,8 +46,15 @@
 
 .control input {
   width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--ink);
   padding-right: 40px;
   padding-left: 40px;
+  appearance: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .control:focus-within input {
