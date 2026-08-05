@@ -3,6 +3,7 @@
 export type AnalyticsEventName =
   | 'page_view'
   | 'calculate_complete'
+  | 'calculate_blocked'
   | 'result_expand'
   | 'share_link'
   | 'copy_result'
