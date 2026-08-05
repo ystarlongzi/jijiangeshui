@@ -4,7 +4,9 @@ import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
 import JsonLd from '../_components/JsonLd'
 import TrackedLink from '../_components/TrackedLink'
+import { getIndexableArticles } from '@/lib/article-content-service'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
+import { formatDateOnly } from '../_lib/date'
 import styles from './TopicsPage.module.css'
 
 export const metadata: Metadata = {
@@ -62,9 +64,15 @@ const incomeLinks = [
   { label: '偶然所得', href: '/accidental-tax' },
 ]
 
-export default function TopicsPage() {
+export default async function TopicsPage() {
+  const articles = await getIndexableArticles(6)
+  const structuredItems = [
+    ...topics.map((topic) => ({ name: topic.title, url: `${siteUrl}${topic.href}` })),
+    ...articles.map((article) => ({ name: article.title, url: `${siteUrl}/articles/${encodeURIComponent(article.slug)}` })),
+  ]
+
   return <div className="app-shell">
-    <SiteHeader active="home" />
+    <SiteHeader />
     <main className={styles.page}>
       <JsonLd data={{
         '@context': 'https://schema.org',
@@ -75,11 +83,11 @@ export default function TopicsPage() {
         isPartOf: { '@type': 'WebSite', name: siteName, url: siteUrl },
         mainEntity: {
           '@type': 'ItemList',
-          itemListElement: topics.map((topic, index) => ({
+          itemListElement: structuredItems.map((item, index) => ({
             '@type': 'ListItem',
             position: index + 1,
-            name: topic.title,
-            url: `${siteUrl}${topic.href}`,
+            name: item.name,
+            url: item.url,
           })),
         },
       }} />
@@ -109,6 +117,28 @@ export default function TopicsPage() {
           {incomeLinks.map((item) => <TrackedLink href={item.href} eventPayload={{ module: 'topics_income', label: item.label }} key={item.href}>{item.label}<ArrowRight size={14} /></TrackedLink>)}
         </div>
       </section>
+
+      {articles.length > 0 && <section className={styles.articleSection}>
+        <div className={styles.articleHeading}>
+          <div>
+            <h2>最新个税文章</h2>
+            <p>从规则解读和案例入手，再回到计算器验证。</p>
+          </div>
+          <TrackedLink href="/articles" eventPayload={{ module: 'topics_articles', label: '查看全部' }}>查看全部 <ArrowRight size={14} /></TrackedLink>
+        </div>
+        <div className={styles.articleList}>
+          {articles.map((article) => <TrackedLink
+            href={`/articles/${encodeURIComponent(article.slug)}`}
+            eventPayload={{ module: 'topics_articles', label: article.title }}
+            key={article.slug}
+          >
+            <span>{article.categoryLabel}</span>
+            <strong>{article.title}</strong>
+            <time dateTime={article.updatedAt}>{formatDateOnly(article.updatedAt)}</time>
+            <ArrowRight size={15} />
+          </TrackedLink>)}
+        </div>
+      </section>}
 
       <SiteFooter />
     </main>

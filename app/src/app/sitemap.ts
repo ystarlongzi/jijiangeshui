@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { getIndexableArticles } from '@/lib/article-content-service'
 import { getAvailableCityRules } from '@/lib/city-rule-service'
 import { siteUrl } from '@/lib/site'
 
@@ -19,13 +20,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/reverse-tax`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/special-deductions`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/city`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/topics`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${siteUrl}/articles`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${siteUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
   ]
-  const cityRules = await getAvailableCityRules()
+  const [cityRules, articles] = await Promise.all([
+    getAvailableCityRules(),
+    getIndexableArticles(),
+  ])
   const cityRoutes: MetadataRoute.Sitemap = Object.keys(cityRules).map((city) => ({
     url: `${siteUrl}/city/${city}`,
     changeFrequency: 'monthly',
     priority: 0.7,
   }))
-  return [...coreRoutes, ...cityRoutes]
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
+    url: `${siteUrl}/articles/${encodeURIComponent(article.slug)}`,
+    lastModified: article.updatedAt,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }))
+  return [...coreRoutes, ...cityRoutes, ...articleRoutes]
 }
