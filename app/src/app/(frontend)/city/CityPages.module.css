@@ -54,10 +54,9 @@
 }
 
 .status {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
   align-items: center;
-  gap: 8px 10px;
+  gap: 10px;
   min-width: 170px;
   padding: 16px;
   border: 1px solid var(--line);
@@ -68,8 +67,15 @@
 }
 
 .status svg {
-  grid-row: span 2;
+  flex: 0 0 auto;
   color: var(--accent);
+}
+
+.status > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .status strong {
@@ -223,7 +229,7 @@
 .card dd {
   margin: 0;
   color: var(--ink);
-  font-weight: 750;
+  font-weight: 600;
   text-align: right;
 }
 
@@ -265,7 +271,7 @@
 }
 
 .policyTable {
-  min-width: 640px;
+  width: 100%;
 }
 
 .policyTable th,
@@ -273,12 +279,17 @@
   padding: 15px 18px;
 }
 
+.policyTable th:first-child,
+.policyTable td:first-child {
+  width: 120px;
+}
+
 .policyTable th {
   background: var(--surface-muted);
 }
 
 .policyTable td {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .tableNote {
@@ -297,7 +308,7 @@
   padding: 24px;
 }
 
-.exampleCard span {
+.exampleLabel {
   color: var(--accent);
   font-size: 12px;
   font-weight: 800;
@@ -307,6 +318,13 @@
   max-width: 720px;
   margin: 8px 0 10px;
   font-size: 24px;
+  font-weight: 600;
+}
+
+.exampleCard h2 > span,
+.exampleCard p > span {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .exampleCard p {
@@ -386,6 +404,10 @@
   padding: 24px;
   border-radius: 12px;
   background: var(--accent-soft);
+}
+
+.indexNextStep {
+  margin-bottom: 18px;
 }
 
 .nextStep > div {
@@ -536,6 +558,10 @@
   .nextStep {
     align-items: start;
     flex-direction: column;
+  }
+
+  .indexNextStep {
+    margin-bottom: 12px;
   }
 
   .indexGrid,

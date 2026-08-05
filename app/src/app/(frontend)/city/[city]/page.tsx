@@ -11,6 +11,7 @@ import DataTable from '../../_components/DataTable'
 import Panel from '../../_components/Panel'
 import PrimaryActionLink from '../../_components/PrimaryActionLink'
 import RuleSourcePanel from '../../_components/RuleSourcePanel'
+import MoneyText, { MoneyRange, SideRuleText } from '../../_components/MoneyText'
 import { formatDateOnly } from '../../_lib/date'
 import styles from '../CityPages.module.css'
 
@@ -48,15 +49,15 @@ export default async function CityPage({ params }: CityPageProps) {
     cells: {
       item: item.name,
       base: getContributionBaseRule(rule, item.baseType).label,
-      employee: formatSideRule(item.employee),
-      employer: formatSideRule(item.employer),
+      employee: <SideRuleText rule={item.employee} />,
+      employer: <SideRuleText rule={item.employer} />,
     },
   }))
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
     <nav className={styles.breadcrumb}><Link href="/">极简个税</Link><span>/</span><span>{rule.label}个税计算器</span></nav>
     <section className={styles.hero}><div><div className={styles.titleLine}><MapPin size={20} /><span>{rule.label} · {currentYear}年规则</span></div><h1>{rule.label}个税计算器</h1><p>按 {rule.label} {currentYear} 年社保、公积金规则，测算工资到手、个人缴费和全年预扣变化。</p><PrimaryActionLink href={`/calculator?city=${city}`}>开始计算 <ArrowRight size={16} /></PrimaryActionLink></div><div className={styles.status}><ShieldCheck size={20} /><div><span>当前规则生效</span><strong>{formatDateOnly(rule.effective)}</strong></div></div></section>
-    <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>{socialBaseRule.label}</dt><dd>{formatMoney(socialBaseRule.min)} - {formatMoney(socialBaseRule.max)}</dd></div><div><dt>{housingBaseRule.label}</dt><dd>{formatMoney(housingBaseRule.min)} - {formatMoney(housingBaseRule.max)}</dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl>{rule.contributionItems.filter((item) => item.systemType === 'social').slice(0, 3).map((item) => <div key={item.code}><dt>{item.name}</dt><dd>{formatSideRule(item.employee)} / {formatSideRule(item.employer)}</dd></div>)}<div><dt>公积金</dt><dd>个人和单位可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%</dd></div></dl></article></section>
+    <section className={styles.contentGrid}><article className={styles.card}><h2>{rule.label}缴费范围</h2><p>社保和公积金基数可以分别设置，工资超过城市范围时按上下限估算。</p><dl><div><dt>{socialBaseRule.label}</dt><dd><MoneyRange min={socialBaseRule.min} max={socialBaseRule.max} /></dd></div><div><dt>{housingBaseRule.label}</dt><dd><MoneyRange min={housingBaseRule.min} max={housingBaseRule.max} /></dd></div></dl></article><article className={styles.card}><h2>个人与单位比例</h2><p>以下比例用于计算器的默认估算，实际申报以单位和城市规则为准。</p><dl>{rule.contributionItems.filter((item) => item.systemType === 'social').slice(0, 3).map((item) => <div key={item.code}><dt>{item.name}</dt><dd><SideRuleText rule={item.employee} /> / <SideRuleText rule={item.employer} /></dd></div>)}<div><dt>公积金</dt><dd>个人和单位可选 {Math.min(...cityHousingRateOptions)}% - {Math.max(...cityHousingRateOptions)}%</dd></div></dl></article></section>
     <Panel as="section" className={styles.policyTablePanel}>
       <div className={styles.tableHeading}>
         <div><h2>{rule.label}五险一金比例表</h2><p>完整列出当前计算器使用的个人和单位缴费规则。</p></div>
@@ -78,9 +79,9 @@ export default async function CityPage({ params }: CityPageProps) {
     </Panel>
     <Panel as="section" className={styles.exampleCard}>
       <div>
-        <span>{rule.label}工资案例</span>
-        <h2>税前 {formatMoney(exampleSalary)}，8 月预计到手 {formatMoney(exampleResult.takeHome)}</h2>
-        <p>按当前默认规则估算，个人五险一金约 {formatMoney(exampleResult.employeeInsurance)}，本月预扣个税约 {formatMoney(exampleResult.currentTax)}。实际结果还会受专项附加扣除、入职月份和单位申报基数影响。</p>
+        <span className={styles.exampleLabel}>{rule.label}工资案例</span>
+        <h2>税前 <MoneyText value={exampleSalary} />，8 月预计到手 <MoneyText value={exampleResult.takeHome} /></h2>
+        <p>按当前默认规则估算，个人五险一金约 <MoneyText value={exampleResult.employeeInsurance} />，本月预扣个税约 <MoneyText value={exampleResult.currentTax} />。实际结果还会受专项附加扣除、入职月份和单位申报基数影响。</p>
       </div>
       <Link href={`/calculator?city=${city}&salary=${exampleSalary}&month=8&startMonth=1`}>按此案例计算 <ArrowRight size={16} /></Link>
     </Panel>
@@ -101,15 +102,4 @@ export default async function CityPage({ params }: CityPageProps) {
     />
     <SiteFooter />
   </main></div>
-}
-
-function formatMoney(value: number) {
-  return `¥${value.toLocaleString('zh-CN')}`
-}
-
-function formatSideRule(rule: { method: string; rate?: number; fixedAmount?: number }) {
-  if (rule.method === 'none') return '不缴'
-  if (rule.method === 'fixed') return `${formatMoney(rule.fixedAmount || 0)}`
-  if (rule.method === 'rate') return `${rule.rate || 0}%`
-  return `${rule.rate || 0}% + ${formatMoney(rule.fixedAmount || 0)}`
 }

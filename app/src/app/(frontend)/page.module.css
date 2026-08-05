@@ -289,7 +289,7 @@
 }
 
 .highlightSection {
-  margin-inline: calc((1120px - 100vw) / 2);
+  margin-inline: calc((100% - 100vw) / 2);
   padding: 42px max(24px, calc((100vw - 1120px) / 2));
   border-block: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
   background: color-mix(in srgb, var(--surface-muted) 82%, var(--accent-soft));
@@ -297,13 +297,17 @@
 
 .highlightGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 34px;
 }
 
 .highlightItem {
   display: flex;
   gap: 13px;
+}
+
+.highlightItem > div {
+  min-width: 0;
 }
 
 .highlightIcon {
@@ -447,7 +451,6 @@
   }
 
   .toolGrid,
-  .highlightGrid,
   .readingLinks {
     grid-template-columns: 1fr;
   }
@@ -477,5 +480,11 @@
 
   .readingSection {
     padding: 54px 0 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  .highlightGrid {
+    grid-template-columns: 1fr;
   }
 }

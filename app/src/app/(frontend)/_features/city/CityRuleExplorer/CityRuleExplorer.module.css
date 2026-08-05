@@ -69,9 +69,23 @@
 .searchBox input {
   width: 100%;
   min-height: 44px;
-  padding-left: 40px;
-  border-color: var(--line);
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-small);
+  color: var(--ink);
+  appearance: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
   background: var(--surface);
+}
+
+.searchBox input:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.searchBox input::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 .clearButton {

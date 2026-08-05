@@ -40,7 +40,7 @@ export default async function CityIndexPage() {
 
     <CityRuleExplorer cities={cityExplorerItems} popularCities={popularCities} />
 
-    <section className={styles.nextStep}><div><MapPin size={20} /><div><h2>城市规则会影响到手工资</h2><p>同样的税前工资，在不同城市可能因为社保、公积金基数上下限和单位比例不同，得到不同结果。</p></div></div><Link href="/calculator">进入工资计算器 <ArrowRight size={16} /></Link></section>
+    <section className={`${styles.nextStep} ${styles.indexNextStep}`}><div><MapPin size={20} /><div><h2>城市规则会影响到手工资</h2><p>同样的税前工资，在不同城市可能因为社保、公积金基数上下限和单位比例不同，得到不同结果。</p></div></div><Link href="/calculator">进入工资计算器 <ArrowRight size={16} /></Link></section>
     <SiteFooter />
   </main></div>
 }
