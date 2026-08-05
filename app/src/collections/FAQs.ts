@@ -29,7 +29,7 @@ export const FAQs: CollectionConfig = {
       ],
       required: true,
     },
-    { name: 'answer', label: '答案', type: 'richText' },
+    { name: 'answer', label: '答案', type: 'richText', required: true },
     { name: 'sortOrder', label: '显示顺序', type: 'number', defaultValue: 10 },
   ],
 }
