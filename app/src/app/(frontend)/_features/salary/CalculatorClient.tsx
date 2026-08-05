@@ -116,9 +116,6 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
   const isEmployerHousingRateInvalid = !inputValidation.employerHousingRate.valid
   const isDeductionInvalid = deductionAmount > activeSalary
   const housingRateOptionsText = cityHousingRateOptions.map((rate) => `${rate}%`).join('、')
-  const housingRateMeta = cityHousingRateOptions.length > 0
-    ? `比例可选：${housingRateOptionsText}，最终以城市规则和单位实际缴纳情况为准。`
-    : '当前城市暂无可用的公积金缴费比例规则。'
   const validationMessages = [
     hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠测算，请稍后再试或查看城市规则。` : '',
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
@@ -319,7 +316,7 @@ export default function CalculatorClient({ rules = fallbackCityRules }: Calculat
             <BaseField label={socialBaseRule.label} value={socialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
             <BaseField label={housingBaseRule.label} value={housingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
           </div>
-          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} options={cityHousingRateOptions} invalid={isEmployeeHousingRateInvalid} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} options={cityHousingRateOptions} invalid={isEmployerHousingRateInvalid} onChange={setEmployerHousingRate} /></div><p className={styles.fieldMeta}>{housingRateMeta}</p>
+          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} options={cityHousingRateOptions} invalid={isEmployeeHousingRateInvalid} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} options={cityHousingRateOptions} invalid={isEmployerHousingRateInvalid} onChange={setEmployerHousingRate} /></div>
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button className={styles.formTextAction} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : ''} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
           <RuleBoundaryNotice messages={boundaryMessages} title="边界提醒" />
