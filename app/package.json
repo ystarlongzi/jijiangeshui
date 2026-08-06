@@ -7,6 +7,8 @@
     "dev": "next dev --webpack --port 4000",
     "build": "next build",
     "start": "next start --port 4000",
+    "deploy:ssr": "node scripts/deploy/deploy-ssr.mjs",
+    "deploy:ssl": "bash scripts/deploy/setup-ssl-acme.sh",
     "lint": "eslint .",
     "smoke": "tsx scripts/smoke-test.ts",
     "test": "node --import tsx --test src/**/*.test.ts",
