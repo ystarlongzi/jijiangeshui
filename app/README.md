@@ -2,6 +2,8 @@
 
 基于 Next.js、Payload CMS 和 PostgreSQL 的新应用骨架。
 
+当前前台产品已经以 `src/app/(frontend)` 下的 Next.js 页面为准，包含工资薪金、税后反推、年终奖、分类所得、专项附加扣除、城市规则和税率表等入口。产品完成基线、数据验收结果和下一轮待办见 [docs/iteration-backlog.md](docs/iteration-backlog.md)。
+
 ## 本地启动
 
 1. 在仓库根目录执行 `docker compose up -d postgres`。
@@ -30,4 +32,4 @@ npm run rules:import -- ./data/hrwork-social-insurance-2026-07-28.json
 - `faqs`：常见问题
 - `import-jobs`：规则导入任务记录
 
-`prototype/` 仍然是独立的原型目录，后续会把计算器页面逐步迁移到 Next.js 前端。
+`../prototype/` 仍然保留为历史原型参考；当前用户可访问功能以 `src/app/(frontend)` 为准，不再以 prototype 的迁移状态作为产品完成度判断依据。
