@@ -23,7 +23,7 @@
 
 ## 生产环境变量
 
-部署脚本默认读取 `app/.env`，上传前生成临时 `.env.production`，不会修改本地文件。至少需要提供真实的：
+部署脚本默认读取 `app/.env.production`，上传前生成临时的生产环境文件，不会修改本地文件。至少需要提供真实的：
 
 ```dotenv
 DATABASE_URI=postgres://用户名:密码@数据库地址:5432/jijian_geshui

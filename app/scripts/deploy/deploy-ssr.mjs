@@ -41,7 +41,7 @@ Options:
   --app-port <port>         Local Next.js listen port
   --domain <domain>         Public domain used by Nginx and SSL
   --site-url <url>          Public site URL injected into production env
-  --env-file <path>         Local env file to upload (default: app/.env)
+  --env-file <path>         Local env file to upload (default: app/.env.production)
   --skip-build              Upload source, env and Nginx config only
   --reload-nginx            Run nginx -t and reload Nginx after activation
   --no-prompt               Do not ask for deployment parameters
@@ -50,7 +50,7 @@ Options:
 }
 
 function parseArgs(argv) {
-  const options = { ...defaults, envFile: path.join(appRoot, '.env'), skipBuild: false, reloadNginx: false, noPrompt: false }
+  const options = { ...defaults, envFile: path.join(appRoot, '.env.production'), skipBuild: false, reloadNginx: false, noPrompt: false }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     if (arg === '--help') { options.help = true; continue }
