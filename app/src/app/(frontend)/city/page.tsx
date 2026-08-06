@@ -34,10 +34,6 @@ export default async function CityIndexPage() {
     .filter((city): city is CityRuleExplorerItem => Boolean(city))
 
   return <div className="app-shell"><SiteHeader active="calculator" /><main className={styles.page}>
-    <section className={`${styles.hero} ${styles.indexHero}`}>
-      <div><div className={styles.titleLine}><MapPin size={20} /><span>{currentYear} 年城市规则</span></div><h1>城市个税计算器</h1><p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p></div>
-    </section>
-
     <CityRuleExplorer cities={cityExplorerItems} popularCities={popularCities} />
 
     <section className={`${styles.nextStep} ${styles.indexNextStep}`}><div><MapPin size={20} /><div><h2>城市规则会影响到手工资</h2><p>同样的税前工资，在不同城市可能因为社保、公积金基数上下限和单位比例不同，得到不同结果。</p></div></div><Link href="/calculator">进入工资计算器 <ArrowRight size={16} /></Link></section>

@@ -26,10 +26,6 @@
   border-bottom: 1px solid var(--line);
 }
 
-.indexHero {
-  grid-template-columns: 1fr;
-}
-
 .titleLine {
   display: flex;
   align-items: center;

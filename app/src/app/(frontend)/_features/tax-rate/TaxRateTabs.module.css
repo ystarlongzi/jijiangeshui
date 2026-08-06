@@ -92,7 +92,11 @@
   background: var(--surface-muted);
 }
 
+/* tab 现在使用真实链接承载 SEO 入口，固定高度下需要显式居中链接文字。 */
 .identityOptions :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 32px;
   padding: 0 14px;
   border: 0;

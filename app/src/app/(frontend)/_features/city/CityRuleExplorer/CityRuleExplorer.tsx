@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { ArrowRight, MapPin, Search, Sparkles } from 'lucide-react'
 import TrackedLink from '../../../_components/TrackedLink'
+import { currentYear } from '@/lib/site'
 import styles from './CityRuleExplorer.module.css'
 
 export type CityRuleExplorerItem = {
@@ -48,42 +49,42 @@ export default function CityRuleExplorer({ cities, popularCities }: CityRuleExpl
   }
 
   return <section className={styles.explorer} aria-label="城市规则目录">
-    <div className={styles.directoryIntro}>
-      <div>
-        <span className={styles.eyebrow}>城市目录</span>
-        <h2>先选城市，再看规则</h2>
-        <p>按城市查看社保、公积金基数范围，进入详情页后可直接开始计算。</p>
-      </div>
-      <span className={styles.totalCount}>{cities.length} 个城市</span>
-    </div>
+    {/* 标题、描述、搜索和热门城市入口属于同一个城市选择模块，避免被理解成两个独立流程。 */}
+    <div className={styles.explorerIntro}>
+      <header>
+        <div className={styles.titleLine}><MapPin aria-hidden="true" size={20} /><span>{currentYear} 年城市规则</span></div>
+        <h1>城市个税计算器</h1>
+        <p>选择缴费城市，查看社保、公积金基数范围，并带入工资薪金计算器估算到手工资。</p>
+      </header>
 
-    <div className={styles.searchRow}>
-      <label className={styles.searchBox}>
-        <Search aria-hidden="true" size={16} />
-        <input
-          aria-label="搜索城市"
-          autoComplete="off"
-          placeholder="搜索城市、省份或拼音"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-      </label>
-      {isFiltered && <button className={styles.clearButton} type="button" onClick={clearFilters}>清除筛选</button>}
-    </div>
-
-    {popularCities.length > 0 && <div className={styles.popularRow}>
-      <div className={styles.popularLabel}><Sparkles aria-hidden="true" size={16} /><span>热门城市</span></div>
-      <div className={styles.popularLinks}>
-        {popularCities.map((city) => <TrackedLink
-          className={styles.popularLink}
-          eventPayload={{ module: 'city_index', label: '热门城市', city: city.key }}
-          href={`/city/${city.key}`}
-          key={city.key}
-        >
-          {city.label}<ArrowRight aria-hidden="true" size={14} />
-        </TrackedLink>)}
+      <div className={styles.searchRow}>
+        <label className={styles.searchBox}>
+          <Search aria-hidden="true" size={16} />
+          <input
+            aria-label="搜索城市"
+            autoComplete="off"
+            placeholder="搜索城市、省份或拼音"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+        {isFiltered && <button className={styles.clearButton} type="button" onClick={clearFilters}>清除筛选</button>}
       </div>
-    </div>}
+
+      {popularCities.length > 0 && <div className={styles.popularRow}>
+        <div className={styles.popularLabel}><Sparkles aria-hidden="true" size={16} /><span>热门城市</span></div>
+        <div className={styles.popularLinks}>
+          {popularCities.map((city) => <TrackedLink
+            className={styles.popularLink}
+            eventPayload={{ module: 'city_index', label: '热门城市', city: city.key }}
+            href={`/city/${city.key}`}
+            key={city.key}
+          >
+            {city.label}<ArrowRight aria-hidden="true" size={14} />
+          </TrackedLink>)}
+        </div>
+      </div>}
+    </div>
 
     <div className={styles.directoryToolbar}>
       <div className={styles.resultMeta}>

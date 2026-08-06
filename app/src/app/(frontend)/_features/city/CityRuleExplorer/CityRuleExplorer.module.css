@@ -1,50 +1,40 @@
 .explorer {
-  padding: 42px 0 18px;
+  padding: 0 0 18px;
 }
 
-.directoryIntro {
+.explorerIntro {
+  padding-bottom: 42px;
+  border-bottom: 1px solid var(--line);
+}
+
+.titleLine {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 26px;
-}
-
-.eyebrow {
-  display: block;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 8px;
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.directoryIntro h2 {
-  margin: 0;
-  color: var(--ink);
-  font-size: clamp(24px, 3vw, 34px);
-  letter-spacing: -0.02em;
-}
-
-.directoryIntro p {
-  max-width: 560px;
-  margin: 10px 0 0;
-  color: var(--muted);
   font-size: 14px;
-  line-height: 1.7;
+  font-weight: 750;
 }
 
-.totalCount {
-  flex: 0 0 auto;
+.explorerIntro h1 {
+  margin: 18px 0 14px;
+  color: var(--ink);
+  font-size: clamp(38px, 6vw, 66px);
+}
+
+.explorerIntro p {
+  margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: nowrap;
 }
 
 .searchRow {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: 42px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -110,8 +100,7 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 22px 0 0;
 }
 
 .popularLabel {
@@ -335,21 +324,24 @@
 
 @media (max-width: 680px) {
   .explorer {
-    padding: 30px 0 12px;
+    padding: 0 0 12px;
   }
 
-  .directoryIntro {
-    display: block;
-    padding-bottom: 20px;
+  .explorerIntro {
+    padding-bottom: 36px;
   }
 
-  .directoryIntro p {
+  .explorerIntro h1 {
+    font-size: 44px;
+  }
+
+  .explorerIntro p {
     font-size: 13px;
+    white-space: normal;
   }
 
-  .totalCount {
-    display: block;
-    margin-top: 12px;
+  .searchRow {
+    margin-top: 28px;
   }
 
   .searchRow {
@@ -364,7 +356,7 @@
 
   .popularRow {
     display: block;
-    padding: 18px 0;
+    padding: 18px 0 0;
   }
 
   .popularLinks {
