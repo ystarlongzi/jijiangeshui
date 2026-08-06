@@ -5,8 +5,31 @@ import type { CitySummary } from '@/lib/city-rule-types'
 
 type Notify = (message: string) => void
 type CityListResponse = { items?: CitySummary[] }
+type ReverseLocationResponse = { city?: string; province?: string; displayName?: string; message?: string }
 function normalizeCityName(value: string) {
-  return value.trim().toLowerCase().replace(/(特别行政区|自治州|地区|盟|市)$/u, '')
+  return value.trim().toLocaleLowerCase('zh-CN').replace(/\s+/gu, '').replace(/(特别行政区|自治州|地区|盟|市|区|县)$/u, '')
+}
+
+function getCityCandidates(data: ReverseLocationResponse) {
+  const displayCandidates = (data.displayName || '')
+    .split(/[，,]/u)
+    .map((part) => part.trim())
+    .filter((part) => /(?:特别行政区|自治州|地区|盟|市)$/u.test(part))
+
+  return [...displayCandidates, data.city || ''].filter(Boolean)
+}
+
+function matchCity(cities: CitySummary[], candidates: string[]) {
+  for (const candidate of candidates) {
+    const normalizedCandidate = normalizeCityName(candidate)
+    const matched = cities.find((city) => {
+      const names = [city.label, city.name].map(normalizeCityName)
+      // 只按城市本身匹配，不用省份兜底，否则“广东省”可能误选成该省第一个城市。
+      return names.includes(normalizedCandidate)
+    })
+    if (matched) return matched
+  }
+  return undefined
 }
 
 export default function useCityLocator(notify: Notify, options: { cities?: CitySummary[]; onLocated?: (city: string) => void } = {}) {
@@ -25,27 +48,22 @@ export default function useCityLocator(notify: Notify, options: { cities?: CityS
           try {
             const params = new URLSearchParams({ lat: String(position.coords.latitude), lon: String(position.coords.longitude) })
             const response = await fetch(`/api/location/reverse?${params.toString()}`)
-            const data = await response.json() as { city?: string; province?: string; message?: string }
+            const data = await response.json() as ReverseLocationResponse
             if (!response.ok || !data.city) {
               notify(data.message || '已获取位置，但暂时无法识别城市，请手动选择')
               return
             }
 
-            const normalizedCity = normalizeCityName(data.city)
-            let matched = cities.find((city) => {
-              const names = [city.label, city.name].map(normalizeCityName)
-              // 只按城市本身匹配，不用省份兜底，否则“广东省”可能误选成该省第一个城市。
-              return names.includes(normalizedCity)
-            })
+            const cityCandidates = getCityCandidates(data)
+            let matched = matchCity(cities, cityCandidates)
 
             if (!matched) {
-              const cityResponse = await fetch(`/api/cities?keyword=${encodeURIComponent(data.city)}&limit=20`)
-              if (cityResponse.ok) {
+              for (const candidate of cityCandidates) {
+                const cityResponse = await fetch(`/api/cities?keyword=${encodeURIComponent(candidate)}&limit=20`)
+                if (!cityResponse.ok) continue
                 const cityResult = await cityResponse.json() as CityListResponse
-                matched = (cityResult.items || []).find((city) => {
-                  const names = [city.label, city.name].map(normalizeCityName)
-                  return names.includes(normalizedCity)
-                })
+                matched = matchCity(cityResult.items || [], [candidate])
+                if (matched) break
               }
             }
 

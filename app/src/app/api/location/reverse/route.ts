@@ -4,6 +4,7 @@ type ReverseGeocodeResponse = {
   display_name?: string
   address?: {
     city?: string
+    city_district?: string
     town?: string
     county?: string
     municipality?: string
@@ -39,14 +40,25 @@ export async function GET(request: Request) {
 
     const data = await response.json() as ReverseGeocodeResponse
     const address = data.address || {}
-    const city = address.city || address.municipality || address.town || address.county || ''
+    const displayName = data.display_name || ''
+    const city = inferPrefectureCity(address, displayName)
     const province = address.state || address.province || ''
     if (!city) return NextResponse.json({ message: '定位结果中没有可识别的城市。' }, { status: 404 })
 
-    return NextResponse.json({ city, province, displayName: data.display_name || city })
+    return NextResponse.json({ city, province, displayName: displayName || city })
   } catch (error) {
     console.warn('反向地理编码失败。', error)
     return NextResponse.json({ message: '暂时无法解析定位城市。' }, { status: 502 })
   }
 }
 
+function inferPrefectureCity(address: NonNullable<ReverseGeocodeResponse['address']>, displayName: string) {
+  // Nominatim 在杭州余杭区可能把 county/city 返回为“余杭区”，但 display_name 仍包含“杭州市”。
+  // 优先使用地址串中明确的地级市，避免拿区县直接匹配社保规则。
+  const displayCity = displayName
+    .split(/[，,]/u)
+    .map((part) => part.trim())
+    .find((part) => /(?:特别行政区|自治州|地区|盟|市)$/u.test(part))
+
+  return displayCity || address.municipality || address.city || address.town || address.county || address.city_district || ''
+}
