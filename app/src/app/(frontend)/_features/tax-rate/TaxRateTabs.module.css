@@ -8,7 +8,7 @@
   gap: 14px;
 }
 
-.categoryCards button {
+.categoryCards :is(button, a) {
   display: grid;
   gap: 8px;
   min-height: 92px;
@@ -18,21 +18,23 @@
   background: var(--surface);
   color: var(--muted);
   text-align: left;
+  text-decoration: none;
+  cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
 }
 
-.categoryCards button strong {
+.categoryCards :is(button, a) strong {
   color: var(--ink);
   font-size: 17px;
 }
 
-.categoryCards button span {
+.categoryCards :is(button, a) span {
   font-size: 12px;
   line-height: 1.6;
 }
 
-.categoryCards button.active,
-.categoryCards button:hover {
+.categoryCards :is(button.active, a.active),
+.categoryCards :is(button, a):hover {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent-deep);
@@ -55,7 +57,7 @@
   gap: 18px 36px;
 }
 
-.incomeOptions button {
+.incomeOptions :is(button, a) {
   padding: 0 0 14px;
   border: 0;
   border-bottom: 3px solid transparent;
@@ -64,10 +66,12 @@
   font-size: 15px;
   font-weight: 750;
   white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.incomeOptions button.active,
-.incomeOptions button:hover {
+.incomeOptions :is(button.active, a.active),
+.incomeOptions :is(button, a):hover {
   border-bottom-color: var(--accent);
   color: var(--ink);
 }
@@ -88,7 +92,7 @@
   background: var(--surface-muted);
 }
 
-.identityOptions button {
+.identityOptions :is(button, a) {
   min-height: 32px;
   padding: 0 14px;
   border: 0;
@@ -98,10 +102,12 @@
   font-size: 12px;
   font-weight: 750;
   white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.identityOptions button.active,
-.identityOptions button:hover {
+.identityOptions :is(button.active, a.active),
+.identityOptions :is(button, a):hover {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 4px rgba(17, 53, 49, 0.08);
@@ -267,7 +273,7 @@
     gap: 14px 22px;
   }
 
-  .incomeOptions button {
+  .incomeOptions :is(button, a) {
     padding-bottom: 12px;
     font-size: 13px;
   }

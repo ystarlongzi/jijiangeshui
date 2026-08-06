@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import DividendTaxClient from '../_features/income-tax-tools/dividend/DividendTaxClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
+import { findIncomeTaxRateRule } from '@/lib/income-tax-calculator-rules'
 import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
 
 export const metadata: Metadata = {
@@ -9,9 +11,13 @@ export const metadata: Metadata = {
   alternates: { canonical: '/dividend-tax' },
 }
 
-export default function DividendTaxPage() {
+export default async function DividendTaxPage() {
+  const dataset = await getIncomeTaxRuleDataset()
+  const yearRules = dataset.rulesByYear[String(currentYear)]
+  const taxRateRule = findIncomeTaxRateRule(yearRules, 'dividend', 'notApplicable')
+
   return <>
     <JsonLd data={createCalculatorJsonLd({ name: `${currentYear}年利息股息红利个税计算器`, description: metadata.description, url: `${siteUrl}/dividend-tax`, siteName })} />
-    <DividendTaxClient />
+    <DividendTaxClient taxRateRule={taxRateRule} taxRateYear={currentYear} />
   </>
 }

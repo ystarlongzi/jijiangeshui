@@ -26,3 +26,10 @@ test('财产转让：负数收入按 0 处理', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 0)
 })
+
+test('财产转让：传入 CMS 比例税率后覆盖内置 20%', () => {
+  const result = calculatePropertyTransferTax({ income: 100000, originalValue: 60000, taxRate: 0.1 })
+
+  assert.equal(result.rate, 0.1)
+  assert.equal(result.tax, 4000)
+})

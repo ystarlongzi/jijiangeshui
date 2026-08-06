@@ -18,6 +18,9 @@ const checks: SmokeCheck[] = [
   { path: '/reverse-tax', status: 200, contains: '反推' },
   { path: '/tax-rate', status: 200, contains: '税率' },
   { path: '/tax-rate?type=labor&identity=non-resident&year=2026', status: 200, contains: '非居民个人劳务报酬', titleContains: '非居民个人劳务报酬' },
+  { path: '/labor-tax', status: 200, contains: '劳务报酬' },
+  { path: '/dividend-tax', status: 200, contains: '股息' },
+  { path: '/sitemap.xml', status: 200, contains: 'type=dividend' },
   { path: '/special-deductions', status: 200, contains: '专项' },
   // 使用非法参数验证 API 路由已经部署，避免冒烟测试依赖第三方地理编码服务。
   { path: '/api/location/reverse?lat=invalid&lon=invalid', status: 400 },
@@ -46,7 +49,7 @@ async function main() {
         throw new Error(`${check.path} 未找到页面关键文案“${check.contains}”。`)
       }
       if (check.titleContains) {
-        const title = body.match(/<title>(.*?)<\/title>/s)?.[1] || ''
+        const title = body.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ''
         if (!title.includes(check.titleContains)) throw new Error(`${check.path} 的页面标题未包含“${check.titleContains}”。`)
       }
       console.log(`通过：${check.path} -> ${response.status}`)

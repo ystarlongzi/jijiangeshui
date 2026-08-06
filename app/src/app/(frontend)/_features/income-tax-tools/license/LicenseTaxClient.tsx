@@ -19,14 +19,19 @@ import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
 import { calculateLicenseTax } from '@/lib/license-tax'
+import { getIncomeTaxFlatRate, getIncomeTaxRuleWarning, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-export default function LicenseTaxClient() {
+export default function LicenseTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(10000)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateLicenseTax(income), [income])
+  const taxRate = getIncomeTaxFlatRate(taxRateRule)
+  const result = useMemo(() => calculateLicenseTax(income, taxRate), [income, taxRate])
+  const rate = Math.round(result.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'flat', taxRateYear, '居民特许权使用费')
 
   const notify = (message: string) => {
     setToast(message)
@@ -59,7 +64,7 @@ export default function LicenseTaxClient() {
         `税前收入：${money(income)}`,
         `费用扣除：${money(result.deduction)}`,
         `应纳税所得额：${money(result.taxable)}`,
-        '预扣率：20%',
+        `预扣率：${rate}%`,
         `预扣个税：${money(result.tax)}`,
         `预计到手：${money(result.takeHome)}`,
       ]))
@@ -74,7 +79,7 @@ export default function LicenseTaxClient() {
       ['税前收入', result.income.toFixed(2)],
       ['费用扣除', result.deduction.toFixed(2)],
       ['应纳税所得额', result.taxable.toFixed(2)],
-      ['预扣率', '20%'],
+      ['预扣率', `${rate}%`],
       ['预扣个税', result.tax.toFixed(2)],
       ['预计到手', result.takeHome.toFixed(2)],
     ]
@@ -94,24 +99,25 @@ export default function LicenseTaxClient() {
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="特许权使用费个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算特许权使用费</h2>
         <label className={styles.field} htmlFor="licenseIncome"><span>特许权使用费税前收入</span><MoneyInput id="licenseIncome" value={income} onChange={setIncome} /></label>
-        <p className={styles.formNote}>居民个人特许权使用费通常先扣除费用，再按 20% 比例预扣个人所得税。</p>
+        <p className={styles.formNote}>居民个人特许权使用费通常先扣除费用，再按 {rate}% 比例预扣个人所得税。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>
 
       <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 特许权使用费 {money(income)}</p></div><span className={styles.badge}>居民个人</span></div>
-        <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
-        <MetricGrid items={[{ label: '费用扣除', value: money(result.deduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '预扣率', value: '20%' }, { label: '预扣个税', value: money(result.tax) }]} />
+        <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 {rate}% 比例预扣率。</p></div>
+        <MetricGrid items={[{ label: '费用扣除', value: money(result.deduction) }, { label: '应纳税所得额', value: money(result.taxable) }, { label: '预扣率', value: `${rate}%` }, { label: '预扣个税', value: money(result.tax) }]} />
         <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>费用扣除</dt><dd>{income <= 4000 ? `${money(income)} 中扣除 ${money(result.deduction)}` : `${money(income)} × 20% = ${money(result.deduction)}`}</dd></div>
             <div><dt>应纳税所得额</dt><dd>{money(income)} - {money(result.deduction)} = {money(result.taxable)}</dd></div>
-            <div><dt>预扣个税</dt><dd>{money(result.taxable)} × 20% = {money(result.tax)}</dd></div>
+            <div><dt>预扣个税</dt><dd>{money(result.taxable)} × {rate}% = {money(result.tax)}</dd></div>
             <div><dt>税后到手</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
@@ -121,7 +127,7 @@ export default function LicenseTaxClient() {
 
     <section className={styles.explain}><div><h2>和稿酬有什么不同？</h2><p>特许权使用费通常不适用稿酬所得“收入额减按 70%”的规则，适合专利、商标、著作权等使用权收入测算。</p></div><Link href="/author-tax">算稿酬 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="license" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

@@ -19,16 +19,21 @@ import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
 import { calculatePropertyTransferTax } from '@/lib/property-transfer-tax'
+import { getIncomeTaxFlatRate, getIncomeTaxRuleWarning, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-export default function PropertyTransferTaxClient() {
+export default function PropertyTransferTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(100000)
   const [originalValue, setOriginalValue] = useState(60000)
   const [reasonableFees, setReasonableFees] = useState(5000)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculatePropertyTransferTax({ income, originalValue, reasonableFees }), [income, originalValue, reasonableFees])
+  const taxRate = getIncomeTaxFlatRate(taxRateRule)
+  const result = useMemo(() => calculatePropertyTransferTax({ income, originalValue, reasonableFees, taxRate }), [income, originalValue, reasonableFees, taxRate])
+  const rate = Math.round(result.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'flat', taxRateYear, '财产转让所得')
 
   const notify = (message: string) => {
     setToast(message)
@@ -76,7 +81,7 @@ export default function PropertyTransferTaxClient() {
         `财产原值：${money(result.originalValue)}`,
         `合理费用：${money(result.reasonableFees)}`,
         `应纳税所得额：${money(result.taxable)}`,
-        '税率：20%',
+        `税率：${rate}%`,
         `应缴个税：${money(result.tax)}`,
         `预计税后收入：${money(result.takeHome)}`,
       ]))
@@ -92,7 +97,7 @@ export default function PropertyTransferTaxClient() {
       ['财产原值', result.originalValue.toFixed(2)],
       ['合理费用', result.reasonableFees.toFixed(2)],
       ['应纳税所得额', result.taxable.toFixed(2)],
-      ['税率', '20%'],
+      ['税率', `${rate}%`],
       ['应缴个税', result.tax.toFixed(2)],
       ['预计税后收入', result.takeHome.toFixed(2)],
     ]
@@ -107,11 +112,12 @@ export default function PropertyTransferTaxClient() {
       <div>
         <div className={styles.eyebrow}><TrendingUp size={18} />{currentYear} 年财产转让个税计算器</div>
         <h1>卖出资产，<br />个税多少？</h1>
-        <p>输入转让收入、财产原值和合理费用，按财产转让所得 20% 比例税率估算个税和税后收入。</p>
+        <p>输入转让收入、财产原值和合理费用，按财产转让所得 {rate}% 比例税率估算个税和税后收入。</p>
       </div>
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="财产转让个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产转让</h2>
@@ -123,14 +129,14 @@ export default function PropertyTransferTaxClient() {
       </Panel>
 
       <Panel as="section" className={styles.result} aria-live="polite">
-        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 财产转让 {money(income)}</p></div><span className={styles.badge}>{rate}% 税率</span></div>
         <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}，应纳税所得额 {money(result.taxable)}。</p></div>
         <MetricGrid items={[{ label: '转让收入', value: money(result.income) }, { label: '财产原值', value: money(result.originalValue) }, { label: '合理费用', value: money(result.reasonableFees) }, { label: '应纳税所得额', value: money(result.taxable) }]} />
         <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>应纳税所得额</dt><dd>{money(income)} - {money(originalValue)} - {money(reasonableFees)} = {money(result.taxable)}</dd></div>
-            <div><dt>应缴个税</dt><dd>{money(result.taxable)} × 20% = {money(result.tax)}</dd></div>
+            <div><dt>应缴个税</dt><dd>{money(result.taxable)} × {rate}% = {money(result.tax)}</dd></div>
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
@@ -138,9 +144,9 @@ export default function PropertyTransferTaxClient() {
       </Panel>
     </section>
 
-    <section className={styles.explain}><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 20% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>财产转让怎么扣？</h2><p>财产转让所得按一次转让计算，以收入额减除财产原值和合理费用后的余额作为应纳税所得额，再按 {rate}% 计算个税。</p></div><Link href="/rental-tax">算财产租赁 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="transfer" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

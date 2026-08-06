@@ -39,3 +39,13 @@ test('财产租赁：负数收入按 0 处理', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 0)
 })
+
+test('财产租赁：其他财产使用 CMS 比例税率，住房优惠税率保持独立口径', () => {
+  const general = calculateRentalTax({ income: 5000, mode: 'general', generalRate: 0.08 })
+  const housing = calculateRentalTax({ income: 5000, mode: 'housing', generalRate: 0.08 })
+
+  assert.equal(general.rate, 0.08)
+  assert.equal(general.tax, 320)
+  assert.equal(housing.rate, 0.1)
+  assert.equal(housing.tax, 400)
+})

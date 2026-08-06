@@ -19,15 +19,17 @@ import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
 import { calculateRentalTax, type RentalTaxRateMode } from '@/lib/rental-tax'
+import { getIncomeTaxFlatRate, getIncomeTaxRuleWarning, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-const modes: { value: RentalTaxRateMode; label: string; hint: string }[] = [
-  { value: 'housing', label: '出租住房', hint: '按 10% 优惠税率估算' },
-  { value: 'general', label: '其他财产', hint: '按 20% 比例税率估算' },
+const modes: { value: RentalTaxRateMode; label: string }[] = [
+  { value: 'housing', label: '出租住房' },
+  { value: 'general', label: '其他财产' },
 ]
 
-export default function RentalTaxClient() {
+export default function RentalTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(5000)
   const [taxesAndFees, setTaxesAndFees] = useState(0)
@@ -35,8 +37,11 @@ export default function RentalTaxClient() {
   const [repairExpense, setRepairExpense] = useState(0)
   const [mode, setMode] = useState<RentalTaxRateMode>('housing')
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateRentalTax({ income, taxesAndFees, subleaseRent, repairExpense, mode }), [income, taxesAndFees, subleaseRent, repairExpense, mode])
+  const generalRate = getIncomeTaxFlatRate(taxRateRule)
+  const result = useMemo(() => calculateRentalTax({ income, taxesAndFees, subleaseRent, repairExpense, mode, generalRate }), [income, taxesAndFees, subleaseRent, repairExpense, mode, generalRate])
   const rate = Math.round(result.rate * 100)
+  const generalRatePercent = Math.round(generalRate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'flat', taxRateYear, '财产租赁所得')
 
   const notify = (message: string) => {
     setToast(message)
@@ -135,11 +140,12 @@ export default function RentalTaxClient() {
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="财产租赁个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算财产租赁</h2>
         <div className={styles.rentalModeList} aria-label="租赁类型">
-          {modes.map((item) => <button className={`${styles.rentalMode}${mode === item.value ? ` ${styles.active}` : ''}`} type="button" key={item.value} onClick={() => setMode(item.value)}><strong>{item.label}</strong><span>{item.hint}</span></button>)}
+          {modes.map((item) => <button className={`${styles.rentalMode}${mode === item.value ? ` ${styles.active}` : ''}`} type="button" key={item.value} onClick={() => setMode(item.value)}><strong>{item.label}</strong><span>{item.value === 'housing' ? '按 10% 优惠税率估算' : `按 ${generalRatePercent}% 比例税率估算`}</span></button>)}
         </div>
         <label className={styles.field} htmlFor="rentalIncome"><span>每月租赁税前收入</span><MoneyInput id="rentalIncome" value={income} onChange={setIncome} /></label>
         <label className={styles.field} htmlFor="rentalTaxes"><span>出租过程中已缴税费</span><MoneyInput id="rentalTaxes" value={taxesAndFees} onChange={setTaxesAndFees} /></label>
@@ -167,9 +173,9 @@ export default function RentalTaxClient() {
       </Panel>
     </section>
 
-    <section className={styles.explain}><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 20% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>财产租赁怎么扣？</h2><p>财产租赁所得以一个月内取得的收入为一次。个人出租住房通常可按 10% 优惠税率估算，其他财产租赁按 {generalRatePercent}% 比例税率估算。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="rental" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

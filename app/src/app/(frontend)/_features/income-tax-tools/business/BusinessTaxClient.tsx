@@ -18,19 +18,23 @@ import { copyText, resultLines } from '../../../_lib/clipboard'
 import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
-import { calculateBusinessTax } from '@/lib/business-tax'
+import { businessTaxBrackets, calculateBusinessTax } from '@/lib/business-tax'
+import { getIncomeTaxRuleWarning, getIncomeTaxTableBrackets, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-export default function BusinessTaxClient() {
+export default function BusinessTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [revenue, setRevenue] = useState(200000)
   const [costsAndExpenses, setCostsAndExpenses] = useState(80000)
   const [losses, setLosses] = useState(10000)
   const [otherDeductions, setOtherDeductions] = useState(0)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateBusinessTax({ revenue, costsAndExpenses, losses, otherDeductions }), [revenue, costsAndExpenses, losses, otherDeductions])
+  const brackets = getIncomeTaxTableBrackets(taxRateRule, businessTaxBrackets)
+  const result = useMemo(() => calculateBusinessTax({ revenue, costsAndExpenses, losses, otherDeductions }, brackets), [revenue, costsAndExpenses, losses, otherDeductions, brackets])
   const rate = Math.round(result.bracket.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'table', taxRateYear, '经营所得')
 
   const notify = (message: string) => {
     setToast(message)
@@ -124,6 +128,7 @@ export default function BusinessTaxClient() {
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="经营所得个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算经营所得</h2>
@@ -153,7 +158,7 @@ export default function BusinessTaxClient() {
 
     <section className={styles.explain}><div><h2>经营所得怎么算？</h2><p>经营所得通常按纳税年度收入总额，减除成本、费用以及损失后的余额计算，再套用 5% 至 35% 的五级超额累进税率。</p></div><Link href="/tax-rate">看经营所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="business" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

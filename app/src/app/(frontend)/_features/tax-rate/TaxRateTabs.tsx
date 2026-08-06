@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type MouseEvent } from 'react'
 import { ExternalLink, Info } from 'lucide-react'
 import Link from 'next/link'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
@@ -210,6 +210,13 @@ export default function TaxRateTabs({ incomeTaxRules, initialSelection }: TaxRat
     pushSelectionUrl({ type: activeType, identity, year: nextYear })
   }
 
+  const handleSelectionLinkClick = (event: MouseEvent<HTMLAnchorElement>, onSelect: () => void) => {
+    // 普通左键在当前页无刷新切换；新标签页、快捷键打开等行为保留原生链接能力，方便用户和搜索引擎访问。
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    onSelect()
+  }
+
   const rateColumns = [{ key: 'level', header: '级数', align: 'left' as const }, { key: 'range', header: '应纳税所得额', align: 'left' as const }, { key: 'rate', header: '税率 / 预扣率', align: 'right' as const }, { key: 'quick', header: '速算扣除数', align: 'right' as const }]
   const rateRows = active.rows?.map((row, index) => ({
     key: `${activeType}-${identity}-${row.range}`,
@@ -222,9 +229,21 @@ export default function TaxRateTabs({ incomeTaxRules, initialSelection }: TaxRat
   })) ?? []
 
   return <section className={styles.tabsSection} aria-label="个人所得税税率表">
-    <div className={styles.categoryCards} role="tablist" aria-label="所得类型分类">{([{ id: 'comprehensive', label: '综合所得', description: '工资薪金、劳务报酬、稿酬、特许权使用费' }, { id: 'classified', label: '分类所得', description: '经营、财产、利息股息红利和偶然所得' }] as { id: IncomeGroup; label: string; description: string }[]).map((item) => <button key={item.id} className={activeGroup === item.id ? styles.active : ''} type="button" role="tab" aria-selected={activeGroup === item.id} onClick={() => selectGroup(item.id)}><strong>{item.label}</strong><span>{item.description}</span></button>)}</div>
-    <div className={styles.incomeNav} aria-label={currentGroup.label}><div className={styles.incomeGroup}><div className={styles.incomeOptions} role="tablist" aria-label={currentGroup.label}>{currentGroup.items.map((item) => <button key={item.id} className={activeType === item.id ? styles.active : ''} type="button" role="tab" aria-selected={activeType === item.id} onClick={() => selectType(item.id)}>{item.label}</button>)}</div></div></div>
-    {activeGroup === 'comprehensive' && <div className={styles.identityNav} role="tablist" aria-label="居民或非居民个人"><div className={styles.identityOptions}>{([{ id: 'resident', label: '居民个人' }, { id: 'non-resident', label: '非居民个人' }] as { id: Identity; label: string }[]).map((item) => <button key={item.id} className={identity === item.id ? styles.active : ''} type="button" role="tab" aria-selected={identity === item.id} onClick={() => selectIdentity(item.id)}>{item.label}</button>)}</div></div>}
+    <div className={styles.categoryCards} role="tablist" aria-label="所得类型分类">{([{ id: 'comprehensive', label: '综合所得', description: '工资薪金、劳务报酬、稿酬、特许权使用费' }, { id: 'classified', label: '分类所得', description: '经营、财产、利息股息红利和偶然所得' }] as { id: IncomeGroup; label: string; description: string }[]).map((item) => {
+      const nextType: IncomeType = item.id === 'comprehensive' ? 'salary' : 'business'
+      const nextIdentity = isClassifiedTaxRateType(nextType) ? 'resident' : identity
+      const selection = { type: nextType, identity: nextIdentity, year: taxYear }
+      return <a key={item.id} href={getTaxRateUrl(selection, defaultYear)} className={activeGroup === item.id ? styles.active : ''} role="tab" aria-selected={activeGroup === item.id} onClick={(event) => handleSelectionLinkClick(event, () => selectGroup(item.id))}><strong>{item.label}</strong><span>{item.description}</span></a>
+    })}</div>
+    <div className={styles.incomeNav} aria-label={currentGroup.label}><div className={styles.incomeGroup}><div className={styles.incomeOptions} role="tablist" aria-label={currentGroup.label}>{currentGroup.items.map((item) => {
+      const nextIdentity = isClassifiedTaxRateType(item.id) ? 'resident' : identity
+      const selection = { type: item.id, identity: nextIdentity, year: taxYear }
+      return <a key={item.id} href={getTaxRateUrl(selection, defaultYear)} className={activeType === item.id ? styles.active : ''} role="tab" aria-selected={activeType === item.id} onClick={(event) => handleSelectionLinkClick(event, () => selectType(item.id))}>{item.label}</a>
+    })}</div></div></div>
+    {activeGroup === 'comprehensive' && <div className={styles.identityNav} role="tablist" aria-label="居民或非居民个人"><div className={styles.identityOptions}>{([{ id: 'resident', label: '居民个人' }, { id: 'non-resident', label: '非居民个人' }] as { id: Identity; label: string }[]).map((item) => {
+      const selection = { type: activeType, identity: item.id, year: taxYear }
+      return <a key={item.id} href={getTaxRateUrl(selection, defaultYear)} className={identity === item.id ? styles.active : ''} role="tab" aria-selected={identity === item.id} onClick={(event) => handleSelectionLinkClick(event, () => selectIdentity(item.id))}>{item.label}</a>
+    })}</div></div>}
     <Panel className={styles.tabPanel} role="tabpanel"><div className={styles.tableHeading}><div><h2>{active.title}</h2><p>{active.description}</p></div><div><SelectField className={styles.yearLabel} label="纳税年度" value={taxYear} onChange={selectYear} options={(incomeTaxRules?.availableYears || [currentYear]).map((year) => ({ value: year, label: `${year} 年` }))} /></div></div><RuleBoundaryNotice messages={boundaryMessages} title="当前年度规则待补充" tone={activeType === 'salary' ? 'error' : 'warning'} />{active.rows ? <DataTable ariaLabel={active.title} columns={rateColumns} rows={rateRows} headerTone="muted" wrapperClassName={styles.tableWrap} tableClassName={styles.table} /> : <div className={styles.simpleRatePanel}><div className={styles.simpleRateCopy}><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className={styles.tabNote}><Info size={15} /><span>{active.note}</span></div>}<div className={styles.sourceLine}><span>来源：CMS 所得税率规则（未发布时显示内置参考值）；规则核对日期：{activeCheckedAt}</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看个人所得税法 <ExternalLink size={13} /></a></div></Panel>
     <section className={styles.nextCard}><div><h2>看完税率表，直接测算</h2><p>税率只决定计算口径，实际结果还要结合收入、扣除、成本或费用。</p></div><Link href={calculatorLink.href}>{calculatorLink.label} <ExternalLink size={13} /></Link></section>
   </section>

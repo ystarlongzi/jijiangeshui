@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next'
 import { getIndexableArticles } from '@/lib/article-content-service'
 import { getAvailableCityRules } from '@/lib/city-rule-service'
-import { siteUrl } from '@/lib/site'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
+import { getTaxRateSeoSelections, getTaxRateUrl } from '@/lib/tax-rate-page'
+import { currentYear, siteUrl } from '@/lib/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const coreRoutes: MetadataRoute.Sitemap = [
@@ -24,10 +26,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/articles`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${siteUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
   ]
-  const [cityRules, articles] = await Promise.all([
+  const [cityRules, articles, incomeTaxRules] = await Promise.all([
     getAvailableCityRules(),
     getIndexableArticles(),
+    getIncomeTaxRuleDataset(),
   ])
+  const defaultTaxYear = incomeTaxRules.availableYears[0] || currentYear
+  const taxRateRoutes: MetadataRoute.Sitemap = incomeTaxRules.availableYears.flatMap((year) => getTaxRateSeoSelections(year)
+    .map((selection) => getTaxRateUrl(selection, defaultTaxYear))
+    // 默认居民工资入口已经由核心路由 /tax-rate 提供，避免 sitemap 出现重复 URL。
+    .filter((path) => path !== '/tax-rate')
+    .map((path) => ({
+      url: `${siteUrl}${path}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.65,
+    })))
   const cityRoutes: MetadataRoute.Sitemap = Object.keys(cityRules).map((city) => ({
     url: `${siteUrl}/city/${city}`,
     changeFrequency: 'monthly',
@@ -39,5 +52,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly',
     priority: 0.6,
   }))
-  return [...coreRoutes, ...cityRoutes, ...articleRoutes]
+  return [...coreRoutes, ...taxRateRoutes, ...cityRoutes, ...articleRoutes]
 }

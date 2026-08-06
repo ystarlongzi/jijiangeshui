@@ -34,3 +34,11 @@ test('经营所得：负数收入按 0 处理', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.afterTax, 0)
 })
+
+test('经营所得：传入 CMS 档位后按 CMS 税率表计算', () => {
+  const result = calculateBusinessTax({ revenue: 100000 }, [{ ceiling: Infinity, rate: 0.08, quick: 500 }])
+
+  assert.equal(result.bracket.rate, 0.08)
+  assert.equal(result.bracket.quick, 500)
+  assert.equal(result.tax, 7500)
+})

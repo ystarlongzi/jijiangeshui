@@ -19,14 +19,19 @@ import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
 import { calculateAuthorTax } from '@/lib/author-tax'
+import { getIncomeTaxFlatRate, getIncomeTaxRuleWarning, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-export default function AuthorTaxClient() {
+export default function AuthorTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(10000)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateAuthorTax(income), [income])
+  const taxRate = getIncomeTaxFlatRate(taxRateRule)
+  const result = useMemo(() => calculateAuthorTax(income, taxRate), [income, taxRate])
+  const rate = Math.round(result.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'flat', taxRateYear, '居民稿酬')
 
   const notify = (message: string) => {
     setToast(message)
@@ -60,7 +65,7 @@ export default function AuthorTaxClient() {
         `费用扣除：${money(result.expenseDeduction)}`,
         `扣除费用后：${money(result.incomeAfterExpense)}`,
         `减按 70% 后：${money(result.taxable)}`,
-        '预扣率：20%',
+        `预扣率：${rate}%`,
         `预扣个税：${money(result.tax)}`,
         `预计到手：${money(result.takeHome)}`,
       ]))
@@ -76,7 +81,7 @@ export default function AuthorTaxClient() {
       ['费用扣除', result.expenseDeduction.toFixed(2)],
       ['扣除费用后', result.incomeAfterExpense.toFixed(2)],
       ['减按 70% 后', result.taxable.toFixed(2)],
-      ['预扣率', '20%'],
+      ['预扣率', `${rate}%`],
       ['预扣个税', result.tax.toFixed(2)],
       ['预计到手', result.takeHome.toFixed(2)],
     ]
@@ -96,25 +101,26 @@ export default function AuthorTaxClient() {
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="稿酬个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算稿酬收入</h2>
         <label className={styles.field} htmlFor="authorIncome"><span>稿酬税前收入</span><MoneyInput id="authorIncome" value={income} onChange={setIncome} /></label>
-        <p className={styles.formNote}>稿酬所得先按劳务类规则扣除费用，再将收入额减按 70% 计算，通常按 20% 比例预扣。</p>
+        <p className={styles.formNote}>稿酬所得先按劳务类规则扣除费用，再将收入额减按 70% 计算，通常按 {rate}% 比例预扣。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>
 
       <Panel as="section" className={styles.result} aria-live="polite">
         <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 稿酬 {money(income)}</p></div><span className={styles.badge}>居民个人</span></div>
-        <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 20% 比例预扣率。</p></div>
-        <MetricGrid items={[{ label: '费用扣除', value: money(result.expenseDeduction) }, { label: '减按 70% 后', value: money(result.taxable) }, { label: '预扣率', value: '20%' }, { label: '预扣个税', value: money(result.tax) }]} />
+        <div className={styles.takeHome}><span>预计到手</span><strong>{money(result.takeHome)}</strong><p>预扣个税 {money(result.tax)}，适用 {rate}% 比例预扣率。</p></div>
+        <MetricGrid items={[{ label: '费用扣除', value: money(result.expenseDeduction) }, { label: '减按 70% 后', value: money(result.taxable) }, { label: '预扣率', value: `${rate}%` }, { label: '预扣个税', value: money(result.tax) }]} />
         <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
             <div><dt>费用扣除</dt><dd>{income <= 4000 ? `${money(income)} 中扣除 ${money(result.expenseDeduction)}` : `${money(income)} × 20% = ${money(result.expenseDeduction)}`}</dd></div>
             <div><dt>扣除费用后</dt><dd>{money(income)} - {money(result.expenseDeduction)} = {money(result.incomeAfterExpense)}</dd></div>
             <div><dt>减按 70%</dt><dd>{money(result.incomeAfterExpense)} × 70% = {money(result.taxable)}</dd></div>
-            <div><dt>预扣个税</dt><dd>{money(result.taxable)} × 20% = {money(result.tax)}</dd></div>
+            <div><dt>预扣个税</dt><dd>{money(result.taxable)} × {rate}% = {money(result.tax)}</dd></div>
             <div><dt>税后到手</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
@@ -124,7 +130,7 @@ export default function AuthorTaxClient() {
 
     <section className={styles.explain}><div><h2>稿酬和劳务报酬有什么不同？</h2><p>稿酬所得通常指作品出版、发表取得的收入。和一般劳务报酬相比，稿酬所得收入额按规定减按 70% 计算。</p></div><Link href="/labor-tax">算劳务报酬 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="author" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

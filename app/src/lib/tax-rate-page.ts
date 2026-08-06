@@ -71,3 +71,20 @@ export function getTaxRateUrl(selection: TaxRateSelection, defaultYear = current
   params.set('year', String(selection.year))
   return `/tax-rate?${params.toString()}`
 }
+
+/**
+ * 生成税率页需要被搜索引擎发现的入口集合：综合所得包含居民/非居民两套规则，
+ * 分类所得只有一个身份维度。sitemap 和页面上的真实 href 共用这套选择口径。
+ */
+export function getTaxRateSeoSelections(year: number): TaxRateSelection[] {
+  const comprehensiveTypes: TaxRateIncomeType[] = ['salary', 'labor', 'royalty', 'license']
+  const classifiedTypes: TaxRateIncomeType[] = ['business', 'rent', 'transfer', 'dividend', 'accidental']
+
+  return [
+    ...comprehensiveTypes.flatMap((type) => [
+      { type, identity: 'resident' as const, year },
+      { type, identity: 'non-resident' as const, year },
+    ]),
+    ...classifiedTypes.map((type) => ({ type, identity: 'resident' as const, year })),
+  ]
+}

@@ -19,14 +19,19 @@ import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
 import { calculateFlatIncomeTax } from '@/lib/flat-income-tax'
+import { getIncomeTaxFlatRate, getIncomeTaxRuleWarning, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 
-export default function DividendTaxClient() {
+export default function DividendTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(10000)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateFlatIncomeTax(income), [income])
+  const taxRate = getIncomeTaxFlatRate(taxRateRule)
+  const result = useMemo(() => calculateFlatIncomeTax(income, taxRate), [income, taxRate])
+  const rate = Math.round(result.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'flat', taxRateYear, '利息、股息、红利所得')
 
   const notify = (message: string) => {
     setToast(message)
@@ -57,7 +62,7 @@ export default function DividendTaxClient() {
       await copyText(resultLines([
         '利息股息红利个税计算结果',
         `税前收入：${money(result.income)}`,
-        '税率：20%',
+        `税率：${rate}%`,
         `应缴个税：${money(result.tax)}`,
         `税后收入：${money(result.takeHome)}`,
       ]))
@@ -70,7 +75,7 @@ export default function DividendTaxClient() {
     const rows = [
       ['项目', '金额/结果'],
       ['税前收入', result.income.toFixed(2)],
-      ['税率', '20%'],
+      ['税率', `${rate}%`],
       ['应缴个税', result.tax.toFixed(2)],
       ['税后收入', result.takeHome.toFixed(2)],
     ]
@@ -85,27 +90,28 @@ export default function DividendTaxClient() {
       <div>
         <div className={styles.eyebrow}><Coins size={18} />{currentYear} 年利息股息红利个税计算器</div>
         <h1>分红利息，<br />扣多少税？</h1>
-        <p>输入利息、股息或红利收入，按 20% 比例税率估算应缴个人所得税和税后收入。</p>
+        <p>输入利息、股息或红利收入，按 {rate}% 比例税率估算应缴个人所得税和税后收入。</p>
       </div>
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="利息股息红利个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算利息股息红利</h2>
         <label className={styles.field} htmlFor="dividendIncome"><span>本次税前收入</span><MoneyInput id="dividendIncome" value={income} onChange={setIncome} /></label>
-        <p className={styles.formNote}>利息、股息、红利所得通常以每次取得收入为一次，按 20% 比例税率计算，由扣缴义务人按规定代扣代缴。</p>
+        <p className={styles.formNote}>利息、股息、红利所得通常以每次取得收入为一次，按 {rate}% 比例税率计算，由扣缴义务人按规定代扣代缴。</p>
         <div className={styles.formActions}><Button variant="primary" type="submit">更新计算结果 <ArrowRight size={16} /></Button><Button variant="secondary" type="button" onClick={reset}><RotateCcw size={15} />重置</Button></div>
       </Panel>
 
       <Panel as="section" className={styles.result} aria-live="polite">
-        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 税前收入 {money(income)}</p></div><span className={styles.badge}>20% 税率</span></div>
+        <div className={styles.resultHeading}><div><span className={styles.sectionTitle}>计算结果</span><p>{currentYear} 年 · 税前收入 {money(income)}</p></div><span className={styles.badge}>{rate}% 税率</span></div>
         <div className={styles.takeHome}><span>预计税后收入</span><strong>{money(result.takeHome)}</strong><p>应缴个税 {money(result.tax)}。</p></div>
-        <MetricGrid items={[{ label: '税前收入', value: money(result.income) }, { label: '税率', value: '20%' }, { label: '应缴个税', value: money(result.tax) }, { label: '税后收入', value: money(result.takeHome) }]} />
+        <MetricGrid items={[{ label: '税前收入', value: money(result.income) }, { label: '税率', value: `${rate}%` }, { label: '应缴个税', value: money(result.tax) }, { label: '税后收入', value: money(result.takeHome) }]} />
         <div className={styles.process}>
           <h3>计算过程</h3>
           <dl>
-            <div><dt>应缴个税</dt><dd>{money(income)} × 20% = {money(result.tax)}</dd></div>
+            <div><dt>应缴个税</dt><dd>{money(income)} × {rate}% = {money(result.tax)}</dd></div>
             <div><dt>税后收入</dt><dd>{money(income)} - {money(result.tax)} = {money(result.takeHome)}</dd></div>
           </dl>
         </div>
@@ -113,9 +119,9 @@ export default function DividendTaxClient() {
       </Panel>
     </section>
 
-    <section className={styles.explain}><div><h2>这类所得有什么特点？</h2><p>利息、股息、红利所得不并入综合所得，通常按次用 20% 比例税率计算。不同金融产品可能存在免税或特殊口径，需要结合具体收入性质核对。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
+    <section className={styles.explain}><div><h2>这类所得有什么特点？</h2><p>利息、股息、红利所得不并入综合所得，通常按次用 {rate}% 比例税率计算。不同金融产品可能存在免税或特殊口径，需要结合具体收入性质核对。</p></div><Link href="/tax-rate">看分类所得税率 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="dividend" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

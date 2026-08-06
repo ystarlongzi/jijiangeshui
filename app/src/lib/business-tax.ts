@@ -1,10 +1,7 @@
 import { roundMoney } from './tax-calculator'
+import type { TaxBracket } from './tax-rules'
 
-type BusinessBracket = {
-  ceiling: number
-  rate: number
-  quick: number
-}
+export type BusinessBracket = TaxBracket
 
 export const businessTaxBrackets: BusinessBracket[] = [
   { ceiling: 30000, rate: 0.05, quick: 0 },
@@ -21,11 +18,13 @@ export type BusinessTaxInput = {
   otherDeductions?: number
 }
 
-export function calculateBusinessTax({ revenue, costsAndExpenses = 0, losses = 0, otherDeductions = 0 }: BusinessTaxInput) {
+export function calculateBusinessTax({ revenue, costsAndExpenses = 0, losses = 0, otherDeductions = 0 }: BusinessTaxInput, brackets: BusinessBracket[] = businessTaxBrackets) {
   const safeRevenue = Math.max(0, revenue)
   const totalDeduction = Math.max(0, costsAndExpenses) + Math.max(0, losses) + Math.max(0, otherDeductions)
   const taxable = Math.max(0, safeRevenue - totalDeduction)
-  const bracket = businessTaxBrackets.find((item) => taxable <= item.ceiling) || businessTaxBrackets[businessTaxBrackets.length - 1]
+  // CMS 表格为空时回到内置表，避免缺少发布数据时出现不可计算状态。
+  const activeBrackets = brackets.length > 0 ? brackets : businessTaxBrackets
+  const bracket = activeBrackets.find((item) => taxable <= item.ceiling) || activeBrackets[activeBrackets.length - 1]
   const tax = roundMoney(Math.max(0, taxable * bracket.rate - bracket.quick))
 
   return {

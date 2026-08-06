@@ -47,3 +47,11 @@ test('劳务报酬：负数收入按 0 处理', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 0)
 })
+
+test('劳务报酬：传入 CMS 档位后按 CMS 税率和速算扣除数计算', () => {
+  const result = calculateLaborTax(10000, [{ ceiling: Infinity, rate: 0.1, quick: 100 }])
+
+  assert.equal(result.bracket.rate, 0.1)
+  assert.equal(result.bracket.quick, 100)
+  assert.equal(result.tax, 700)
+})

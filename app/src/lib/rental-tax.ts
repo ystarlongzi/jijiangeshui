@@ -8,6 +8,8 @@ export type RentalTaxInput = {
   subleaseRent?: number
   repairExpense?: number
   mode?: RentalTaxRateMode
+  /** CMS 的财产租赁比例税率；住房模式仍按单独的 10% 优惠口径计算。 */
+  generalRate?: number
 }
 
 export function calculateRentalTax({
@@ -16,6 +18,7 @@ export function calculateRentalTax({
   subleaseRent = 0,
   repairExpense = 0,
   mode = 'housing',
+  generalRate = 0.2,
 }: RentalTaxInput) {
   const safeIncome = Math.max(0, income)
   const repairDeduction = Math.min(Math.max(0, repairExpense), 800)
@@ -23,7 +26,8 @@ export function calculateRentalTax({
   const incomeAfterCosts = Math.max(0, safeIncome - deductibleCosts)
   const statutoryDeduction = incomeAfterCosts <= 4000 ? Math.min(800, incomeAfterCosts) : incomeAfterCosts * 0.2
   const taxable = Math.max(0, incomeAfterCosts - statutoryDeduction)
-  const rate = mode === 'housing' ? 0.1 : 0.2
+  const safeGeneralRate = Number.isFinite(generalRate) && generalRate >= 0 && generalRate <= 1 ? generalRate : 0.2
+  const rate = mode === 'housing' ? 0.1 : safeGeneralRate
   const tax = roundMoney(taxable * rate)
 
   return {

@@ -18,16 +18,20 @@ import { copyText, resultLines } from '../../../_lib/clipboard'
 import { downloadCsv } from '../../../_lib/csv'
 import { useMoneyFormat } from '../../../_components/MoneyFormatProvider'
 import { trackEvent } from '../../../_lib/analytics'
-import { calculateLaborTax } from '@/lib/labor-tax'
+import { calculateLaborTax, laborTaxBrackets } from '@/lib/labor-tax'
+import { getIncomeTaxRuleWarning, getIncomeTaxTableBrackets, type IncomeTaxCalculatorRuleProps } from '@/lib/income-tax-calculator-rules'
+import RuleBoundaryNotice from '../../../_components/RuleBoundaryNotice'
 import { currentYear, ruleCheckedDate } from '@/lib/site'
 import { parseAmountParam } from '@/lib/url-params'
 
-export default function LaborTaxClient() {
+export default function LaborTaxClient({ taxRateRule, taxRateYear = currentYear }: IncomeTaxCalculatorRuleProps) {
   const { money } = useMoneyFormat()
   const [income, setIncome] = useState(10000)
   const [toast, setToast] = useState('')
-  const result = useMemo(() => calculateLaborTax(income), [income])
+  const brackets = getIncomeTaxTableBrackets(taxRateRule, laborTaxBrackets)
+  const result = useMemo(() => calculateLaborTax(income, brackets), [income, brackets])
   const rate = Math.round(result.bracket.rate * 100)
+  const ruleWarningMessages = getIncomeTaxRuleWarning(taxRateRule, 'table', taxRateYear, '居民劳务报酬')
 
   const notify = (message: string) => {
     setToast(message)
@@ -97,6 +101,7 @@ export default function LaborTaxClient() {
       <div className={styles.heroNote}><strong>规则核对日期</strong><span>{ruleCheckedDate}</span></div>
     </header>
 
+    <RuleBoundaryNotice messages={ruleWarningMessages} title="税率规则来源提示" />
     <section className={styles.workspace} aria-label="劳务报酬个税计算器">
       <Panel as="form" className={styles.input} onSubmit={(event) => event.preventDefault()}>
         <h2>计算劳务报酬</h2>
@@ -124,7 +129,7 @@ export default function LaborTaxClient() {
 
     <section className={styles.explain}><div><h2>适合哪些收入？</h2><p>常见于独立设计、咨询、讲课、翻译、技术服务等非雇佣性质收入。年度汇算时，居民个人劳务报酬通常会并入综合所得。</p></div><Link href="/calculator">算工资薪金 <ReceiptText size={15} /></Link></section>
     <LongTailInfo type="labor" />
-    <RuleSourcePanel />
+    <RuleSourcePanel checkedAt={taxRateRule?.checkedAt || ruleCheckedDate} />
     <SiteFooter />
   </main></div>
   <Toast message={toast} />

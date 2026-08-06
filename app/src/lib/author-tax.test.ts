@@ -30,3 +30,10 @@ test('稿酬所得：负数收入按 0 处理', () => {
   assert.equal(result.tax, 0)
   assert.equal(result.takeHome, 0)
 })
+
+test('稿酬所得：传入 CMS 比例税率后覆盖内置 20%', () => {
+  const result = calculateAuthorTax(10000, 0.1)
+
+  assert.equal(result.rate, 0.1)
+  assert.equal(result.tax, 560)
+})
