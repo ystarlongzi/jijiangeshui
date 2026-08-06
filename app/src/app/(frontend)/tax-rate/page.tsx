@@ -9,11 +9,19 @@ import JsonLd from '../_components/JsonLd'
 import PrimaryActionLink from '../_components/PrimaryActionLink'
 import Link from 'next/link'
 import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
+import { getTaxRateLabel, getTaxRatePageSeo, getTaxRateUrl, parseTaxRateSelection, type TaxRateSearchParams } from '@/lib/tax-rate-page'
 
-export const metadata: Metadata = {
-  title: `税率表｜${currentYear}年个人所得税预扣规则｜${siteName}`,
-  description: `${currentYear}年个人所得税税率表和预扣规则，支持工资薪金、劳务报酬、稿酬、特许权使用费和非居民个人所得。`,
-  alternates: { canonical: '/tax-rate' },
+type TaxRatePageProps = { searchParams: Promise<TaxRateSearchParams> }
+
+export async function generateMetadata({ searchParams }: TaxRatePageProps): Promise<Metadata> {
+  const incomeTaxRules = await getIncomeTaxRuleDataset()
+  const selection = parseTaxRateSelection(await searchParams, incomeTaxRules.availableYears)
+  const seo = getTaxRatePageSeo(selection)
+  return {
+    title: seo.title,
+    description: seo.description,
+    alternates: { canonical: getTaxRateUrl(selection, incomeTaxRules.availableYears[0] || currentYear) },
+  }
 }
 
 const taxRateFaq = [
@@ -31,27 +39,30 @@ const taxRateFaq = [
   },
 ]
 
-export default async function TaxRatePage() {
+export default async function TaxRatePage({ searchParams }: TaxRatePageProps) {
   const incomeTaxRules = await getIncomeTaxRuleDataset()
+  const selection = parseTaxRateSelection(await searchParams, incomeTaxRules.availableYears)
+  const seo = getTaxRatePageSeo(selection)
+  const canonicalPath = getTaxRateUrl(selection, incomeTaxRules.availableYears[0] || currentYear)
 
   return <><JsonLd data={[
     {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
-      name: `${currentYear} 年个人所得税税率表`,
-      url: `${siteUrl}/tax-rate`,
-      description: metadata.description,
+      name: `${selection.year} 年${getTaxRateLabel(selection)}税率表`,
+      url: `${siteUrl}${canonicalPath}`,
+      description: seo.description,
       dateModified: ruleCheckedDate,
       isPartOf: { '@type': 'WebSite', name: siteName, url: siteUrl },
       publisher: { '@type': 'Organization', name: siteName },
       mainEntity: {
         '@type': 'ItemList',
         name: `${currentYear} 年个人所得税税率表`,
-        itemListElement: ['工资薪金', '劳务报酬', '稿酬', '特许权使用费', '经营所得', '财产租赁', '财产转让', '利息股息红利', '偶然所得'].map((name, index) => ({
+        itemListElement: [{ name: getTaxRateLabel(selection), url: `${siteUrl}${canonicalPath}` }].map((item, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          name,
-          url: `${siteUrl}/tax-rate#${index + 1}`,
+          name: item.name,
+          url: item.url,
         })),
       },
     },
@@ -60,7 +71,7 @@ export default async function TaxRatePage() {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: siteName, item: siteUrl },
-        { '@type': 'ListItem', position: 2, name: '税率表', item: `${siteUrl}/tax-rate` },
+        { '@type': 'ListItem', position: 2, name: seo.heading, item: `${siteUrl}${canonicalPath}` },
       ],
     },
     {
@@ -73,8 +84,8 @@ export default async function TaxRatePage() {
       })),
     },
   ]} /><div className="app-shell"><SiteHeader active="tax-rate" /><main className={styles.page}>
-    <header className={styles.header}><div><div className={styles.titleLine}><BookOpen size={20} /><span>{currentYear} 年个人所得税规则</span></div><h1>税率表</h1><p>工资薪金、劳务报酬、稿酬及其他所得，分别适用不同的税率和计税规则。</p></div><PrimaryActionLink className={styles.headerAction} href="/calculator">用税率表算工资 <Calculator size={16} /></PrimaryActionLink></header>
-    <TaxRateTabs incomeTaxRules={incomeTaxRules} />
+    <header className={styles.header}><div><div className={styles.titleLine}><BookOpen size={20} /><span>{selection.year} 年个人所得税规则</span></div><h1>{seo.heading}</h1><p>工资薪金、劳务报酬、稿酬及其他所得，分别适用不同的税率和计税规则。</p></div><PrimaryActionLink className={styles.headerAction} href="/calculator">用税率表算工资 <Calculator size={16} /></PrimaryActionLink></header>
+    <TaxRateTabs incomeTaxRules={incomeTaxRules} initialSelection={selection} />
     <section className={styles.explanation}><div><h2>看完税率表，下一步做什么？</h2><p>先确认自己的所得类型，再进入对应计算器。工资薪金用户可以输入城市、工资和五险一金，查看本月到手与全年预扣逐月变化；专项扣除也会影响最终结果。</p></div><div className={styles.nextActions}><Link href="/calculator">算工资到手 <ArrowRight size={15} /></Link><Link href="/calculator#deduction">看专项扣除 <ArrowRight size={15} /></Link></div></section>
     <section className={styles.faq}><h2>常见问题</h2>{taxRateFaq.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>
     <div className={styles.bottomActions}><Link href="/calculator"><Calculator size={16} />返回工资计算器</Link><Link href="/">返回首页 <ArrowRight size={16} /></Link></div>

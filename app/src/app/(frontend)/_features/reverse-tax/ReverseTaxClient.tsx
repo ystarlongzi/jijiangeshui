@@ -85,15 +85,19 @@ export default function ReverseTaxClient({ rules = fallbackCityRules, incomeTaxR
       setDeductions({})
       notify(`已带入专项附加扣除 ${money(requestedDeduction)} / 月`)
     }
+    // 这里只在首次挂载时解析 URL，避免用户修改反推参数后又被 URL 覆盖。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const selectedCityRule = cityRules[city] || cityRules.beijing || fallbackCityRules.beijing
   const yearRules: IncomeTaxYearRules = incomeTaxRules?.rulesByYear[String(taxYear)] || {
     year: taxYear,
     taxBrackets: [],
+    taxRates: [],
     specialDeductionGroups: fallbackDeductionGroups,
     specialDeductionItems: fallbackDeductionItems,
     taxRateAvailable: false,
+    taxRateWarnings: [],
     specialDeductionAvailable: false,
     source: 'unavailable',
     missingReasons: [`${taxYear} 年税率和专项附加扣除规则尚未加载。`],

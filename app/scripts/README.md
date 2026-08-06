@@ -29,6 +29,10 @@
    - 只读 Payload CMS，汇总城市、政策状态、有效规则覆盖率、来源和警告数量。
    - 适合导入或发布后快速确认数据库里到底有什么。
 
+7. `income-tax-rules-summary.ts`
+   - 只读 Payload CMS，检查目标年度 13 条个人所得税必需规则的 active 覆盖、重复、来源和警告。
+   - 适合正式环境导入并人工审核后做上线前验收。
+
 ## 常用命令
 
 如果只是日常维护，优先按下面几种场景选择命令：
@@ -36,6 +40,12 @@
 | 场景 | 推荐命令 | 结果怎么看 |
 | --- | --- | --- |
 | 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、未覆盖城市数量、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
+| 想验收税率 CMS 是否可供前台读取 | `npm run rules:income-tax-summary -- --rule-year 2026 --strict` | 检查 13 条必需税率是否 active、是否重复、是否缺来源或有警告；`--strict` 不通过时返回失败状态。 |
+| 想预演税率和专项扣除导入 | `npm run rules:import-income-tax:dry-run` | 只生成导入清单，不连接数据库、不写入 CMS。 |
+| 想写入 CMS 待审核草稿 | `npm run rules:import-income-tax` | 幂等写入 13 条税率和 6 条专项扣除，默认 `pendingReview`，不会影响前台。 |
+| 已完成人工核对，想发布税率和专项扣除 | `npm run rules:import-income-tax:publish` | 明确写入 `active`，执行前应先完成来源和数字复核。 |
+
+个人所得税 CMS 正式环境建议按下面顺序执行：先运行 dry-run；配置正式环境的 `DATABASE_URI` 和 `PAYLOAD_SECRET` 后，执行普通导入写入 `pendingReview`；在 Payload 后台复核来源、区间和金额；确认无误后在后台发布，或在已完成人工复核的前提下执行 `rules:import-income-tax:publish`；最后运行 `rules:income-tax-summary -- --rule-year 2026 --strict` 验收。当前工作区只有本地数据库配置，本轮没有写入生产环境。
 | 想检查当前已发布规则能不能给前台用 | `npm run rules:audit -- --cms --policy-year 2026 --summary` | 看前台可用城市、OK/warning/error 城市数。`error` 需要先修，`warning` 通常是来源或核对信息不完整。 |
 | 只核对一个城市的 CMS 规则 | `npm run rules:audit -- --cms --policy-year 2026 --city beijing --summary` | 支持城市 slug 或城市名称；适合先核对单个城市的基数、缴费项目、来源和生效日期。 |
 | 想找出需要复核的城市 | `npm run rules:audit -- --cms --policy-year 2026 --stale --summary` | 只展示缺少核对日期或核对日期超过阈值的城市，默认阈值 180 天，适合做下一轮数据维护清单。 |

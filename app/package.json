@@ -7,7 +7,8 @@
     "dev": "next dev --webpack --port 4000",
     "build": "next build",
     "start": "next start --port 4000",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "smoke": "tsx scripts/smoke-test.ts",
     "test": "node --import tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "payload": "payload",
@@ -22,6 +23,8 @@
     "rules:import-seed:dry-run": "tsx scripts/import-rules.ts ./data/city-rules-seed.json --dry-run",
     "rules:import-income-tax": "tsx scripts/import-income-tax-rules.ts",
     "rules:import-income-tax:dry-run": "tsx scripts/import-income-tax-rules.ts --dry-run",
+    "rules:import-income-tax:publish": "tsx scripts/import-income-tax-rules.ts --publish",
+    "rules:income-tax-summary": "tsx scripts/income-tax-rules-summary.ts",
     "rules:export-fallback": "tsx scripts/export-fallback-rules.ts",
     "rules:validate": "tsx scripts/validate-rule-import.ts",
     "rules:audit": "tsx scripts/audit-rules.ts",
@@ -47,6 +50,8 @@
     "@types/node": "22.15.30",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.6",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
     "tsx": "4.20.3",
     "typescript": "5.9.2"
   }

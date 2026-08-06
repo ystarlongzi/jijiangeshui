@@ -11,7 +11,7 @@ import {
   type SpecialDeductionGroup,
 } from './special-deductions'
 import { taxBrackets as fallbackTaxBrackets, type TaxBracket } from './tax-rules'
-import type { IncomeTaxRuleDataset, IncomeTaxYearRules } from './income-tax-rule-types'
+import type { IncomeTaxIncomeType, IncomeTaxRateRule, IncomeTaxRuleDataset, IncomeTaxYearRules, IncomeTaxpayerIdentity } from './income-tax-rule-types'
 
 const RULE_CACHE_SECONDS = 300
 
@@ -26,9 +26,11 @@ type CmsTaxRateRow = {
 
 type CmsTaxRateDoc = {
   ruleYear?: number | null
+  incomeCategory?: string | null
   incomeType?: string | null
   taxpayerIdentity?: string | null
   rateMode?: string | null
+  flatRate?: number | null
   tableRows?: CmsTaxRateRow[] | null
   effectiveFrom?: string | null
   effectiveTo?: string | null
@@ -59,6 +61,22 @@ const deductionTypeByGroupKey: Record<string, string> = {
   rent: 'housingRent',
   elderly: 'elderlyCare',
 }
+
+const requiredTaxRateRules: Array<{ incomeType: IncomeTaxIncomeType; taxpayerIdentity: IncomeTaxpayerIdentity; label: string }> = [
+  { incomeType: 'salary', taxpayerIdentity: 'resident', label: '居民工资薪金' },
+  { incomeType: 'salary', taxpayerIdentity: 'nonResident', label: '非居民工资薪金' },
+  { incomeType: 'labor', taxpayerIdentity: 'resident', label: '居民劳务报酬' },
+  { incomeType: 'labor', taxpayerIdentity: 'nonResident', label: '非居民劳务报酬' },
+  { incomeType: 'author', taxpayerIdentity: 'resident', label: '居民稿酬' },
+  { incomeType: 'author', taxpayerIdentity: 'nonResident', label: '非居民稿酬' },
+  { incomeType: 'license', taxpayerIdentity: 'resident', label: '居民特许权使用费' },
+  { incomeType: 'license', taxpayerIdentity: 'nonResident', label: '非居民特许权使用费' },
+  { incomeType: 'business', taxpayerIdentity: 'notApplicable', label: '经营所得' },
+  { incomeType: 'rental', taxpayerIdentity: 'notApplicable', label: '财产租赁所得' },
+  { incomeType: 'transfer', taxpayerIdentity: 'notApplicable', label: '财产转让所得' },
+  { incomeType: 'dividend', taxpayerIdentity: 'notApplicable', label: '利息股息红利所得' },
+  { incomeType: 'accidental', taxpayerIdentity: 'notApplicable', label: '偶然所得' },
+]
 
 export async function getIncomeTaxRuleDataset(): Promise<IncomeTaxRuleDataset> {
   if (!process.env.DATABASE_URI) return createUnavailableDataset('missing-database-uri')
@@ -120,12 +138,19 @@ async function readIncomeTaxRulesFromPayload(): Promise<IncomeTaxRuleDataset> {
 }
 
 function buildYearRules(year: number, taxDocs: CmsTaxRateDoc[], deductionDocs: CmsSpecialDeductionDoc[]): IncomeTaxYearRules {
-  const salaryRule = findEffectiveDocument(
-    taxDocs.filter((doc) => doc.ruleYear === year && doc.incomeType === 'salary' && doc.taxpayerIdentity === 'resident' && doc.rateMode === 'table'),
-    year,
-  )
-  const taxBrackets = salaryRule ? normalizeTaxBrackets(salaryRule.tableRows) : fallbackTaxBrackets
-  const taxRateAvailable = Boolean(salaryRule && taxBrackets.length > 0)
+  const taxRates = requiredTaxRateRules.flatMap((requiredRule) => {
+    const document = findEffectiveDocument(
+      taxDocs.filter((doc) => doc.ruleYear === year && doc.incomeType === requiredRule.incomeType && doc.taxpayerIdentity === requiredRule.taxpayerIdentity),
+      year,
+    )
+    return document ? [adaptTaxRateRule(document, requiredRule)] : []
+  })
+  const salaryRule = taxRates.find((rule) => rule.incomeType === 'salary' && rule.taxpayerIdentity === 'resident' && rule.rateMode === 'table')
+  const taxBrackets = salaryRule && salaryRule.brackets.length > 0 ? salaryRule.brackets : fallbackTaxBrackets
+  const taxRateAvailable = Boolean(salaryRule && salaryRule.brackets.length > 0)
+  const taxRateWarnings = requiredTaxRateRules
+    .filter((requiredRule) => !taxRates.some((rule) => rule.incomeType === requiredRule.incomeType && rule.taxpayerIdentity === requiredRule.taxpayerIdentity))
+    .map((requiredRule) => `${year} 年${requiredRule.label}税率规则尚未在 CMS 中发布，税率表将显示内置参考值。`)
 
   const cmsDeductions = deductionDocs.filter((doc) => doc.ruleYear === year)
   const requiredDeductionTypes = Object.values(deductionTypeByGroupKey)
@@ -137,7 +162,7 @@ function buildYearRules(year: number, taxDocs: CmsTaxRateDoc[], deductionDocs: C
     const cmsRule = findEffectiveDocument(cmsDeductions.filter((doc) => doc.deductionType === deductionType), year)
     return cmsRule ? adaptDeductionGroup(fallbackGroup, cmsRule, deductionType) : fallbackGroup
   })
-  const checkedAt = [salaryRule?.source?.checkedAt, ...cmsDeductions.map((doc) => findEffectiveDocument([doc], year)?.source?.checkedAt)]
+  const checkedAt = [salaryRule?.checkedAt, ...cmsDeductions.map((doc) => findEffectiveDocument([doc], year)?.source?.checkedAt)]
     .filter((value): value is string => Boolean(value))
     .sort()
     .at(-1)
@@ -150,13 +175,27 @@ function buildYearRules(year: number, taxDocs: CmsTaxRateDoc[], deductionDocs: C
   return {
     year,
     taxBrackets,
+    taxRates,
     specialDeductionGroups: groups,
     specialDeductionItems: createSpecialDeductionItems(groups),
     taxRateAvailable,
+    taxRateWarnings,
     specialDeductionAvailable,
-    source: missingReasons.length > 0 ? 'fallback' : 'payload',
+    source: missingReasons.length > 0 || taxRateWarnings.length > 0 ? 'fallback' : 'payload',
     checkedAt,
     missingReasons,
+  }
+}
+
+function adaptTaxRateRule(document: CmsTaxRateDoc, requiredRule: { incomeType: IncomeTaxIncomeType; taxpayerIdentity: IncomeTaxpayerIdentity }): IncomeTaxRateRule {
+  const rateMode = document.rateMode === 'flat' ? 'flat' : 'table'
+  return {
+    incomeType: requiredRule.incomeType,
+    taxpayerIdentity: requiredRule.taxpayerIdentity,
+    rateMode,
+    brackets: rateMode === 'table' ? normalizeTaxBrackets(document.tableRows) : [],
+    flatRate: rateMode === 'flat' && typeof document.flatRate === 'number' ? normalizeRate(document.flatRate) : undefined,
+    checkedAt: document.source?.checkedAt || undefined,
   }
 }
 
@@ -219,9 +258,11 @@ function createUnavailableDataset(fallbackReason: string): IncomeTaxRuleDataset 
   const fallbackYear: IncomeTaxYearRules = {
     year: currentYear,
     taxBrackets: fallbackTaxBrackets,
+    taxRates: [],
     specialDeductionGroups: fallbackDeductionGroups,
     specialDeductionItems: createSpecialDeductionItems(fallbackDeductionGroups),
     taxRateAvailable: false,
+    taxRateWarnings: ['当前无法读取 CMS 非工资所得税率规则，税率表将显示内置参考值。'],
     specialDeductionAvailable: false,
     source: 'unavailable',
     missingReasons: ['当前无法读取 CMS 税率和专项附加扣除规则，已停止估算。'],

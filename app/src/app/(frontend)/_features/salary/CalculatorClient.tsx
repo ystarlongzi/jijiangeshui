@@ -71,9 +71,11 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   const yearRules: IncomeTaxYearRules = incomeTaxRules?.rulesByYear[String(taxYear)] || {
     year: taxYear,
     taxBrackets: fallbackTaxBrackets,
+    taxRates: [],
     specialDeductionGroups: fallbackDeductionGroups,
     specialDeductionItems: fallbackDeductionItems,
     taxRateAvailable: false,
+    taxRateWarnings: [],
     specialDeductionAvailable: false,
     source: 'unavailable',
     missingReasons: [`${taxYear} 年税率和专项附加扣除规则尚未加载。`],
@@ -107,7 +109,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   useEffect(() => {
     if (!editingSocial) setSocialBase(clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max))
     if (!editingHousing) setHousingBase(clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max))
-  }, [city, taxYear, salaryForBase, rule, editingSocial, editingHousing])
+  }, [city, taxYear, salaryForBase, rule, editingSocial, editingHousing, socialBaseRule.min, socialBaseRule.max, housingBaseRule.min, housingBaseRule.max])
 
   useEffect(() => {
     if (cityHousingRateOptions.length === 0) return
@@ -128,7 +130,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     const monthHousingBase = editingHousing ? housingBase : clamp(monthSalary, monthHousingBaseRule.min, monthHousingBaseRule.max)
     return calculateInsurance(monthRule, monthSocialBase, monthHousingBase, employeeHousingRate, employerHousingRate)
   }), [selectedCityRule, taxYear, salaryMode, salary, monthlySalaries, editingSocial, editingHousing, socialBase, housingBase, employeeHousingRate, employerHousingRate])
-  const insurance = insuranceByMonth[month - 1] || []
+  // 固定当前月份的数组引用，避免空数组在每次渲染时变化并触发下游计算。
+  const insurance = useMemo(() => insuranceByMonth[month - 1] || [], [insuranceByMonth, month])
   const result = useMemo(() => calculateMonthFromSeries(
     salariesForCalculation,
     month,
@@ -265,6 +268,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
       setDeductionSelections({})
       notify(`已带入专项附加扣除 ${money(requestedDeduction)} / 月`)
     }
+    // 这里只在首次挂载时解析 URL，避免用户修改表单后又被 URL 覆盖。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const reset = () => {

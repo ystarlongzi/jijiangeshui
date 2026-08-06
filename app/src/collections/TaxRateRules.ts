@@ -44,6 +44,9 @@ export const TaxRateRules: CollectionConfig = {
         if (data.rateMode === 'table' && rows.length === 0) {
           throw new Error('表格税率规则至少需要一行税率区间。')
         }
+        if (data.rateMode === 'flat' && (typeof data.flatRate !== 'number' || data.flatRate < 0 || data.flatRate > 1)) {
+          throw new Error('比例税率规则必须填写 0 到 1 之间的小数税率，例如 20% 填 0.2。')
+        }
 
         const invalidRow = rows.some((row: { lowerBound?: number; upperBound?: number }) => {
           if (row.upperBound === undefined || row.upperBound === null) return false
