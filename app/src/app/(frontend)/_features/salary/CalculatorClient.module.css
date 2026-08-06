@@ -106,6 +106,14 @@
   text-decoration: none;
 }
 
+.formTextAction svg {
+  transition: transform 160ms ease;
+}
+
+.formTextAction[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
 .salaryModeRow {
   display: inline-flex;
   align-items: center;
@@ -558,6 +566,12 @@
   align-items: end;
   flex-wrap: wrap;
   margin-bottom: 18px;
+}
+
+.pageContent :global(.detail-heading-actions) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .pageContent :global(.heading-with-meta) {

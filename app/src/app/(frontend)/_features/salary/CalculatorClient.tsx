@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Copy, Download } from 'lucide-react'
+import { ChevronDown, Copy, Download } from 'lucide-react'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, resolveCityRuleForMonth, taxBrackets as fallbackTaxBrackets, type CityRule } from '@/lib/tax-rules'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
@@ -360,7 +360,6 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   }
   const previousRate = previousMonthResult ? Math.round(previousMonthResult.bracket.rate * 100) : rate
   const taxChange = result.currentTax - (previousMonthResult?.currentTax || 0)
-  const taxYearOptions = (incomeTaxRules?.availableYears || [currentYear]).map((year) => ({ value: year, label: `${year} 年` }))
   const formatTaxMessage = calculationBlocked
     ? '当前年度或城市规则尚未完成加载，系统已停止估算，请先补齐规则后再查看结果。'
     : result.taxable <= 0
@@ -384,7 +383,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
           <div className="panel-heading"><h2>计算条件</h2></div>
           <CitySelect id="city" label="缴费城市" value={city} onChange={setCity} rules={cityRules} invalid={hasRuleQualityErrors} action={<span className="city-actions"><Button className={styles.formTextAction} variant="text" type="button" onClick={locate}>自动定位</Button><TrackedLink className={styles.formTextAction} href={`/city/${city}`} eventPayload={{ module: 'salary_form', label: '查看城市规则', city }}>查看规则</TrackedLink></span>} />
           <FormField htmlFor="salary" label={salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`} error={isSalaryInvalid ? '税前收入需要大于 0。' : ''} action={<span className={styles.salaryModeRow}><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</Button><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</Button></span>}><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</FormField>
-          <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="taxYear" label="纳税年度" value={taxYear} onChange={setTaxYear} options={taxYearOptions} /><SelectField className={styles.compactField} id="month" label="计算月份" value={month} onChange={setMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="startMonth" label="入职月份" value={startMonth} onChange={setStartMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
+          <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="month" label="计算月份" value={month} onChange={setMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="startMonth" label="入职月份" value={startMonth} onChange={setStartMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
           {isMonthInvalid && <p className={styles.fieldError}>计算月份不能早于入职月份。</p>}
           <div className={styles.sectionDivider} />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
@@ -477,6 +476,7 @@ function ContributionSegment({ className, label, value, total, money }: { classN
 }
 
 function InsuranceTable({ insurance, month, year, money }: { insurance: InsuranceItem[]; month: number; year: number; money: (value: number, decimals?: number) => string }) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const social = insurance.filter((item) => !item.housing)
   const housing = insurance.filter((item) => item.housing)
   const sum = (items: InsuranceItem[], key: 'employee' | 'employer' | 'subtotal') => items.reduce((total, item) => total + item[key], 0)
@@ -518,7 +518,7 @@ function InsuranceTable({ insurance, month, year, money }: { insurance: Insuranc
     downloadCsv(`五险一金汇缴明细-${year}-${month}月.csv`, rows)
   }
 
-  return <Panel as="section" className="detail-panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{year} 年 {month} 月</span></div><button className={styles.exportButton} type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div><DataTable ariaLabel={`${year} 年 ${month} 月五险一金汇缴明细`} columns={columns} rows={tableRows} wrapperClassName="detail-table-wrap" tableClassName="insurance-table" /><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></Panel>
+  return <Panel as="section" className="detail-panel"><div className="section-heading-row"><div className="heading-with-meta"><h2>五险一金汇缴明细</h2><span className="month-label">{year} 年 {month} 月</span></div><div className="detail-heading-actions"><Button className={styles.formTextAction} variant="text" type="button" aria-expanded={detailsOpen} aria-controls="insurance-detail-table" onClick={() => setDetailsOpen((open) => !open)}><ChevronDown size={14} aria-hidden="true" />{detailsOpen ? '收起明细' : '查看明细'}</Button><button className={styles.exportButton} type="button" onClick={exportCsv}><Download size={14} />导出 CSV</button></div></div><div className="contribution-chart" aria-label="社保公积金缴费占比"><div className="contribution-total"><span>本月汇缴总额</span><strong>{money(contributionTotal, 0)}</strong></div><div className="contribution-stack">{contributionSegments.map((item) => <span className={`contribution-segment ${item.className}`} style={{ '--segment-width': `${contributionTotal > 0 ? item.value / contributionTotal * 100 : 0}%` } as CSSProperties} key={item.label} title={`${item.label} ${money(item.value, 0)}`} />)}</div><div className="contribution-list">{contributionSegments.map((item) => <ContributionSegment key={item.label} {...item} total={contributionTotal} money={money} />)}</div></div>{detailsOpen && <div id="insurance-detail-table"><DataTable ariaLabel={`${year} 年 ${month} 月五险一金汇缴明细`} columns={columns} rows={tableRows} headerTone="muted" wrapperClassName="detail-table-wrap" tableClassName="insurance-table" /><p className="table-note">金额下方展示实际使用的缴费基数 × 比例，便于核对规则。</p></div>}</Panel>
 }
 
 function AnnualTable({ salaries, month, startMonth, deduction, insurance, insuranceByMonth, taxBrackets, year, money }: { salaries: number[]; month: number; startMonth: number; deduction: number; insurance: InsuranceItem[]; insuranceByMonth: InsuranceItem[][]; taxBrackets: typeof fallbackTaxBrackets; year: number; money: (value: number, decimals?: number) => string }) {
@@ -569,7 +569,7 @@ function AnnualTable({ salaries, month, startMonth, deduction, insurance, insura
     const height = inactive ? 0 : Math.max(6, item.currentTax / maxTax * 100)
     const style = { '--tax-height': `${height}%` } as CSSProperties
     return <div className={`annual-tax-bar ${currentMonth === month ? 'current' : ''} ${inactive ? 'inactive' : ''}`} key={currentMonth}><span className="bar-value">{inactive ? '-' : money(item.currentTax, 0)}</span><span className="bar-track"><span className="bar-fill" style={style} /></span><span className="bar-month">{currentMonth}月</span></div>
-  })}</div></div><DataTable ariaLabel="全年预扣逐月明细" columns={columns} rows={tableRows} wrapperClassName="annual-table-wrap" tableClassName="annual-table" /><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></Panel>
+  })}</div></div><DataTable ariaLabel="全年预扣逐月明细" columns={columns} rows={tableRows} headerTone="muted" wrapperClassName="annual-table-wrap" tableClassName="annual-table" /><p className="table-note">这里的全年个税为工资薪金累计预扣合计估算，不等同于年度汇算最终应纳或应退结果。</p></Panel>
 }
 
 function RateTable({ brackets, year, money }: { brackets: typeof fallbackTaxBrackets; year: number; money: (value: number, decimals?: number) => string }) {
