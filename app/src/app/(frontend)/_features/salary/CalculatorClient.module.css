@@ -690,6 +690,11 @@
   padding: 13px 10px;
 }
 
+.pageContent :global(.insurance-table),
+.pageContent :global(.annual-table) {
+  table-layout: fixed;
+}
+
 .pageContent :global(.insurance-table tbody tr.subtotal td) {
   color: var(--orange);
 }
