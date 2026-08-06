@@ -6,24 +6,9 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
 import { cityRules, selectEffectiveCityRule, type CityRule } from './tax-rules'
+import type { CityRuleLoadStatus, CitySummary } from './city-rule-types'
 
-type CityRuleMap = Record<string, CityRule>
-
-export type CityRuleDatasetSource = 'payload' | 'fallback'
-export type CityRuleSourceByCity = Record<string, CityRuleDatasetSource>
-
-export type CityRuleDataset = {
-  rules: CityRuleMap
-  ruleSourcesByCity: CityRuleSourceByCity
-  source: CityRuleDatasetSource
-  fallbackCities: number
-  cmsEnabledCities: number
-  cmsPolicies: number
-  cmsActivePolicyCities: number
-  cmsMergedCities: number
-  pendingIncluded: boolean
-  fallbackReason?: string
-}
+const DEFAULT_CITY_RULE_CACHE_SECONDS = 300
 
 type CmsCityDoc = {
   id: string | number
@@ -38,7 +23,143 @@ type CmsPolicyDoc = Parameters<typeof adaptCmsPolicyToCityRule>[0] & {
   city?: string | number | { id?: string | number | null } | null
 }
 
-const DEFAULT_CITY_RULE_CACHE_SECONDS = 300
+type CityDirectoryEntry = CitySummary & {
+  id: string | number
+}
+
+export type CityRuleLoadResult = CityRuleLoadStatus & {
+  rule?: CityRule
+}
+
+export type GetCitiesOptions = {
+  keyword?: string
+  limit?: number
+  all?: boolean
+}
+
+export async function getAvailableCities(options: GetCitiesOptions = {}): Promise<CitySummary[]> {
+  const cities = process.env.DATABASE_URI
+    ? await getCachedCityDirectory()
+    : createFallbackCityDirectory()
+  const keyword = options.keyword?.trim().toLocaleLowerCase('zh-CN') || ''
+  const matchedCities = keyword
+    ? cities.filter((city) => `${city.slug} ${city.name} ${city.label} ${city.province} ${city.pinyin}`.toLocaleLowerCase('zh-CN').includes(keyword))
+    : cities
+
+  const visibleCities = options.all ? matchedCities : matchedCities.slice(0, normalizeLimit(options.limit))
+  return visibleCities.map(({ id: _id, ...city }) => city)
+}
+
+async function getAvailableCityEntry(slug: string): Promise<CityDirectoryEntry | undefined> {
+  const normalizedSlug = normalizeSlug(slug)
+  if (!normalizedSlug) return undefined
+  const cities = process.env.DATABASE_URI
+    ? await getCachedCityDirectory()
+    : createFallbackCityDirectory()
+  return cities.find((city) => city.slug === normalizedSlug)
+}
+
+export async function getAvailableCity(slug: string): Promise<CitySummary | undefined> {
+  const city = await getAvailableCityEntry(slug)
+  if (!city) return undefined
+  const { id: _id, ...summary } = city
+  return summary
+}
+
+export async function getAvailableCityRuleResult(slug: string): Promise<CityRuleLoadResult> {
+  const normalizedSlug = normalizeSlug(slug)
+  const city = normalizedSlug ? await getAvailableCityEntry(normalizedSlug) : undefined
+  if (!city) return { source: 'fallback', fallbackReason: 'city-not-found' }
+
+  const fallbackRule = cityRules[city.slug]
+  if (!process.env.DATABASE_URI) {
+    return fallbackRule
+      ? { rule: fallbackRule, source: 'fallback', fallbackReason: 'missing-database-uri' }
+      : { source: 'fallback', fallbackReason: 'missing-database-uri' }
+  }
+
+  try {
+    const cmsRule = await getCachedCityRule(city)
+    if (cmsRule) return { rule: cmsRule, source: 'payload' }
+    return fallbackRule
+      ? { rule: fallbackRule, source: 'fallback', fallbackReason: 'policy-not-found' }
+      : { source: 'fallback', fallbackReason: 'policy-not-found' }
+  } catch (error) {
+    console.warn(`读取城市规则失败：${city.slug}，已回退到内置规则。`, error)
+    return fallbackRule
+      ? { rule: fallbackRule, source: 'fallback', fallbackReason: 'payload-read-failed' }
+      : { source: 'fallback', fallbackReason: 'payload-read-failed' }
+  }
+}
+
+export async function getAvailableCityRule(slug: string): Promise<CityRule | undefined> {
+  const result = await getAvailableCityRuleResult(slug)
+  return result.rule
+}
+
+async function getCachedCityDirectory(): Promise<CityDirectoryEntry[]> {
+  const cacheSeconds = getCityRuleCacheSeconds()
+  if (cacheSeconds === 0) return readCityDirectoryFromPayload()
+
+  return unstable_cache(readCityDirectoryFromPayload, ['payload-city-directory'], {
+    revalidate: cacheSeconds,
+    tags: ['city-directory', 'city-rules'],
+  })()
+}
+
+async function getCachedCityRule(city: CityDirectoryEntry): Promise<CityRule | undefined> {
+  const cacheSeconds = getCityRuleCacheSeconds()
+  if (cacheSeconds === 0) return readCityRuleFromPayload(city)
+
+  return unstable_cache(() => readCityRuleFromPayload(city), ['payload-city-rule', city.slug], {
+    revalidate: cacheSeconds,
+    tags: ['city-rules', `city-rule:${city.slug}`],
+  })()
+}
+
+async function readCityDirectoryFromPayload(): Promise<CityDirectoryEntry[]> {
+  const payload = await getPayload({ config })
+  const result = await payload.find({
+    collection: 'cities',
+    depth: 0,
+    limit: 1000,
+    sort: 'provinceName,name',
+    where: { enabled: { equals: true } },
+  })
+
+  return (result.docs as CmsCityDoc[])
+    .filter(hasSlug)
+    .map(toCitySummary)
+}
+
+async function readCityRuleFromPayload(city: CityDirectoryEntry): Promise<CityRule | undefined> {
+  const payload = await getPayload({ config })
+  const activePolicies = await readPoliciesByStatus('active')
+  const policies = activePolicies.length > 0 || !canUsePendingRules()
+    ? activePolicies
+    : await readPoliciesByStatus('pendingReview')
+
+  if (policies.length === 0) return undefined
+
+  const versions = policies.map((policy) => adaptCmsPolicyToCityRule(policy, toCmsCity(city)))
+  return selectEffectiveCityRule(versions, `${new Date().getFullYear()}-12-31`) || versions[0]
+
+  async function readPoliciesByStatus(policyStatus: CmsPolicyStatus) {
+    const result = await payload.find({
+      collection: 'social-insurance-policies',
+      depth: 0,
+      draft: policyStatus === 'pendingReview',
+      limit: 2000,
+      sort: '-effectiveFrom',
+      where: {
+        city: { equals: city.id },
+        policyStatus: { equals: policyStatus },
+      },
+    })
+
+    return result.docs as CmsPolicyDoc[]
+  }
+}
 
 function canUsePendingRules() {
   return process.env.CITY_RULE_INCLUDE_PENDING === 'true' || process.env.NODE_ENV !== 'production'
@@ -54,125 +175,46 @@ function hasSlug(city: CmsCityDoc): city is CmsCityDoc & { slug: string } {
   return typeof city.slug === 'string' && city.slug.trim() !== ''
 }
 
-export async function getAvailableCityRules(): Promise<CityRuleMap> {
-  const dataset = await getAvailableCityRuleDataset()
-  return dataset.rules
-}
-
-export async function getAvailableCityRuleDataset(): Promise<CityRuleDataset> {
-  if (!process.env.DATABASE_URI) return createFallbackDataset('missing-database-uri')
-
-  try {
-    return await readCachedCityRulesFromPayload()
-  } catch (error) {
-    console.warn('读取 Payload 城市规则失败，已回退到内置规则。', error)
-    return createFallbackDataset('payload-read-failed')
-  }
-}
-
-export async function getAvailableCityRule(slug: string): Promise<CityRule | undefined> {
-  const rules = await getAvailableCityRules()
-  return rules[slug]
-}
-
-async function readCachedCityRulesFromPayload() {
-  const cacheSeconds = getCityRuleCacheSeconds()
-  if (cacheSeconds === 0) return readCityRulesFromPayload()
-
-  return unstable_cache(readCityRulesFromPayload, ['payload-city-rules'], {
-    revalidate: cacheSeconds,
-    tags: ['city-rules'],
-  })()
-}
-
-async function readCityRulesFromPayload(): Promise<CityRuleDataset> {
-  const payload = await getPayload({ config })
-  const cityResult = await payload.find({
-    collection: 'cities',
-    depth: 0,
-    limit: 1000,
-    where: { enabled: { equals: true } },
-  })
-  const rules: CityRuleMap = { ...cityRules }
-  const ruleSourcesByCity: CityRuleSourceByCity = Object.fromEntries(
-    Object.keys(cityRules).map((city) => [city, 'fallback' as const]),
-  )
-  const cities = (cityResult.docs as CmsCityDoc[]).filter(hasSlug)
-  const activePolicies = await readPoliciesByCity('active')
-  const pendingIncluded = canUsePendingRules()
-  const pendingPolicies = pendingIncluded ? await readPoliciesByCity('pendingReview') : createEmptyPolicySummary()
-  let cmsMergedCities = 0
-
-  for (const city of cities) {
-    const cityId = String(city.id)
-    const policies = activePolicies.byCity.get(cityId) || pendingPolicies.byCity.get(cityId) || []
-
-    if (policies.length > 0) {
-      const versions = policies.map((policy) => adaptCmsPolicyToCityRule(policy, city))
-      const activeRule = selectEffectiveCityRule(versions, `${new Date().getFullYear()}-12-31`) || versions[0]
-      if (activeRule) {
-        rules[city.slug] = { ...activeRule, policyVersions: versions }
-        ruleSourcesByCity[city.slug] = 'payload'
-        cmsMergedCities += 1
-      }
-    }
-  }
-
+function toCitySummary(city: CmsCityDoc & { slug: string }): CityDirectoryEntry {
+  const label = city.name || city.shortName || city.slug
   return {
-    rules,
-    ruleSourcesByCity,
-    source: 'payload',
-    fallbackCities: Object.keys(cityRules).length,
-    cmsEnabledCities: cities.length,
-    cmsPolicies: activePolicies.count + pendingPolicies.count,
-    cmsActivePolicyCities: activePolicies.byCity.size,
-    cmsMergedCities,
-    pendingIncluded,
-  }
-
-  async function readPoliciesByCity(policyStatus: CmsPolicyStatus) {
-    const policyResult = await payload.find({
-      collection: 'social-insurance-policies',
-      depth: 0,
-      draft: policyStatus === 'pendingReview',
-      limit: 2000,
-      sort: '-effectiveFrom',
-      where: { policyStatus: { equals: policyStatus } },
-    })
-    const policies = policyResult.docs as CmsPolicyDoc[]
-    const grouped = new Map<string, CmsPolicyDoc[]>()
-
-    for (const policy of policies) {
-      const cityId = getRelationId(policy.city)
-      if (!cityId) continue
-      grouped.set(cityId, [...(grouped.get(cityId) || []), policy])
-    }
-
-    return { byCity: grouped, count: policies.length }
+    id: city.id,
+    slug: city.slug,
+    name: city.shortName || city.name || city.slug,
+    label,
+    province: city.provinceName || label,
+    pinyin: city.slug,
   }
 }
 
-function createEmptyPolicySummary() {
-  return { byCity: new Map<string, CmsPolicyDoc[]>(), count: 0 }
-}
-
-function createFallbackDataset(fallbackReason: string): CityRuleDataset {
+function toCmsCity(city: CityDirectoryEntry): CmsCityDoc & { slug: string } {
   return {
-    rules: cityRules,
-    ruleSourcesByCity: Object.fromEntries(Object.keys(cityRules).map((city) => [city, 'fallback' as const])),
-    source: 'fallback',
-    fallbackCities: Object.keys(cityRules).length,
-    cmsEnabledCities: 0,
-    cmsPolicies: 0,
-    cmsActivePolicyCities: 0,
-    cmsMergedCities: 0,
-    pendingIncluded: false,
-    fallbackReason,
+    id: city.id,
+    name: city.label,
+    slug: city.slug,
+    provinceName: city.province,
+    shortName: city.name,
   }
 }
 
-function getRelationId(value: CmsPolicyDoc['city']) {
-  if (typeof value === 'string' || typeof value === 'number') return String(value)
-  if (value && (typeof value.id === 'string' || typeof value.id === 'number')) return String(value.id)
-  return undefined
+function createFallbackCityDirectory(): CityDirectoryEntry[] {
+  return Object.entries(cityRules)
+    .map(([slug, rule]) => ({
+      id: slug,
+      slug,
+      name: rule.name,
+      label: rule.label,
+      province: rule.province,
+      pinyin: rule.pinyin,
+    }))
+    .sort((prev, next) => prev.province.localeCompare(next.province, 'zh-CN') || prev.label.localeCompare(next.label, 'zh-CN'))
+}
+
+function normalizeLimit(value?: number) {
+  const configuredLimit = Number.isFinite(value) ? Math.floor(value as number) : 20
+  return Math.min(Math.max(configuredLimit, 1), 1000)
+}
+
+function normalizeSlug(value: string) {
+  return value.trim().toLowerCase()
 }

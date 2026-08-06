@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import ReverseTaxClient from '../_features/reverse-tax/ReverseTaxClient'
 import { currentYear, siteName } from '@/lib/site'
-import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getAvailableCities, getAvailableCityRuleResult } from '@/lib/city-rule-service'
 import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 
 export const metadata: Metadata = {
@@ -11,18 +11,16 @@ export const metadata: Metadata = {
 }
 
 export default async function ReverseTaxPage() {
-  const [cityRuleDataset, incomeTaxRules] = await Promise.all([
-    getAvailableCityRuleDataset(),
+  const [cities, initialCityRule, incomeTaxRules] = await Promise.all([
+    getAvailableCities({ limit: 20 }),
+    getAvailableCityRuleResult('beijing'),
     getIncomeTaxRuleDataset(),
   ])
 
   return <ReverseTaxClient
-    rules={cityRuleDataset.rules}
+    cities={cities}
+    initialRule={initialCityRule.rule}
+    initialRuleStatus={{ source: initialCityRule.source, fallbackReason: initialCityRule.fallbackReason }}
     incomeTaxRules={incomeTaxRules}
-    cityRuleStatus={{
-      source: cityRuleDataset.source,
-      ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
-      fallbackReason: cityRuleDataset.fallbackReason,
-    }}
   />
 }

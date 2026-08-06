@@ -297,6 +297,25 @@
   padding: 26px;
 }
 
+.resultGroup { position: relative; display: grid; gap: 24px; }
+.ruleLoadingOverlay { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; border-radius: 14px; background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(2px); }
+
+.ruleLoading {
+  min-height: 360px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.ruleLoading strong { color: var(--ink); font-size: 15px; }
+.ruleLoading p { margin: 0; font-size: 12px; }
+.ruleLoadingSpinner { width: 22px; height: 22px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: rule-loading-spin 720ms linear infinite; }
+
+@keyframes rule-loading-spin { to { transform: rotate(360deg); } }
+
 .pageContent :global(.result-panel)::before {
   content: "";
   position: absolute;

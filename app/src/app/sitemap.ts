@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getIndexableArticles } from '@/lib/article-content-service'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCities } from '@/lib/city-rule-service'
 import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 import { getTaxRateSeoSelections, getTaxRateUrl } from '@/lib/tax-rate-page'
 import { currentYear, siteUrl } from '@/lib/site'
@@ -26,8 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/articles`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${siteUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
   ]
-  const [cityRules, articles, incomeTaxRules] = await Promise.all([
-    getAvailableCityRules(),
+  const [cities, articles, incomeTaxRules] = await Promise.all([
+    getAvailableCities({ all: true }),
     getIndexableArticles(),
     getIncomeTaxRuleDataset(),
   ])
@@ -41,8 +41,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: 0.65,
     })))
-  const cityRoutes: MetadataRoute.Sitemap = Object.keys(cityRules).map((city) => ({
-    url: `${siteUrl}/city/${city}`,
+  const cityRoutes: MetadataRoute.Sitemap = cities.map((city) => ({
+    url: `${siteUrl}/city/${city.slug}`,
     changeFrequency: 'monthly',
     priority: 0.7,
   }))

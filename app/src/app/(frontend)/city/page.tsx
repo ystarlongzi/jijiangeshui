@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
 import SiteFooter from '../_components/SiteFooter'
 import SiteHeader from '../_components/SiteHeader'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCities } from '@/lib/city-rule-service'
 import { currentYear, siteName } from '@/lib/site'
 import CityRuleExplorer, { type CityRuleExplorerItem } from '../_features/city/CityRuleExplorer/CityRuleExplorer'
 import styles from './CityPages.module.css'
@@ -14,19 +14,17 @@ export const metadata: Metadata = {
   alternates: { canonical: '/city' },
 }
 
+// 城市目录来自 CMS，按请求在服务端渲染，避免构建时把全部城市数据固化进静态产物。
+export const dynamic = 'force-dynamic'
+
 export default async function CityIndexPage() {
-  const cityRules = await getAvailableCityRules()
-  const cities = Object.entries(cityRules).sort(([, prev], [, next]) => {
-    const provinceOrder = prev.province.localeCompare(next.province, 'zh-CN')
-    if (provinceOrder !== 0) return provinceOrder
-    return prev.label.localeCompare(next.label, 'zh-CN')
-  })
-  const cityExplorerItems: CityRuleExplorerItem[] = cities.map(([key, rule]) => ({
-    key,
-    label: rule.label,
-    name: rule.name,
-    pinyin: rule.pinyin,
-    province: rule.province,
+  const cities = await getAvailableCities({ all: true })
+  const cityExplorerItems: CityRuleExplorerItem[] = cities.map((city) => ({
+    key: city.slug,
+    label: city.label,
+    name: city.name,
+    pinyin: city.pinyin,
+    province: city.province,
   }))
   const popularCityKeys = ['beijing', 'shanghai', 'shenzhen', 'guangzhou', 'hangzhou', 'chengdu']
   const popularCities = popularCityKeys

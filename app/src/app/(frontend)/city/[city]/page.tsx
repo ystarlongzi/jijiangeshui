@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
 import { getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
-import { getAvailableCityRule, getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCityRule } from '@/lib/city-rule-service'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
 import SiteHeader from '../../_components/SiteHeader'
@@ -17,10 +17,8 @@ import styles from '../CityPages.module.css'
 
 type CityPageProps = { params: Promise<{ city: string }> }
 
-export async function generateStaticParams() {
-  const rules = await getAvailableCityRules()
-  return Object.keys(rules).map((city) => ({ city }))
-}
+// 城市规则由 CMS 管理，详情页按请求服务端渲染，既保留 SEO HTML，也避免构建时遍历所有城市。
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { city } = await params
@@ -30,8 +28,7 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
 
 export default async function CityPage({ params }: CityPageProps) {
   const { city } = await params
-  const rules = await getAvailableCityRules()
-  const rule = rules[city]
+  const rule = await getAvailableCityRule(city)
   if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
   const exampleSalary = 20000
   const socialBaseRule = getContributionBaseRule(rule, 'social')

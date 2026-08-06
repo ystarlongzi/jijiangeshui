@@ -26,6 +26,10 @@ export type CityRuleStats = {
   warnings: number
 }
 
+type AuditCityRuleOptions = {
+  includeSourceChecks?: boolean
+}
+
 // 同一个城市可能有多个来源。前台展示和审计摘要优先使用带 checkedAt 的来源，
 // 因为它能说明“这条规则最近一次被核对到什么时候”。
 export function getPrimaryRuleSource(rule: CityRule) {
@@ -60,16 +64,19 @@ export function getRuleQualityStatus(issues: RuleQualityIssue[]): RuleQualitySta
 // 质量审计分为 error 和 warning：
 // - error：会影响计算是否可信，例如缺基数、缺缴费项目、缺核对日期
 // - warning：不一定阻断计算，但需要后续补齐，例如来源没有 URL
-export function auditCityRule(code: string, rule: CityRule): RuleQualityIssue[] {
+export function auditCityRule(code: string, rule: CityRule, options: AuditCityRuleOptions = {}): RuleQualityIssue[] {
   const issues: RuleQualityIssue[] = []
-  const source = getPrimaryRuleSource(rule)
+  const includeSourceChecks = options.includeSourceChecks !== false
   const housingItem = rule.contributionItems.find((item) => item.housing || item.systemType === 'housingFund')
   const socialItems = rule.contributionItems.filter((item) => item.systemType === 'social')
 
-  if (!rule.effective) issues.push(createIssue(code, 'source', 'error', '缺少规则生效日期'))
-  if (!rule.sources.length) issues.push(createIssue(code, 'source', 'error', '缺少规则来源'))
-  if (!source?.checkedAt) issues.push(createIssue(code, 'source', 'error', '缺少规则核对日期'))
-  if (rule.sources.some((item) => !item.url)) issues.push(createIssue(code, 'source', 'warning', '存在未配置 URL 的规则来源'))
+  if (includeSourceChecks) {
+    const source = getPrimaryRuleSource(rule)
+    if (!rule.effective) issues.push(createIssue(code, 'source', 'error', '缺少规则生效日期'))
+    if (!rule.sources.length) issues.push(createIssue(code, 'source', 'error', '缺少规则来源'))
+    if (!source?.checkedAt) issues.push(createIssue(code, 'source', 'error', '缺少规则核对日期'))
+    if (rule.sources.some((item) => !item.url)) issues.push(createIssue(code, 'source', 'warning', '存在未配置 URL 的规则来源'))
+  }
 
   for (const baseRule of Object.values(rule.baseRules)) {
     if (baseRule.min <= 0 || baseRule.max <= 0) {

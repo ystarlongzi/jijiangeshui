@@ -8,6 +8,9 @@
 .heroCard small { color: var(--subtle); font-size: 11px; font-weight: 600; }
 .workspace { display: grid; grid-template-columns: minmax(320px, 390px) minmax(0, 1fr); gap: 20px; padding: 42px 0 58px; }
 .input, .result { padding: 26px; box-shadow: var(--shadow-strong); }
+.result { position: relative; overflow: hidden; }
+.workspace[aria-busy="true"] > .result::after { content: "正在加载城市规则\A正在读取社保和公积金规则，请稍候。"; white-space: pre; position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.8; background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(2px); }
+.workspace[aria-busy="true"] > .result::before { content: ""; position: absolute; top: 50%; left: 50%; z-index: 3; width: 22px; height: 22px; margin: -34px 0 0 -11px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: rule-loading-spin 720ms linear infinite; }
 .input h2 { margin: 0 0 28px; font-size: 24px; }
 .cityActions { display: inline-flex; align-items: center; gap: 12px; }
 .textButton { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1.4; text-decoration: none; }
@@ -38,6 +41,11 @@
 .resultExplain dt, .resultExplain dd { margin: 0; font-size: 11px; }
 .resultExplain dt { color: var(--muted); }
 .resultExplain dd { color: var(--ink); font-weight: 600; }
+.ruleLoading { min-height: 360px; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; color: var(--muted); }
+.ruleLoading strong { color: var(--ink); font-size: 15px; }
+.ruleLoading p { margin: 0; font-size: 12px; }
+.ruleLoadingSpinner { width: 22px; height: 22px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: rule-loading-spin 720ms linear infinite; }
+@keyframes rule-loading-spin { to { transform: rotate(360deg); } }
 .explain { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding: 28px 0; border-top: 1px solid var(--line); }
 .explain h2 { margin-bottom: 8px; font-size: 22px; }
 .explain p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }

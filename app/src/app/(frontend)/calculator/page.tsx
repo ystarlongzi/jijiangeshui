@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import CalculatorClient from '../_features/salary/CalculatorClient'
 import { currentYear, siteName, siteUrl } from '@/lib/site'
 import JsonLd from '../_components/JsonLd'
-import { getAvailableCityRuleDataset } from '@/lib/city-rule-service'
+import { getAvailableCities, getAvailableCityRuleResult } from '@/lib/city-rule-service'
 import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 
 export const metadata: Metadata = {
@@ -12,8 +12,9 @@ export const metadata: Metadata = {
 }
 
 export default async function CalculatorPage() {
-  const [cityRuleDataset, incomeTaxRules] = await Promise.all([
-    getAvailableCityRuleDataset(),
+  const [cities, initialCityRule, incomeTaxRules] = await Promise.all([
+    getAvailableCities({ limit: 20 }),
+    getAvailableCityRuleResult('beijing'),
     getIncomeTaxRuleDataset(),
   ])
 
@@ -30,12 +31,9 @@ export default async function CalculatorPage() {
       publisher: { '@type': 'Organization', name: siteName },
     }} />
     <CalculatorClient
-      rules={cityRuleDataset.rules}
-      cityRuleStatus={{
-        source: cityRuleDataset.source,
-        ruleSourcesByCity: cityRuleDataset.ruleSourcesByCity,
-        fallbackReason: cityRuleDataset.fallbackReason,
-      }}
+      cities={cities}
+      initialRule={initialCityRule.rule}
+      initialRuleStatus={{ source: initialCityRule.source, fallbackReason: initialCityRule.fallbackReason }}
       incomeTaxRules={incomeTaxRules}
     />
   </>

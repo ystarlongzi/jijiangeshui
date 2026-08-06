@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronDown, Copy, Download } from 'lucide-react'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, resolveCityRuleForMonth, taxBrackets as fallbackTaxBrackets, type CityRule } from '@/lib/tax-rules'
+import type { CityRuleLoadStatus, CitySummary } from '@/lib/city-rule-types'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
 import { getValidatedHousingRateOptions, validateCityRuleInputs } from '@/lib/city-rule-validation'
@@ -28,6 +29,7 @@ import ValidationPanel from '../../_components/ValidationPanel'
 import RuleBoundaryNotice from '../../_components/RuleBoundaryNotice'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
+import useCityRule from '../../_hooks/useCityRule'
 import { trackEvent } from '../../_lib/analytics'
 import { downloadCsv } from '../../_lib/csv'
 import { formatDateOnly } from '../../_lib/date'
@@ -36,18 +38,22 @@ import styles from './CalculatorClient.module.css'
 const rateRanges = ['不超过 36,000 元', '超过 36,000 元至 144,000 元', '超过 144,000 元至 300,000 元', '超过 300,000 元至 420,000 元', '超过 420,000 元至 660,000 元', '超过 660,000 元至 960,000 元', '超过 960,000 元']
 
 type CalculatorClientProps = {
-  rules?: Record<string, CityRule>
-  cityRuleStatus?: {
-    source: 'payload' | 'fallback'
-    ruleSourcesByCity: Record<string, 'payload' | 'fallback'>
-    fallbackReason?: string
-  }
+  cities?: CitySummary[]
+  initialRule?: CityRule
+  initialRuleStatus?: CityRuleLoadStatus
   incomeTaxRules?: IncomeTaxRuleDataset
 }
 
-export default function CalculatorClient({ rules = fallbackCityRules, cityRuleStatus, incomeTaxRules }: CalculatorClientProps) {
+const fallbackCities: CitySummary[] = Object.entries(fallbackCityRules).map(([slug, rule]) => ({
+  slug,
+  name: rule.name,
+  label: rule.label,
+  province: rule.province,
+  pinyin: rule.pinyin,
+}))
+
+export default function CalculatorClient({ cities = fallbackCities, initialRule, initialRuleStatus, incomeTaxRules }: CalculatorClientProps) {
   const { money } = useMoneyFormat()
-  const cityRules = rules
   const [city, setCity] = useState('beijing')
   const [taxYear, setTaxYear] = useState(incomeTaxRules?.availableYears[0] || currentYear)
   const [salary, setSalary] = useState(20000)
@@ -66,8 +72,10 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   const [deductionDialogOpen, setDeductionDialogOpen] = useState(false)
   const [calculationOpen, setCalculationOpen] = useState(false)
   const [toast, setToast] = useState('')
+  const initialUrlAppliedRef = useRef(false)
+  const cityRuleState = useCityRule(city, { initialRule, initialRuleStatus })
 
-  const selectedCityRule = cityRules[city] || cityRules.beijing || fallbackCityRules.beijing
+  const selectedCityRule = cityRuleState.rule || fallbackCityRules[city] || fallbackCityRules.beijing
   const yearRules: IncomeTaxYearRules = incomeTaxRules?.rulesByYear[String(taxYear)] || {
     year: taxYear,
     taxBrackets: fallbackTaxBrackets,
@@ -83,7 +91,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   // 严格按用户选择的年度和月份找政策；找不到时只用于渲染表单，后面的校验会阻止计算。
   const cityRuleResolution = resolveCityRuleForMonth(selectedCityRule, taxYear, month)
   const rule = cityRuleResolution.rule
-  const cityRuleLoaded = !cityRuleStatus || (cityRuleStatus.source === 'payload' && cityRuleStatus.ruleSourcesByCity[city] === 'payload')
+  const cityRuleStatus = cityRuleState.status
+  const cityRuleLoaded = Boolean(cityRuleState.rule && cityRuleState.loadedCity === city && !cityRuleState.loading)
   const ruleSourceDate = yearRules.checkedAt || rule.sources.find((source) => source.checkedAt)?.checkedAt || rule.effective
   const displayRuleSourceDate = formatDateOnly(ruleSourceDate)
   const ruleSourceLinks = rule.sources
@@ -98,7 +107,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     employeeHousingRate,
     employerHousingRate,
   }), [rule, socialBase, housingBase, employeeHousingRate, employerHousingRate])
-  const ruleQualityIssues = useMemo(() => auditCityRule(city, rule), [city, rule])
+  // sources 仅供 CMS 内部审计，接口不会下发，不能阻断前端计算。
+  const ruleQualityIssues = useMemo(() => auditCityRule(city, rule, { includeSourceChecks: false }), [city, rule])
   const hasRuleQualityErrors = getRuleQualityStatus(ruleQualityIssues) === 'error'
   const deduction = deductionAmount
   const selectedDeductionItems = Object.values(deductionSelections).map((id) => yearRules.specialDeductionItems.find((item) => item.id === id)).filter(Boolean)
@@ -163,7 +173,11 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
   const isDeductionInvalid = deductionAmount > activeSalary
   const housingRateOptionsText = cityHousingRateOptions.map((rate) => `${rate}%`).join('、')
   const blockingRuleMessages = [
-    !cityRuleLoaded ? `当前城市规则没有从 CMS 成功加载${cityRuleStatus?.fallbackReason ? `（${cityRuleStatus.fallbackReason}）` : ''}，暂时无法可靠测算。` : '',
+    !cityRuleLoaded
+      ? cityRuleState.fetching
+        ? cityRuleState.rule ? '' : '正在加载当前城市的社保公积金规则，请稍候。'
+        : cityRuleState.error || `当前城市规则没有从 CMS 成功加载${cityRuleStatus?.fallbackReason ? `（${cityRuleStatus.fallbackReason}）` : ''}，暂时无法可靠测算。`
+      : '',
     ...yearRules.missingReasons,
   ].filter(Boolean)
   const validationMessages = [
@@ -212,7 +226,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     setToast(message)
     window.setTimeout(() => setToast(''), 2400)
   }
-  const locate = useCityLocator(notify, { rules: cityRules, onLocated: setCity })
+  const locate = useCityLocator(notify, { cities, onLocated: setCity })
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -226,10 +240,8 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     const requestedHousingBase = parseAmountParam(params.get('housingBase'))
     const requestedMonth = parseIntegerParam(params.get('month'), 1, 12)
     const requestedStartMonth = parseIntegerParam(params.get('startMonth'), 1, 12)
-    const requestedEmployeeHousingRate = parseIntegerParam(params.get('employeeHousingRate'), 3, 12)
-    const requestedEmployerHousingRate = parseIntegerParam(params.get('employerHousingRate'), 3, 12)
 
-    if (requestedCity && cityRules[requestedCity]) setCity(requestedCity)
+    if (requestedCity && /^[a-z0-9-]{1,100}$/u.test(requestedCity)) setCity(requestedCity)
     if (requestedYear && incomeTaxRules?.availableYears.includes(requestedYear)) setTaxYear(requestedYear)
     if (requestedSalary > 0) setSalary(requestedSalary)
     if (requestedSalaryMode === 'monthly' && requestedSalaries.length === 12) {
@@ -246,14 +258,6 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     }
     if (requestedMonth) setMonth(requestedMonth)
     if (requestedStartMonth) setStartMonth(requestedStartMonth)
-    const requestedRule = getCityRuleForMonth(
-      requestedCity && cityRules[requestedCity] ? cityRules[requestedCity] : cityRules.beijing || fallbackCityRules.beijing,
-      requestedYear || taxYear,
-      requestedMonth || month,
-    )
-    const requestedHousingRateOptions = getValidatedHousingRateOptions(requestedRule)
-    if (requestedEmployeeHousingRate && requestedHousingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
-    if (requestedEmployerHousingRate && requestedHousingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
     if (requestedDeduction > 0) {
       setDeductionAmount(requestedDeduction)
       setDeductionSelections({})
@@ -262,6 +266,22 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
     // 这里只在首次挂载时解析 URL，避免用户修改表单后又被 URL 覆盖。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (initialUrlAppliedRef.current || !cityRuleState.rule || cityRuleState.loading) return
+    const params = new URLSearchParams(window.location.search)
+    const requestedCity = params.get('city')
+    if (requestedCity && requestedCity !== city) return
+    const requestedYear = parseIntegerParam(params.get('year'), 2000, 2100)
+    const requestedMonth = parseIntegerParam(params.get('month'), 1, 12)
+    const requestedEmployeeHousingRate = parseIntegerParam(params.get('employeeHousingRate'), 3, 12)
+    const requestedEmployerHousingRate = parseIntegerParam(params.get('employerHousingRate'), 3, 12)
+    const requestedRule = getCityRuleForMonth(cityRuleState.rule, requestedYear || taxYear, requestedMonth || month)
+    const requestedHousingRateOptions = getValidatedHousingRateOptions(requestedRule)
+    if (requestedEmployeeHousingRate && requestedHousingRateOptions.includes(requestedEmployeeHousingRate)) setEmployeeHousingRate(requestedEmployeeHousingRate)
+    if (requestedEmployerHousingRate && requestedHousingRateOptions.includes(requestedEmployerHousingRate)) setEmployerHousingRate(requestedEmployerHousingRate)
+    initialUrlAppliedRef.current = true
+  }, [city, cityRuleState.loading, cityRuleState.rule, month, taxYear])
 
   const reset = () => {
     setCity('beijing'); setTaxYear(incomeTaxRules?.availableYears[0] || currentYear); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
@@ -381,7 +401,7 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
       <section className="workspace-grid" aria-label="个税计算器">
         <Panel as="form" className="input-panel" onSubmit={(event) => { event.preventDefault(); calculate() }}>
           <div className="panel-heading"><h2>计算条件</h2></div>
-          <CitySelect id="city" label="缴费城市" value={city} onChange={setCity} rules={cityRules} invalid={hasRuleQualityErrors} action={<span className="city-actions"><Button className={styles.formTextAction} variant="text" type="button" onClick={locate}>自动定位</Button><TrackedLink className={styles.formTextAction} href={`/city/${city}`} eventPayload={{ module: 'salary_form', label: '查看城市规则', city }}>查看规则</TrackedLink></span>} />
+          <CitySelect id="city" label="缴费城市" value={city} onChange={setCity} cities={cities} invalid={hasRuleQualityErrors} action={<span className="city-actions"><Button className={styles.formTextAction} variant="text" type="button" onClick={locate}>自动定位</Button><TrackedLink className={styles.formTextAction} href={`/city/${city}`} eventPayload={{ module: 'salary_form', label: '查看城市规则', city }}>查看规则</TrackedLink></span>} />
           <FormField htmlFor="salary" label={salaryMode === 'fixed' ? '税前月薪' : `${month} 月税前收入`} error={isSalaryInvalid ? '税前收入需要大于 0。' : ''} action={<span className={styles.salaryModeRow}><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'fixed'} onClick={() => switchSalaryMode('fixed')}>固定月薪</Button><Button className={styles.salaryModeButton} variant="text" type="button" aria-pressed={salaryMode === 'monthly'} onClick={() => switchSalaryMode('monthly')}>逐月填写</Button></span>}><MoneyInput id="salary" className={isSalaryInvalid ? 'input-error' : ''} value={activeSalary} onChange={updateActiveSalary} />{salaryMode === 'monthly' && <div className="monthly-salary-grid" aria-label="逐月税前收入">{monthlySalaries.map((value, index) => <label className={index + 1 === month ? 'current' : ''} key={index + 1}><span>{index + 1} 月</span><MoneyInput value={value} onChange={(next) => updateMonthlySalary(index + 1, next)} /></label>)}</div>}</FormField>
           <div className={styles.fieldGrid}><SelectField className={styles.compactField} id="month" label="计算月份" value={month} onChange={setMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /><SelectField className={styles.compactField} id="startMonth" label="入职月份" value={startMonth} onChange={setStartMonth} invalid={isMonthInvalid} options={Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: `${index + 1} 月` }))} /></div>
           {isMonthInvalid && <p className={styles.fieldError}>计算月份不能早于入职月份。</p>}
@@ -399,12 +419,13 @@ export default function CalculatorClient({ rules = fallbackCityRules, cityRuleSt
         </Panel>
 
         <div className="results-column">
-          {calculationBlocked ? <RuleUnavailablePanel messages={validationMessages} /> : <>
+          {calculationBlocked && !(cityRuleState.fetching && cityRuleState.rule) ? <RuleUnavailablePanel messages={validationMessages} /> : <div className={styles.resultGroup}>
             <Panel as="section" className="result-panel" aria-live="polite"><div className="result-topline"><span className="result-context">{rule.label} · {taxYear} 年 {month} 月</span><span className="result-badge">累计预扣</span></div><div className="take-home-block"><span>到手工资</span><strong>{money(result.takeHome, 2)}</strong><small>税前 <b>{wholeMoney(activeSalary)}</b></small></div>
               <div className="wage-flow"><div className="wage-flow-heading"><strong>本月工资流向</strong><span>到手 {takeHomePercent}%</span></div><div className="flow-bar" aria-hidden="true"><span className="flow-segment flow-take-home" style={{ width: flowWidth(result.takeHome) }} /><span className="flow-segment flow-social" style={{ width: flowWidth(socialEmployee) }} /><span className="flow-segment flow-housing" style={{ width: flowWidth(housingEmployee) }} /><span className="flow-segment flow-tax" style={{ width: flowWidth(result.currentTax) }} /></div><div className="flow-legend"><FlowLegend className="flow-take-home-dot" label="到手工资" value={result.takeHome} money={money} /><FlowLegend className="flow-social-dot" label="个人社保" value={socialEmployee} money={money} /><FlowLegend className="flow-housing-dot" label="公积金" value={housingEmployee} money={money} /><FlowLegend className="flow-tax-dot" label="个人所得税" value={result.currentTax} money={money} /></div></div>
               <div className="result-explanation">{formatTaxMessage}</div><div className="tax-ladder"><div className="tax-ladder-heading"><span>当前预扣率档位</span><strong>{rate}% 档</strong></div><div className="tax-ladder-rail"><span className="tax-ladder-progress" style={{ width: `${ladderPosition}%` }} /><span className="tax-ladder-marker" style={{ left: `${ladderPosition}%` }} /></div><div className="tax-ladder-levels">{yearRules.taxBrackets.map((item) => Math.round(item.rate * 100)).map((item) => <span key={item} className={item === rate ? 'active' : ''}>{item}%</span>)}</div></div><ResultActions><ResultActionButton onClick={() => { const next = !calculationOpen; setCalculationOpen(next); trackEvent('result_expand', { calculator: 'salary', expanded: next }) }}>查看计算过程 <span>→</span></ResultActionButton><ResultActionButton onClick={copyPayslip}><Copy size={14} />复制工资条</ResultActionButton><ResultActionButton onClick={copyShareLink}><Copy size={14} />复制链接</ResultActionButton></ResultActions>{calculationOpen && <div className="calculation-detail"><div><span>累计应纳税所得额</span><strong>{wholeMoney(result.taxable)}</strong></div><div><span>累计应预扣税额</span><strong>{wholeMoney(result.cumulativeTax)}</strong></div><div><span>预扣率 × 应纳税所得额</span><strong>{rate}% × {wholeMoney(result.taxable)}</strong></div><div><span>速算扣除数</span><strong>{wholeMoney(result.bracket.quick)}</strong></div></div>}</Panel>
             <InsuranceTable insurance={insurance} month={month} year={taxYear} money={money} />
-          </>}
+            {cityRuleState.fetching && <RuleLoadingOverlay />}
+          </div>}
         </div>
       </section>
 
@@ -455,6 +476,16 @@ function RuleUnavailablePanel({ messages }: { messages: string[] }) {
     <RuleBoundaryNotice messages={messages} title="暂时无法计算" tone="error" />
     <p className="result-explanation">当前结果不会用未确认的规则代替。请稍后重试，或先到城市规则和 CMS 后台补齐对应年度的有效规则。</p>
   </Panel>
+}
+
+function RuleLoadingOverlay() {
+  return <div className={styles.ruleLoadingOverlay} role="status" aria-live="polite" aria-busy="true">
+    <div className={styles.ruleLoading}>
+      <span className={styles.ruleLoadingSpinner} aria-hidden="true" />
+      <strong>正在加载城市规则</strong>
+      <p>正在读取社保和公积金规则，请稍候。</p>
+    </div>
+  </div>
 }
 
 function ContributionSegment({ className, label, value, total, money }: { className: string; label: string; value: number; total: number; money: (value: number, decimals?: number) => string }) {

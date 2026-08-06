@@ -24,7 +24,7 @@ import SiteHeader from './_components/SiteHeader'
 import SiteFooter from './_components/SiteFooter'
 import SectionHeading from './_components/SectionHeading'
 import PrimaryActionLink from './_components/PrimaryActionLink'
-import { getAvailableCityRules } from '@/lib/city-rule-service'
+import { getAvailableCities } from '@/lib/city-rule-service'
 import { currentYear, ruleCheckedDate, siteName, siteUrl } from '@/lib/site'
 
 export const metadata = {
@@ -59,11 +59,11 @@ const highlights = [
 const preferredCityKeys = ['beijing', 'shanghai', 'shenzhen', 'guangzhou', 'hangzhou']
 
 export default async function HomePage() {
-  const rules = await getAvailableCityRules()
+  const cities = await getAvailableCities({ all: true })
   const popularCities = preferredCityKeys
     .map((key) => {
-      const rule = rules[key]
-      return rule ? { key, label: rule.label } : null
+      const city = cities.find((item) => item.slug === key)
+      return city ? { key: city.slug, label: city.label } : null
     })
     .filter((city): city is { key: string; label: string } => Boolean(city))
   const websiteStructuredData = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl, description: `按城市、五险一金和专项扣除，测算 ${currentYear} 年工资到手与全年预扣个税。` }

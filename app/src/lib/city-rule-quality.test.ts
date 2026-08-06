@@ -33,6 +33,14 @@ test('城市规则质量：基数范围异常时标记为错误', () => {
   assert.equal(issues.some((issue) => issue.category === 'baseRule' && issue.severity === 'error'), true)
 })
 
+test('城市规则质量：前台计算可以跳过来源审计', () => {
+  const ruleWithoutSources: CityRule = { ...cityRules.beijing, sources: [] }
+  const issues = auditCityRule('beijing', ruleWithoutSources, { includeSourceChecks: false })
+
+  assert.equal(getRuleQualityStatus(issues), 'ok')
+  assert.equal(issues.some((issue) => issue.category === 'source'), false)
+})
+
 test('城市规则统计：汇总当年规则和来源覆盖情况', () => {
   const stats = getCityRuleStats(Object.entries(cityRules), 2026)
 
