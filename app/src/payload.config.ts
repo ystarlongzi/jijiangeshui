@@ -23,12 +23,15 @@ export default buildConfig({
   admin: {
     user: 'admins',
     importMap: {
-      importMapFile: path.resolve(dirname, 'app/(payload)/admin/importMap.ts'),
+      importMapFile: path.resolve(dirname, 'app/(payload)/www-app-admin/importMap.ts'),
     },
     meta: {
       titleSuffix: ' · 极简个税',
       description: '极简个税内容与规则管理后台',
     },
+  },
+  routes: {
+    admin: '/www-app-admin',
   },
   collections: [Users, Cities, SocialInsurancePolicies, TaxRateRules, SpecialDeductionRules, Articles, FAQs, ImportJobs],
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],

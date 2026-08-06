@@ -8,7 +8,7 @@ import {
 } from '@payloadcms/next/layouts'
 import React from 'react'
 
-import { importMap } from './admin/importMap'
+import { importMap } from './www-app-admin/importMap'
 import './custom.css'
 
 const serverFunction: ServerFunctionClient = async function (args) {

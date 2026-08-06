@@ -10,7 +10,9 @@
 2. 复制 `.env.example` 为 `.env`，填写 `DATABASE_URI` 和 `PAYLOAD_SECRET`。
 3. 执行 `npm install`。
 4. 执行 `npm run dev`。
-5. 打开 `http://localhost:4000/admin` 创建第一个管理员。
+5. 打开 `http://localhost:4000/www-app-admin` 创建第一个管理员。
+
+生产部署、Nginx 和 HTTPS 证书流程见 [docs/deploy.zh-CN.md](../docs/deploy.zh-CN.md)。
 
 ## 导入社保规则
 
