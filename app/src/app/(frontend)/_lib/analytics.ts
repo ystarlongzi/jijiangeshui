@@ -29,6 +29,7 @@ type TrackedEvent = {
 declare global {
   interface Window {
     dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
     plausible?: (eventName: string, options?: { props?: AnalyticsPayload }) => void
   }
 }
@@ -45,5 +46,14 @@ export function trackEvent(name: AnalyticsEventName, payload: AnalyticsPayload =
 
   window.dispatchEvent(new CustomEvent('jijian-geshui:analytics', { detail }))
   window.dataLayer?.push({ event: `jijian_${name}`, ...payload, path: detail.path })
+  if (name === 'page_view') {
+    window.gtag?.('event', 'page_view', {
+      page_path: detail.path,
+      page_location: window.location.href,
+      page_title: document.title,
+    })
+  } else {
+    window.gtag?.('event', `jijian_${name}`, { ...payload, page_path: detail.path })
+  }
   window.plausible?.(`jijian_${name}`, { props: { ...payload, path: detail.path } })
 }

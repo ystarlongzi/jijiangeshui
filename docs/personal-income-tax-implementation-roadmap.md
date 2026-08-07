@@ -88,7 +88,7 @@
 - 工资薪金全年个税走势图已完成：在逐月明细上方展示全年预扣合计、最高月个税、首次跨档月份和 12 个月税额柱状图。
 - 五险一金缴费占比图已完成：在汇缴明细上方展示本月汇缴总额，以及个人社保、个人公积金、企业社保、企业公积金的占比分布。
 - 可观测性关键交互已补齐：记录金额分组切换、移动端菜单开关、税率表 tab 切换、专项附加扣除弹框打开、展开、选择、清空和保存。
-- 统计服务可配置接入已完成：支持通过 `NEXT_PUBLIC_GTM_ID` 加载 GTM，通过 `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` 加载 Plausible；统一事件会同时推送到 `dataLayer` 和 `window.plausible`。
+- 统计服务可配置接入已完成：支持通过 `NEXT_PUBLIC_GA_MEASUREMENT_ID` 直接加载 Google Analytics 4，通过 `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` 加载 Plausible；统一事件会同时推送到 Google Analytics、`dataLayer` 和 `window.plausible`。
 - 城市规则后台覆盖状态已完成：Payload 后台和审计脚本保留已收录城市、规则来源、待复核和来源缺口等维护信息；前台城市索引只展示用户关心的城市入口、社保基数和公积金基数。
 - 城市规则导入校验已完成：采集 JSON schema 已抽到公共模块，新增 `rules:validate` 离线校验命令和示例数据，导入前可先检查结构与关键字段。
 - 城市规则审计命令已完成：新增 `rules:audit`，用于检查兜底城市规则的基数范围、缴费项目、来源和公积金比例配置。
