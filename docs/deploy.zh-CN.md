@@ -90,7 +90,7 @@ npm run deploy:ssr -- --skip-build
 
 ### GitHub Actions 自动部署
 
-`.github/workflows/deploy.yml` 会在 `main` 分支 push 或手动触发时执行 `app` 目录下的依赖安装、Payload 类型生成、lint、测试、类型检查和构建，并把 standalone 构建产物打包上传。检查通过后调用 `npm run deploy:ssr -- --artifact <release.zip>` 完成远程部署；服务器只安装运行依赖、执行数据库 migration、切换 release 和重启服务，不再重复执行 `npm run build`。
+`.github/workflows/deploy.yml` 会在 `main` 分支 push 或手动触发时执行 `app` 目录下的依赖安装、Payload 类型生成、lint、测试、类型检查和构建，并把 standalone 构建产物打包上传。前台 CMS 页面使用运行时服务端渲染，Workflow 构建阶段不需要连接生产数据库；请求到达生产 Node 服务后，服务端再读取生产环境中的 Payload 数据。检查通过后调用 `npm run deploy:ssr -- --artifact <release.zip>` 完成远程部署；服务器只安装运行依赖、执行数据库 migration、切换 release 和重启服务，不再重复执行 `npm run build`。
 
 Workflow 使用 `registry.npmjs.org` 安装依赖，并关闭 npm audit/fund 请求；`app/package-lock.json` 也保持相同的官方 registry 地址，避免 GitHub Actions 运行器跨区域访问本地镜像时长时间无输出。安装脚本输出保持前台执行，便于定位具体依赖的安装进度。
 
@@ -109,7 +109,7 @@ npm run deploy:ssr -- --no-prompt --reload-nginx
 - `SSH_HOST`：部署服务器地址。
 - `SSH_USER`：SSH 用户名。
 - `SSH_PORT`：SSH 端口；不设置时使用 `27892`。
-- `ENV_PRODUCTION`：完整的生产环境变量文件内容，至少包含 `DATABASE_URI` 和 `PAYLOAD_SECRET`；接入 Google Analytics 时再加入 `NEXT_PUBLIC_GA_MEASUREMENT_ID`。
+- `ENV_PRODUCTION`：完整的生产环境变量文件内容，至少包含 `DATABASE_URI`、`PAYLOAD_SECRET` 和 `PAYLOAD_DB_PUSH=false`；接入 Google Analytics 时再加入 `NEXT_PUBLIC_GA_MEASUREMENT_ID`。
 
 以下 Repository variables 可选，不设置时使用当前部署脚本的默认值：
 
