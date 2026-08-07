@@ -146,13 +146,17 @@ function readEnvValues(content) {
   return values
 }
 function renderProductionEnv(content, siteUrl) {
-  let replaced = false
+  let serverUrlReplaced = false
+  let siteUrlReplaced = false
   const lines = content.split(/\r?\n/u).map((line) => {
-    if (!/^\s*NEXT_PUBLIC_SERVER_URL\s*=/u.test(line)) return line
-    replaced = true
-    return `NEXT_PUBLIC_SERVER_URL=${siteUrl}`
+    const match = line.match(/^\s*(NEXT_PUBLIC_(?:SERVER|SITE)_URL)\s*=/u)
+    if (!match) return line
+    if (match[1] === 'NEXT_PUBLIC_SITE_URL') siteUrlReplaced = true
+    else serverUrlReplaced = true
+    return `${match[1]}=${siteUrl}`
   })
-  if (!replaced) lines.push(`NEXT_PUBLIC_SERVER_URL=${siteUrl}`)
+  if (!serverUrlReplaced) lines.push(`NEXT_PUBLIC_SERVER_URL=${siteUrl}`)
+  if (!siteUrlReplaced) lines.push(`NEXT_PUBLIC_SITE_URL=${siteUrl}`)
   return `${lines.join('\n').replace(/\n*$/u, '')}\n`
 }
 function renderNginxConfig(template, options) {
