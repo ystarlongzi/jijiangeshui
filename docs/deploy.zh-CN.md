@@ -90,7 +90,7 @@ npm run deploy:ssr -- --skip-build
 
 ### GitHub Actions 自动部署
 
-`.github/workflows/deploy.yml` 会在 `main` 分支 push 或手动触发时执行 `app` 目录下的 lint、测试、类型检查和构建，并把 standalone 构建产物打包上传。检查通过后调用 `npm run deploy:ssr -- --artifact <release.zip>` 完成远程部署；服务器只安装运行依赖、执行数据库 migration、切换 release 和重启服务，不再重复执行 `npm run build`。
+`.github/workflows/deploy.yml` 会在 `main` 分支 push 或手动触发时执行 `app` 目录下的依赖安装、Payload 类型生成、lint、测试、类型检查和构建，并把 standalone 构建产物打包上传。检查通过后调用 `npm run deploy:ssr -- --artifact <release.zip>` 完成远程部署；服务器只安装运行依赖、执行数据库 migration、切换 release 和重启服务，不再重复执行 `npm run build`。
 
 Workflow 使用 `registry.npmjs.org` 安装依赖，并关闭 npm audit/fund 请求；`app/package-lock.json` 也保持相同的官方 registry 地址，避免 GitHub Actions 运行器跨区域访问本地镜像时长时间无输出。安装脚本输出保持前台执行，便于定位具体依赖的安装进度。
 

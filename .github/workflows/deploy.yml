@@ -45,6 +45,12 @@ jobs:
         working-directory: app
         run: npm ci --registry=https://registry.npmjs.org --no-audit --no-fund --foreground-scripts --loglevel=info
 
+      - name: 生成 Payload 类型
+        working-directory: app
+        env:
+          PAYLOAD_DB_PUSH: "false"
+        run: npm run generate:types
+
       - name: 运行 lint
         working-directory: app
         run: npm run lint
