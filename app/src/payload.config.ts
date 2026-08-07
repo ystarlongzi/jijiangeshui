@@ -18,6 +18,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const configuredPoolMax = Number(process.env.PAYLOAD_DB_POOL_MAX)
 const databasePoolMax = Number.isFinite(configuredPoolMax) && configuredPoolMax > 0 ? Math.floor(configuredPoolMax) : 3
+const pushDevSchema = process.env.PAYLOAD_DB_PUSH !== 'false'
 
 export default buildConfig({
   admin: {
@@ -39,6 +40,8 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'replace-this-secret-before-production',
   db: postgresAdapter({
+    // 本地默认保留 Payload 的开发便利模式；生成 migration 时设置 PAYLOAD_DB_PUSH=false，避免新结构先被自动推送。
+    push: pushDevSchema,
     pool: {
       connectionString: process.env.DATABASE_URI || '',
       // Next 构建会并行执行多个页面；限制每个 Payload 实例的连接数，避免把本地 Postgres 撞到 max_connections。

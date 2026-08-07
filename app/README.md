@@ -6,13 +6,15 @@
 
 ## 本地启动
 
-1. 在仓库根目录执行 `docker compose up -d postgres`。
+1. 在 `app` 目录执行 `npm run db:local:up` 启动本地 PostgreSQL。
 2. 复制 `.env.example` 为 `.env`，填写 `DATABASE_URI` 和 `PAYLOAD_SECRET`。
 3. 执行 `npm install`。
 4. 执行 `npm run dev`。
 5. 打开 `http://localhost:4000/www-app-admin` 创建第一个管理员。
 
 生产部署、Nginx 和 HTTPS 证书流程见 [docs/deploy.zh-CN.md](../docs/deploy.zh-CN.md)。
+
+数据库初始化、恢复、迁移和每日备份脚本见 [`ops/README.md`](./ops/README.md)。
 
 ## 导入社保规则
 

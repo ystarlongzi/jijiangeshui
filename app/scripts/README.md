@@ -174,7 +174,7 @@ npm run rules:sources -- --gaps
 
 ```bash
 cp .env.example .env
-npm run db:up
+npm run db:local:up
 npm run rules:import-seed
 ```
 

@@ -127,11 +127,11 @@ Payload 有效规则
 
 ## 7. 本地开发
 
-仓库根目录提供 `docker-compose.yml`，用于启动独立 PostgreSQL。应用使用 `app/.env` 中的 `DATABASE_URI` 和 `PAYLOAD_SECRET`。
+仓库根目录提供 `docker-compose-local.yml`，用于启动独立的本地 PostgreSQL。应用使用 `app/.env` 中的 `DATABASE_URI` 和 `PAYLOAD_SECRET`。
 
 ```bash
-docker compose up -d postgres
 cd app
+npm run db:local:up
 npm install
 npm run dev
 ```

@@ -1,6 +1,6 @@
 # 极简个税部署说明
 
-本文档对应 `app/scripts/deploy/deploy-ssr.mjs`、`app/scripts/deploy/jijiangeshui.conf` 和 `app/scripts/deploy/setup-ssl-acme.sh`，用于把极简个税部署到与伊斯兰日历相同的 Linux 服务器。
+本文档对应 `app/ops/deploy/deploy-ssr.mjs`、`app/ops/deploy/jijiangeshui.conf` 和 `app/ops/deploy/setup-ssl-acme.sh`，用于把极简个税部署到与伊斯兰日历相同的 Linux 服务器。
 
 ## 默认约定
 
@@ -68,9 +68,10 @@ npm run deploy:ssr
 1. 创建 `releases/<release-id>`、`shared` 和 `current` 目录。
 2. 上传 `app/` 内容，排除依赖、构建产物和本地密钥。
 3. 上传生产环境变量和 Nginx 配置。
-4. 在服务器执行 `npm ci`、`npm run build`，并检查 standalone 入口。
-5. 更新 `current` 软链接，创建或重启 `jijian-geshui.service`。
-6. 做本机端口健康检查；失败时尝试恢复上一个 release。
+4. 在服务器执行 `npm ci`。
+5. 在切换版本前执行已提交的 Payload migration，然后构建并检查 standalone 入口。
+6. 更新 `current` 软链接，创建或重启 `jijian-geshui.service`。
+7. 做本机端口健康检查；失败时尝试恢复上一个 release。
 
 不交互并在最后重载 Nginx：
 
@@ -84,9 +85,31 @@ npm run deploy:ssr -- --no-prompt --reload-nginx
 npm run deploy:ssr -- --skip-build
 ```
 
+### 数据库迁移
+
+修改 `app/src/collections` 后，开发者必须在本地生成并提交 migration：
+
+```bash
+cd /Users/liucai/Documents/极简个税/app
+PAYLOAD_DB_PUSH=false npm run db:migration:create -- add_new_field
+PAYLOAD_DB_PUSH=false npm run db:migrate
+```
+
+正式部署时，`deploy:ssr` 会在远程 release 目录中自动执行 `NODE_ENV=production npm run db:migrate`，成功后才构建并切换 `current`。已执行的 migration 不要修改，后续修复新增 migration。数据库迁移成功后若后续构建或重启失败，数据库不会自动回滚，应使用前向修复或人工恢复备份。
+
+### 每日数据库备份
+
+`deploy:ssr` 会自动安装并启用每日 00:00 的备份 service/timer，默认保留 15 天。已有服务器也可以使用 `app/ops/jijian-geshui-backup.service.example` 和 `.timer.example` 手动安装。安装后检查：
+
+```bash
+systemctl enable --now jijian-geshui-backup.timer
+systemctl list-timers jijian-geshui-backup.timer
+journalctl -u jijian-geshui-backup.service -n 100 --no-pager
+```
+
 ## Nginx 与缓存
 
-部署脚本会把 `app/scripts/deploy/jijiangeshui.conf` 渲染后上传为：
+部署脚本会把 `app/ops/deploy/jijiangeshui.conf` 渲染后上传为：
 
 ```text
 /root/websites/nginx-config/conf/jijiangeshui.conf

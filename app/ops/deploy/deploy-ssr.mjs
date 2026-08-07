@@ -195,6 +195,9 @@ async function main() {
   const remoteEnv = path.posix.join(options.deployPath, 'shared', '.env.production')
   const remoteNginx = path.posix.join(options.nginxPath, 'jijiangeshui.conf')
   const remoteService = `/etc/systemd/system/${options.appName}.service`
+  const backupServiceName = `${options.appName}-backup`
+  const remoteBackupService = `/etc/systemd/system/${backupServiceName}.service`
+  const remoteBackupTimer = `/etc/systemd/system/${backupServiceName}.timer`
   const tempFiles = await prepareTempFiles(options, envContent)
 
   try {
@@ -206,7 +209,7 @@ async function main() {
 
     console.log(`[2/6] Uploading app source to ${remoteRelease}`)
     const rsyncSsh = `ssh -i ${shellQuote(options.key)} -p ${shellQuote(options.sshPort)} -o StrictHostKeyChecking=accept-new`
-    await runCommand('rsync', ['-az', '--delete', '--exclude', '.git', '--exclude', '.next', '--exclude', 'node_modules', '--exclude', '.deploy-tmp', '--exclude', '.env', '--exclude', '.env.*', '--exclude', '.DS_Store', '--exclude', 'tsconfig.tsbuildinfo', '-e', rsyncSsh, `${appRoot}/`, `${sshTarget}:${remoteRelease}/`])
+    await runCommand('rsync', ['-az', '--delete', '--exclude', '.git', '--exclude', '.next', '--exclude', 'node_modules', '--exclude', '.deploy-tmp', '--exclude', '.env', '--exclude', '.env.*', '--exclude', '.DS_Store', '--exclude', 'tsconfig.tsbuildinfo', '--exclude', 'ops/backup', '-e', rsyncSsh, `${appRoot}/`, `${sshTarget}:${remoteRelease}/`])
 
     console.log('[3/6] Uploading environment file')
     await runCommand('scp', ['-i', options.key, '-P', options.sshPort, '-o', 'StrictHostKeyChecking=accept-new', tempFiles.envPath, `${sshTarget}:${remoteEnv}`])
@@ -222,6 +225,8 @@ async function main() {
       'fi',
     ].join('\n')
     const serviceUnit = `[Unit]\nDescription=Jijian Geshui Next.js application\nAfter=network.target\n\n[Service]\nType=simple\nWorkingDirectory=${remoteCurrent}\nEnvironment=NODE_ENV=production\nEnvironment=PORT=${options.appPort}\nEnvironment=HOSTNAME=${options.appHost}\nEnvironmentFile=${remoteEnv}\nExecStart=/usr/bin/env node .next/standalone/server.js\nRestart=always\nRestartSec=5\nUser=root\n\n[Install]\nWantedBy=multi-user.target\n`
+    const backupServiceUnit = `[Unit]\nDescription=Jijian Geshui PostgreSQL backup\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nType=oneshot\nUser=root\nWorkingDirectory=${remoteCurrent}\nEnvironmentFile=${remoteEnv}\nEnvironment=BACKUP_DIR=/var/backups/${options.appName}\nEnvironment=BACKUP_RETENTION_DAYS=15\nExecStart=/usr/bin/env node ${remoteCurrent}/ops/backup-db.mjs\n`
+    const backupTimerUnit = `[Unit]\nDescription=Daily midnight backup for ${options.appName}\n\n[Timer]\nOnCalendar=*-*-* 00:00:00\nPersistent=true\nUnit=${backupServiceName}.service\n\n[Install]\nWantedBy=timers.target\n`
     const healthCheck = [
       'if command -v curl >/dev/null 2>&1; then',
       '  healthy=0',
@@ -242,6 +247,7 @@ async function main() {
       "command -v node >/dev/null 2>&1 || { echo 'node is required on the server.' >&2; exit 1; }",
       'npm ci',
       `ln -sfn ${shellQuote(remoteEnv)} ${shellQuote(path.posix.join(remoteRelease, '.env.production'))}`,
+      'NODE_ENV=production npm run db:migrate',
       'npm run build',
       `test -f ${shellQuote(path.posix.join(remoteRelease, '.next/standalone/server.js'))}`,
       'if [ -d public ]; then rm -rf .next/standalone/public && cp -R public .next/standalone/public; fi',
@@ -250,8 +256,11 @@ async function main() {
       options.reloadNginx ? 'nginx -t' : 'true',
       `ln -sfn ${shellQuote(remoteRelease)} ${shellQuote(remoteCurrent)}`,
       `cat > ${shellQuote(remoteService)} <<'EOF'\n${serviceUnit}EOF`,
+      `cat > ${shellQuote(remoteBackupService)} <<'EOF'\n${backupServiceUnit}EOF`,
+      `cat > ${shellQuote(remoteBackupTimer)} <<'EOF'\n${backupTimerUnit}EOF`,
       'systemctl daemon-reload',
       `systemctl enable ${shellQuote(options.appName)}`,
+      `systemctl enable --now ${shellQuote(`${backupServiceName}.timer`)}`,
       `if ! systemctl restart ${shellQuote(options.appName)}; then echo "Application restart failed; attempting rollback." >&2`,
       rollback,
       '  exit 1',
@@ -260,7 +269,7 @@ async function main() {
       options.reloadNginx ? 'nginx -s reload' : 'true',
       `systemctl status ${shellQuote(options.appName)} --no-pager`,
     ].join('\n')
-    console.log('[5/6] Installing dependencies, building app, and restarting service')
+    console.log('[5/6] Installing dependencies, building app, migrating database, and restarting service')
     await runCommand('ssh', [...sshArgs, sshTarget, remoteBuild])
     console.log(`[6/6] Deployment complete: ${options.siteUrl}`)
   } finally {

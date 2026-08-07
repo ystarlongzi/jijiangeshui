@@ -11,3 +11,6 @@ dist/
 .deploy-tmp/
 app/src/payload-types.ts
 app/public/media/
+app/ops/backup/
+*.dump
+*.backup
