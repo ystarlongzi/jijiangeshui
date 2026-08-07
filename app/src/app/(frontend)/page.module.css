@@ -37,6 +37,12 @@
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.heroActions {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
   margin-top: 32px;
 }
 
@@ -62,7 +68,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 0;
+  padding: 0;
   color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
@@ -197,15 +203,68 @@
   padding: 24px 0 82px;
 }
 
+.toolGroups {
+  display: grid;
+  gap: 46px;
+}
+
+.toolGroup {
+  display: grid;
+  gap: 16px;
+}
+
+.toolGroupHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.toolGroupTitle {
+  display: flex;
+  align-items: start;
+  gap: 11px;
+}
+
+.toolGroupMarker {
+  display: block;
+  width: 4px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: 99px;
+  background: var(--accent);
+}
+
+.toolGroupTitle h3 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.toolGroupTitle p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.toolGroupCount {
+  flex: 0 0 auto;
+  color: var(--subtle);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .toolGrid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .toolEntry {
   position: relative;
-  grid-column: span 2;
   display: grid;
   grid-template-columns: 42px 1fr auto;
   align-items: start;
@@ -241,7 +300,6 @@
 }
 
 .featured {
-  grid-column: span 3;
   border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
   background: color-mix(in srgb, var(--accent-soft) 88%, var(--surface));
 }
@@ -409,7 +467,11 @@
   }
 
   .toolEntry {
-    grid-column: span 3;
+    grid-column: auto;
+  }
+
+  .toolGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -442,10 +504,6 @@
     transform: none;
   }
 
-  .heroNote {
-    padding: 0;
-  }
-
   .toolSection {
     padding-bottom: 54px;
   }
@@ -462,6 +520,14 @@
 
   .toolEntry {
     min-height: 132px;
+  }
+
+  .toolGroups {
+    gap: 36px;
+  }
+
+  .toolGroupHeading {
+    align-items: start;
   }
 
   .highlightSection {

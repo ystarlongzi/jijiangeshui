@@ -34,21 +34,28 @@ export const metadata = {
 }
 
 const tools = [
-  { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年预扣变化。', label: '开始计算', featured: true },
-  { href: '/bonus-tax', icon: Gift, title: '年终奖', description: '对比单独计税与并入综合所得，看看哪种方式更合适。', label: '查看规则' },
-  { href: '/business-tax', icon: Briefcase, title: '经营所得', description: '按年度收入、成本费用和损失，估算经营个税。', label: '开始计算' },
-  { href: '/labor-tax', icon: BriefcaseBusiness, title: '劳务报酬', description: '按次或按月估算劳务报酬预扣税和税后到手。', label: '开始计算' },
-  { href: '/author-tax', icon: BookOpen, title: '稿酬', description: '按费用扣除和减按 70% 规则，估算稿酬到手。', label: '开始计算' },
-  { href: '/license-tax', icon: BadgePercent, title: '特许权使用费', description: '按费用扣除和 20% 比例预扣规则，估算税后收入。', label: '开始计算' },
-  { href: '/rental-tax', icon: Home, title: '财产租赁', description: '输入租金、税费和修缮费，估算出租收入个税。', label: '开始计算' },
-  { href: '/property-transfer-tax', icon: TrendingUp, title: '财产转让', description: '按收入、原值和合理费用，估算转让所得个税。', label: '开始计算' },
-  { href: '/dividend-tax', icon: Coins, title: '利息股息红利', description: '按本次收入和 20% 税率，估算税后收入。', label: '开始计算' },
-  { href: '/accidental-tax', icon: Dice5, title: '偶然所得', description: '按中奖、得奖等本次收入，估算应缴个税。', label: '开始计算' },
-  { href: '/reverse-tax', icon: ReceiptText, title: '税后反推', description: '输入期望到手工资，反推需要的税前收入。', label: '查看说明' },
-  { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '按子女教育、租金、房贷和赡养老人等项目，算出本月可扣金额。', label: '开始计算' },
-  { href: '/tax-rate', icon: Percent, title: '税率表', description: '快速查看工资薪金累计预扣预缴税率和速算扣除数。', label: '查看税率' },
-  { href: '/faq', icon: CircleHelp, title: '常见问题', description: '理解累计预扣、社保基数和全年汇算之间的关系。', label: '查看问答' },
+  { href: '/calculator', icon: Calculator, title: '工资薪金', description: '按城市、基数和专项扣除，算清每月到手与全年预扣变化。', label: '开始计算', group: 'salary', featured: true },
+  { href: '/bonus-tax', icon: Gift, title: '年终奖', description: '对比单独计税与并入综合所得，看看哪种方式更合适。', label: '查看规则', group: 'salary' },
+  { href: '/business-tax', icon: Briefcase, title: '经营所得', description: '按年度收入、成本费用和损失，估算经营个税。', label: '开始计算', group: 'business' },
+  { href: '/labor-tax', icon: BriefcaseBusiness, title: '劳务报酬', description: '按次或按月估算劳务报酬预扣税和税后到手。', label: '开始计算', group: 'labor' },
+  { href: '/author-tax', icon: BookOpen, title: '稿酬', description: '按费用扣除和减按 70% 规则，估算稿酬到手。', label: '开始计算', group: 'labor' },
+  { href: '/license-tax', icon: BadgePercent, title: '特许权使用费', description: '按费用扣除和 20% 比例预扣规则，估算税后收入。', label: '开始计算', group: 'labor' },
+  { href: '/rental-tax', icon: Home, title: '财产租赁', description: '输入租金、税费和修缮费，估算出租收入个税。', label: '开始计算', group: 'property' },
+  { href: '/property-transfer-tax', icon: TrendingUp, title: '财产转让', description: '按收入、原值和合理费用，估算转让所得个税。', label: '开始计算', group: 'property' },
+  { href: '/dividend-tax', icon: Coins, title: '利息股息红利', description: '按本次收入和 20% 税率，估算税后收入。', label: '开始计算', group: 'property' },
+  { href: '/accidental-tax', icon: Dice5, title: '偶然所得', description: '按中奖、得奖等本次收入，估算应缴个税。', label: '开始计算', group: 'property' },
+  { href: '/reverse-tax', icon: ReceiptText, title: '税后反推', description: '输入期望到手工资，反推需要的税前收入。', label: '查看说明', group: 'salary' },
+  { href: '/special-deductions', icon: Sparkles, title: '专项扣除', description: '按子女教育、租金、房贷和赡养老人等项目，算出本月可扣金额。', label: '开始计算', group: 'salary' },
+  { href: '/tax-rate', icon: Percent, title: '税率表', description: '快速查看工资薪金累计预扣预缴税率和速算扣除数。', label: '查看税率', group: 'business' },
+  { href: '/faq', icon: CircleHelp, title: '常见问题', description: '理解累计预扣、社保基数和全年汇算之间的关系。', label: '查看问答', group: 'business' },
 ]
+
+const toolGroups = [
+  { id: 'salary', title: '工资与薪酬', description: '上班收入、年终奖，以及到手金额和扣除项目。' },
+  { id: 'labor', title: '劳务与创作', description: '按次或按月取得的劳务、稿酬和授权收入。' },
+  { id: 'property', title: '财产与投资', description: '出租、转让以及股息红利等财产性收入。' },
+  { id: 'business', title: '经营与查规则', description: '经营所得计算，以及税率和常见问题查询。' },
+] as const
 
 const highlights = [
   { icon: MapPin, title: '城市规则', text: '社保、公积金基数范围随城市变化，前提透明可核对。' },
@@ -74,7 +81,10 @@ export default async function HomePage() {
       <div className={styles.heroCopy}>
         <h1>先看懂，<br />再算清。</h1>
         <p className={styles.lead}>从工资到手、社保公积金，到全年预扣变化，把每个数字讲明白。</p>
-        <div className={styles.actions}><PrimaryActionLink href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></PrimaryActionLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
+        <div className={styles.heroActions}>
+          <div className={styles.actions}><PrimaryActionLink href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></PrimaryActionLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
+          <div className={styles.heroNote}><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
+        </div>
       </div>
       <div className={styles.snapshot} aria-label="工资去向概览">
         <div className={styles.snapshotTop}><span>工资去向概览</span><strong>{currentYear}</strong></div>
@@ -83,12 +93,22 @@ export default async function HomePage() {
         <div className={styles.snapshotLegend}><span><i className={`${styles.legendDot} ${styles.takeHome}`} />到手工资 <b>¥15,710</b></span><span><i className={`${styles.legendDot} ${styles.insurance}`} />五险一金 <b>¥3,100</b></span><span><i className={`${styles.legendDot} ${styles.tax}`} />个人所得税 <b>¥1,190</b></span></div>
         <p>按北京市规则估算 · 8 月</p>
       </div>
-      <div className={styles.heroNote}><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
     </section>
 
     <section className={styles.toolSection} aria-labelledby="home-tools-title">
       <SectionHeading title="你想算什么？" titleId="home-tools-title" description="从最常用的工资计算开始，也可以直接进入对应的政策工具。" />
-      <div className={styles.toolGrid}>{tools.map(({ href, icon: Icon, title, description, label, featured }) => <TrackedLink className={`${styles.toolEntry}${featured ? ` ${styles.featured}` : ''}`} href={href} eventPayload={{ module: 'home_tools', label: title }} key={title}><span className={styles.toolIcon}><Icon size={21} strokeWidth={1.8} /></span><span className={styles.toolEntryBody}><strong>{title}</strong><span>{description}</span></span><span className={styles.toolEntryAction}>{label}<ArrowRight size={15} /></span></TrackedLink>)}</div>
+      <div className={styles.toolGroups}>
+        {toolGroups.map((group) => {
+          const groupTools = tools.filter((tool) => tool.group === group.id)
+          return <section className={styles.toolGroup} aria-labelledby={`home-tools-${group.id}`} key={group.id}>
+            <div className={styles.toolGroupHeading}>
+              <div className={styles.toolGroupTitle}><span className={styles.toolGroupMarker} /><div><h3 id={`home-tools-${group.id}`}>{group.title}</h3><p>{group.description}</p></div></div>
+              <span className={styles.toolGroupCount}>{groupTools.length} 项</span>
+            </div>
+            <div className={styles.toolGrid}>{groupTools.map(({ href, icon: Icon, title, description, label, featured }) => <TrackedLink className={`${styles.toolEntry}${featured ? ` ${styles.featured}` : ''}`} href={href} eventPayload={{ module: 'home_tools', label: title }} key={title}><span className={styles.toolIcon}><Icon size={21} strokeWidth={1.8} /></span><span className={styles.toolEntryBody}><strong>{title}</strong><span>{description}</span></span><span className={styles.toolEntryAction}>{label}<ArrowRight size={15} /></span></TrackedLink>)}</div>
+          </section>
+        })}
+      </div>
     </section>
 
     <section className={styles.highlightSection} aria-label="产品特点"><div className={styles.highlightGrid}>{highlights.map(({ icon: Icon, title, text }) => <div className={styles.highlightItem} key={title}><Icon className={styles.highlightIcon} size={20} strokeWidth={1.8} /><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></section>
