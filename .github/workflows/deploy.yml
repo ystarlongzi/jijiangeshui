@@ -43,7 +43,7 @@ jobs:
 
       - name: 安装依赖
         working-directory: app
-        run: npm ci
+        run: npm ci --registry=https://registry.npmjs.org --no-audit --no-fund --foreground-scripts --loglevel=info
 
       - name: 运行 lint
         working-directory: app
