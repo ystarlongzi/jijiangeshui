@@ -21,6 +21,22 @@ export function parseDatabaseUri(value) {
   }
 }
 
+export function databaseUri(connection) {
+  const uri = new URL('postgresql://localhost')
+  uri.hostname = connection.host
+  uri.port = connection.port
+  uri.username = connection.user
+  if (connection.password !== undefined) uri.password = connection.password
+  uri.pathname = `/${connection.database}`
+  if (connection.sslmode) uri.searchParams.set('sslmode', connection.sslmode)
+  return uri.toString()
+}
+
+export function filenameTimestamp(date = new Date()) {
+  const pad = (value) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+}
+
 export function commandEnvironment(connection, extra = {}) {
   const environment = { ...process.env, ...extra }
   if (connection.password) environment.PGPASSWORD = connection.password
@@ -115,7 +131,7 @@ export async function runMigrations(appRoot, connection) {
   await run('npm', ['run', 'db:migrate'], {
     cwd: appRoot,
     env: commandEnvironment(connection, {
-      DATABASE_URI: process.env.OPS_DATABASE_URI || process.env.DATABASE_URI,
+      DATABASE_URI: databaseUri(connection),
       NODE_ENV: 'production',
     }),
   })
