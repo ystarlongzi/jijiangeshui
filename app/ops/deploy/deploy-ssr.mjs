@@ -42,6 +42,7 @@ Options:
   --domain <domain>         Public domain used by Nginx and SSL
   --site-url <url>          Public site URL injected into production env
   --env-file <path>         Local env file to upload (default: app/.env.production)
+  --artifact <path>         Prebuilt release zip; skip remote build
   --skip-build              Upload source, env and Nginx config only
   --reload-nginx            Run nginx -t and reload Nginx after activation
   --no-prompt               Do not ask for deployment parameters
@@ -50,7 +51,7 @@ Options:
 }
 
 function parseArgs(argv) {
-  const options = { ...defaults, envFile: path.join(appRoot, '.env.production'), skipBuild: false, reloadNginx: false, noPrompt: false }
+  const options = { ...defaults, envFile: path.join(appRoot, '.env.production'), artifact: null, skipBuild: false, reloadNginx: false, noPrompt: false }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     if (arg === '--help') { options.help = true; continue }
@@ -76,6 +77,7 @@ function parseArgs(argv) {
       case 'domain': options.domain = value; break
       case 'site-url': options.siteUrl = value; break
       case 'env-file': options.envFile = path.resolve(appRoot, value); break
+      case 'artifact': options.artifact = path.resolve(appRoot, value); break
       default: throw new Error(`Unknown option: --${key}`)
     }
   }
@@ -184,9 +186,11 @@ async function main() {
   options.appName = validateServiceName(options.appName)
   options.domain = validateDomain(options.domain)
   options.siteUrl = normalizeSiteUrl(options.siteUrl)
+  if (options.skipBuild && options.artifact) throw new Error('--artifact cannot be used with --skip-build.')
   await ensureFileExists(options.key, 'SSH private key')
   await ensureFileExists(path.join(appRoot, 'package.json'), 'package.json')
   await ensureFileExists(options.envFile, 'Env file')
+  if (options.artifact) await ensureFileExists(options.artifact, 'Build artifact')
   const envContent = await readFile(options.envFile, 'utf8')
   const envValues = readEnvValues(envContent)
   for (const key of ['DATABASE_URI', 'PAYLOAD_SECRET']) if (!envValues[key]) throw new Error(`${key} must be set in the env file.`)
@@ -199,6 +203,7 @@ async function main() {
   const remoteEnv = path.posix.join(options.deployPath, 'shared', '.env.production')
   const remoteNginx = path.posix.join(options.nginxPath, 'jijiangeshui.conf')
   const remoteService = `/etc/systemd/system/${options.appName}.service`
+  const remoteArtifact = path.posix.join('/tmp', `${options.appName}-${releaseId}.zip`)
   const backupServiceName = `${options.appName}-backup`
   const remoteBackupService = `/etc/systemd/system/${backupServiceName}.service`
   const remoteBackupTimer = `/etc/systemd/system/${backupServiceName}.timer`
@@ -211,9 +216,14 @@ async function main() {
       `mkdir -p ${shellQuote(remoteRelease)} ${shellQuote(path.posix.join(options.deployPath, 'releases'))} ${shellQuote(path.posix.join(options.deployPath, 'shared'))} ${shellQuote(options.nginxPath)}`,
     ].join('\n')])
 
-    console.log(`[2/6] Uploading app source to ${remoteRelease}`)
-    const rsyncSsh = `ssh -i ${shellQuote(options.key)} -p ${shellQuote(options.sshPort)} -o StrictHostKeyChecking=accept-new`
-    await runCommand('rsync', ['-az', '--delete', '--exclude', '.git', '--exclude', '.next', '--exclude', 'node_modules', '--exclude', '.deploy-tmp', '--exclude', '.env', '--exclude', '.env.*', '--exclude', '.DS_Store', '--exclude', 'tsconfig.tsbuildinfo', '--exclude', 'ops/backup', '-e', rsyncSsh, `${appRoot}/`, `${sshTarget}:${remoteRelease}/`])
+    if (options.artifact) {
+      console.log(`[2/6] Uploading prebuilt release artifact to ${remoteRelease}`)
+      await runCommand('scp', ['-i', options.key, '-P', options.sshPort, '-o', 'StrictHostKeyChecking=accept-new', options.artifact, `${sshTarget}:${remoteArtifact}`])
+    } else {
+      console.log(`[2/6] Uploading app source to ${remoteRelease}`)
+      const rsyncSsh = `ssh -i ${shellQuote(options.key)} -p ${shellQuote(options.sshPort)} -o StrictHostKeyChecking=accept-new`
+      await runCommand('rsync', ['-az', '--delete', '--exclude', '.git', '--exclude', '.next', '--exclude', 'node_modules', '--exclude', '.deploy-tmp', '--exclude', '.env', '--exclude', '.env.*', '--exclude', '.DS_Store', '--exclude', 'tsconfig.tsbuildinfo', '--exclude', 'ops/backup', '-e', rsyncSsh, `${appRoot}/`, `${sshTarget}:${remoteRelease}/`])
+    }
 
     console.log('[3/6] Uploading environment file')
     await runCommand('scp', ['-i', options.key, '-P', options.sshPort, '-o', 'StrictHostKeyChecking=accept-new', tempFiles.envPath, `${sshTarget}:${remoteEnv}`])
@@ -244,7 +254,20 @@ async function main() {
       '  fi',
       'else echo "curl is not installed; application health check skipped." >&2; fi',
     ].join('\n')
-    const remoteBuild = [
+    const remotePreparation = options.artifact ? [
+      'set -euo pipefail',
+      "command -v npm >/dev/null 2>&1 || { echo 'npm is required on the server.' >&2; exit 1; }",
+      "command -v node >/dev/null 2>&1 || { echo 'node is required on the server.' >&2; exit 1; }",
+      `mkdir -p ${shellQuote(remoteRelease)}`,
+      `if command -v unzip >/dev/null 2>&1; then unzip -q -o ${shellQuote(remoteArtifact)} -d ${shellQuote(remoteRelease)}; elif command -v python3 >/dev/null 2>&1; then python3 -m zipfile -e ${shellQuote(remoteArtifact)} ${shellQuote(remoteRelease)}; else echo 'unzip or python3 is required on the server.' >&2; exit 1; fi`,
+      `test -f ${shellQuote(path.posix.join(remoteRelease, '.next/standalone/server.js'))}`,
+      `test -f ${shellQuote(path.posix.join(remoteRelease, 'package.json'))}`,
+      `cd ${shellQuote(remoteRelease)}`,
+      'npm ci --omit=dev',
+      `ln -sfn ${shellQuote(remoteEnv)} ${shellQuote(path.posix.join(remoteRelease, '.env.production'))}`,
+      'NODE_ENV=production npm run db:migrate',
+      `rm -f ${shellQuote(remoteArtifact)}`,
+    ] : [
       'set -euo pipefail',
       `cd ${shellQuote(remoteRelease)}`,
       "command -v npm >/dev/null 2>&1 || { echo 'npm is required on the server.' >&2; exit 1; }",
@@ -256,6 +279,9 @@ async function main() {
       `test -f ${shellQuote(path.posix.join(remoteRelease, '.next/standalone/server.js'))}`,
       'if [ -d public ]; then rm -rf .next/standalone/public && cp -R public .next/standalone/public; fi',
       'if [ -d .next/static ]; then rm -rf .next/standalone/.next/static && cp -R .next/static .next/standalone/.next/static; fi',
+    ]
+    const remoteBuild = [
+      ...remotePreparation,
       previousCurrent,
       options.reloadNginx ? 'nginx -t' : 'true',
       `ln -sfn ${shellQuote(remoteRelease)} ${shellQuote(remoteCurrent)}`,
@@ -273,7 +299,9 @@ async function main() {
       options.reloadNginx ? 'nginx -s reload' : 'true',
       `systemctl status ${shellQuote(options.appName)} --no-pager`,
     ].join('\n')
-    console.log('[5/6] Installing dependencies, building app, migrating database, and restarting service')
+    console.log(options.artifact
+      ? '[5/6] Installing prebuilt artifact, installing runtime dependencies, migrating database, and restarting service'
+      : '[5/6] Installing dependencies, building app, migrating database, and restarting service')
     await runCommand('ssh', [...sshArgs, sshTarget, remoteBuild])
     console.log(`[6/6] Deployment complete: ${options.siteUrl}`)
   } finally {

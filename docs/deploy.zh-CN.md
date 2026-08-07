@@ -30,7 +30,10 @@ DATABASE_URI=postgres://用户名:密码@数据库地址:5432/jijian_geshui
 PAYLOAD_SECRET=生产环境随机密钥
 PAYLOAD_PREVIEW_SECRET=独立的预览密钥
 NEXT_PUBLIC_SERVER_URL=https://jijiangeshui.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
+
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` 是 Google Analytics 4 的测量 ID，格式为 `G-XXXXXXXXXX`，不是 Google Tag Manager 容器 ID。留空时不加载 Google Analytics。
 
 脚本会强制把上传环境中的 `NEXT_PUBLIC_SERVER_URL` 设置为 `https://jijiangeshui.com`。不要把生产密钥提交到 Git，也不要直接使用 `.env.example` 作为生产环境文件。
 
@@ -84,6 +87,39 @@ npm run deploy:ssr -- --no-prompt --reload-nginx
 ```bash
 npm run deploy:ssr -- --skip-build
 ```
+
+### GitHub Actions 自动部署
+
+`.github/workflows/deploy.yml` 会在 `main` 分支 push 或手动触发时执行 `app` 目录下的 lint、测试、类型检查和构建，并把 standalone 构建产物打包上传。检查通过后调用 `npm run deploy:ssr -- --artifact <release.zip>` 完成远程部署；服务器只安装运行依赖、执行数据库 migration、切换 release 和重启服务，不再重复执行 `npm run build`。
+
+如果 GitHub Actions 不可用，需要保留服务器构建作为兜底，可以在本地执行不带 `--artifact` 的部署命令：
+
+```bash
+cd /Users/liucai/Documents/极简个税/app
+npm run deploy:ssr -- --no-prompt --reload-nginx
+```
+
+不带 `--artifact` 时，部署脚本会沿用服务器构建路径，在远程 release 中执行 `npm ci`、数据库 migration 和 `npm run build`。
+
+请在 GitHub 仓库的 Settings → Secrets and variables → Actions 中配置以下 Repository secrets：
+
+- `SSH_PRIVATE_KEY`：部署服务器 SSH 私钥，不要提交到仓库。
+- `SSH_HOST`：部署服务器地址。
+- `SSH_USER`：SSH 用户名。
+- `SSH_PORT`：SSH 端口；不设置时使用 `27892`。
+- `ENV_PRODUCTION`：完整的生产环境变量文件内容，至少包含 `DATABASE_URI` 和 `PAYLOAD_SECRET`；接入 Google Analytics 时再加入 `NEXT_PUBLIC_GA_MEASUREMENT_ID`。
+
+以下 Repository variables 可选，不设置时使用当前部署脚本的默认值：
+
+- `DEPLOY_PATH`：默认 `/www/wwwroot/jijian-geshui`。
+- `NGINX_PATH`：默认 `/root/websites/nginx-config/conf/`。
+- `APP_NAME`：默认 `jijian-geshui`。
+- `APP_HOST`：默认 `127.0.0.1`。
+- `APP_PORT`：默认 `30020`。
+- `DOMAIN`：默认 `jijiangeshui.com`。
+- `SITE_URL`：默认 `https://jijiangeshui.com`。
+
+`ENV_PRODUCTION` 只在 Workflow 运行器和目标服务器之间传输，生产密钥不会写入 Git。首次启用后建议先通过 `workflow_dispatch` 手动执行一次，确认 SSH、数据库连接、migration、Nginx 和 systemd 服务均正常，再依赖 `main` 分支自动部署。
 
 ### 数据库迁移
 
