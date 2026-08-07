@@ -1,0 +1,30 @@
+.section { display: grid; gap: 28px; padding: 0 0 34px; border-bottom: 1px solid var(--line); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid article { padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.grid span { display: block; margin-bottom: 9px; color: var(--accent); font-size: 12px; font-weight: 800; }
+.grid h2 { margin-bottom: 10px; font-size: 18px; }
+.grid p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+.related { display: grid; grid-template-columns: minmax(180px, 0.75fr) minmax(0, 2fr); gap: 16px; align-items: start; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--accent-soft); }
+.related span { display: block; margin-bottom: 8px; color: var(--accent); font-size: 12px; font-weight: 800; }
+.related h2 { margin: 0; font-size: 18px; }
+.links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.links a { position: relative; display: grid; gap: 5px; min-height: 88px; padding: 15px 42px 15px 16px; border: 1px solid rgba(18, 133, 112, 0.18); border-radius: 10px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.links a strong { font-size: 13px; line-height: 1.45; }
+.links a small { color: var(--muted); font-size: 11px; line-height: 1.55; }
+.links a svg { position: absolute; right: 15px; top: 17px; color: var(--accent); }
+.faq h2 { margin-bottom: 12px; font-size: 20px; }
+.faqList { border-top: 1px solid var(--line); }
+.faqList details { border-bottom: 1px solid var(--line); }
+.faqList summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; cursor: pointer; list-style: none; font-size: 14px; font-weight: 700; }
+.faqList summary::-webkit-details-marker { display: none; }
+.faqList summary::after { content: "+"; color: var(--accent); font-size: 20px; font-weight: 400; }
+.faqList details[open] summary::after { content: "-"; }
+.faqList details p { max-width: 650px; margin: -4px 35px 18px 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+
+@media (max-width: 680px) {
+  .section { gap: 22px; }
+  .grid { grid-template-columns: 1fr; }
+  .related { grid-template-columns: 1fr; padding: 18px; }
+  .links { grid-template-columns: 1fr; }
+  .links a { min-height: auto; }
+}

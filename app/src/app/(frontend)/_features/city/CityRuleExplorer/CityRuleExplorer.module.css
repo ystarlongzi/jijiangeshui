@@ -1,0 +1,393 @@
+.explorer {
+  padding: 0 0 18px;
+}
+
+.explorerIntro {
+  padding-bottom: 42px;
+  border-bottom: 1px solid var(--line);
+}
+
+.titleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.explorerIntro h1 {
+  margin: 18px 0 14px;
+  color: var(--ink);
+  font-size: clamp(38px, 6vw, 66px);
+}
+
+.explorerIntro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: nowrap;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 42px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+}
+
+.searchBox svg {
+  position: absolute;
+  left: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.searchBox input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-small);
+  color: var(--ink);
+  appearance: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  background: var(--surface);
+}
+
+.searchBox input:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.searchBox input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.clearButton {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.clearButton:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.popularRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 0 0;
+}
+
+.popularLabel {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.popularLabel svg {
+  color: var(--accent);
+}
+
+.popularLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.popularLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.popularLink:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.directoryToolbar {
+  display: grid;
+  align-items: start;
+  gap: 14px;
+  padding: 24px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.resultMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.resultMeta strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.resultMeta span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.provinceFilter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.provinceFilter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.provinceFilter span {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.provinceFilter button:hover,
+.provinceFilter .active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.provinceFilter button:hover span,
+.provinceFilter .active span {
+  color: var(--accent);
+}
+
+.groupList {
+  display: grid;
+  gap: 28px;
+  padding-top: 26px;
+}
+
+.group {
+  min-width: 0;
+}
+
+.groupHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.groupHeading > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.groupHeading svg {
+  color: var(--accent);
+}
+
+.groupHeading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.groupHeading > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cityList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.cityEntry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.cityEntry:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.cityName {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cityName > span {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cityName small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cityAction {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.empty {
+  padding: 36px 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .cityList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .explorer {
+    padding: 0 0 12px;
+  }
+
+  .explorerIntro {
+    padding-bottom: 36px;
+  }
+
+  .explorerIntro h1 {
+    font-size: 44px;
+  }
+
+  .explorerIntro p {
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  .searchRow {
+    margin-top: 28px;
+  }
+
+  .searchRow {
+    display: block;
+    padding: 12px;
+  }
+
+  .clearButton {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .popularRow {
+    display: block;
+    padding: 18px 0 0;
+  }
+
+  .popularLinks {
+    margin-top: 10px;
+  }
+
+  .directoryToolbar {
+    padding-top: 20px;
+  }
+
+  .provinceFilter {
+    flex-wrap: nowrap;
+    margin: 0 -14px;
+    padding: 0 14px 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .provinceFilter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .provinceFilter button {
+    flex: 0 0 auto;
+  }
+
+  .cityList {
+    grid-template-columns: 1fr;
+  }
+
+  .cityEntry {
+    min-height: 58px;
+  }
+}

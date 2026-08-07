@@ -1,0 +1,25 @@
+.panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--orange) 34%, var(--line));
+  border-radius: var(--radius-small);
+  background: var(--orange-soft);
+  color: var(--ink);
+}
+
+.panel strong {
+  color: var(--orange);
+  font-size: 12px;
+}
+
+.panel ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}

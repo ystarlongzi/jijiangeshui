@@ -1,0 +1,25 @@
+/* THIS FILE IS GENERATED FROM PAYLOAD'S BLANK TEMPLATE. */
+import config from '@payload-config'
+import '@payloadcms/next/css'
+import type { ServerFunctionClient } from 'payload'
+import {
+  handleServerFunctions,
+  RootLayout,
+} from '@payloadcms/next/layouts'
+import React from 'react'
+
+import { importMap } from './www-app-admin/importMap'
+import './custom.css'
+
+const serverFunction: ServerFunctionClient = async function (args) {
+  'use server'
+  return handleServerFunctions({ ...args, config, importMap })
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+      {children}
+    </RootLayout>
+  )
+}

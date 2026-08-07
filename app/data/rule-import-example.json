@@ -1,0 +1,64 @@
+{
+  "cityInfo": {
+    "list": [
+      {
+        "areaId": "example-city",
+        "areaName": "示例市",
+        "shortName": "示例",
+        "areaCode": "example",
+        "parentAreaName": "示例省"
+      }
+    ]
+  },
+  "socialInsurancePolicy": {
+    "list": [
+      {
+        "areaId": "example-city",
+        "areaName": "示例市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-07-01",
+        "status": "success",
+        "baseRulesInfo": {
+          "list": [
+            { "baseType": "social", "baseMin": 6000, "baseMax": 30000 },
+            { "baseType": "housingFund", "baseMin": 2500, "baseMax": 30000 }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.08,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.16,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.12,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "externalCodes": {
+          "social": "example-social-plan",
+          "housingFund": "example-housing-plan"
+        }
+      }
+    ]
+  },
+  "crawlJob": {
+    "status": "success",
+    "triggerType": "manual",
+    "startedAt": "2026-08-01T00:00:00.000Z",
+    "finishedAt": "2026-08-01T00:00:00.000Z"
+  }
+}

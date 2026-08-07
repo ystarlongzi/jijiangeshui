@@ -1,0 +1,40 @@
+.footer {
+  display: grid;
+  gap: 12px;
+  padding: 14px 22px 22px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+
+.summary span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.summary strong {
+  color: var(--accent-deep);
+  font-size: 22px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+}
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}

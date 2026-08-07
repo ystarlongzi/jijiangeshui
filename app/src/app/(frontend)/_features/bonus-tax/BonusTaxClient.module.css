@@ -1,0 +1,77 @@
+.page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 64px 0 42px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: end; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 750; }
+.hero h1 { margin: 20px 0 16px; font-size: clamp(44px, 6vw, 76px); letter-spacing: -.05em; }
+.hero p { max-width: 700px; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.7; }
+.policyNote { display: grid; gap: 8px; padding: 18px; border-left: 3px solid var(--accent); background: var(--accent-soft); color: var(--muted); font-size: 11px; line-height: 1.7; }
+.policyNote strong { color: var(--ink); font-size: 13px; }
+.workspace { display: grid; grid-template-columns: minmax(320px, 390px) minmax(0, 1fr); gap: 20px; padding: 42px 0 58px; }
+.input, .result { padding: 26px; box-shadow: var(--shadow-strong); }
+.sectionTitle { color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: .08em; }
+.sectionTitle strong { float: right; color: var(--subtle); font-size: 11px; letter-spacing: 0; }
+.input h2 { margin: 10px 0 28px; font-size: 24px; }
+.field { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.field :global(.money-input) { min-height: 50px; }
+.field :global(.money-input) input { font-size: 20px; }
+.field :global(.money-input) em { font-style: normal; font-size: 12px; }
+.formGrid { display: grid; gap: 2px; }
+.formNote, .resultNote { margin: 8px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.65; }
+.formActions { display: grid; grid-template-columns: 1fr 92px; gap: 10px; margin-top: 24px; }
+.formActions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.resultHeading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.resultHeading p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.badge { padding: 7px 10px; border-radius: 7px; background: var(--accent-soft); color: var(--accent-deep); font-size: 11px; font-weight: 750; white-space: nowrap; }
+.recommendation { margin: 28px 0 22px; padding: 18px 20px; border-left: 3px solid var(--accent); background: var(--surface-muted); }
+.recommendation span { color: var(--muted); font-size: 12px; }
+.recommendation strong { display: block; margin-top: 3px; color: var(--accent-deep); font-size: 25px; }
+.recommendation p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.thresholdAlert { display: grid; gap: 13px; margin: -6px 0 22px; padding: 14px 15px; border: 1px solid #fdba74; border-radius: 9px; background: #fff7ed; color: #9a3412; }
+.alertCopy { display: flex; align-items: start; gap: 9px; }
+.thresholdAlert svg { flex: 0 0 auto; margin-top: 1px; color: #f97316; }
+.thresholdAlert p { margin: 0; font-size: 12px; line-height: 1.65; }
+.thresholdAlert strong { color: #ea580c; }
+.thresholdGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.thresholdGrid div { display: grid; gap: 3px; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.64); }
+.thresholdGrid span, .thresholdGrid small { color: #9a3412; font-size: 10px; opacity: .78; }
+.thresholdGrid strong { font-size: 14px; }
+.thresholdChart { display: grid; gap: 7px; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.64); }
+.thresholdChartRow { display: grid; grid-template-columns: 64px minmax(0, 1fr) 92px; gap: 8px; align-items: center; }
+.thresholdChartRow span { color: #9a3412; font-size: 10px; opacity: .78; }
+.thresholdChartRow i { display: block; height: 8px; border-radius: 999px; background: rgba(154, 52, 18, 0.22); }
+.thresholdChartRow i.takehomeBar { background: #f97316; }
+.thresholdChartRow strong { justify-self: end; color: #9a3412; font-size: 11px; font-weight: 800; }
+.thresholdChartRow.recommended strong { color: #ea580c; }
+.takehomeBar {}
+.recommended {}
+.comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.resultCard { padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+.resultCard.active { border-color: var(--accent); background: var(--accent-soft); }
+.active {}
+.cardTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cardTitle h3 { font-size: 15px; }
+.better { display: inline-flex; align-items: center; gap: 4px; color: #f97316; font-size: 11px; font-weight: 750; }
+.cardTakehome { display: grid; gap: 3px; margin: 24px 0 18px; }
+.cardTakehome small { color: var(--muted); font-size: 11px; }
+.cardTakehome strong { font-size: 30px; letter-spacing: -.04em; }
+.resultCard dl { display: grid; gap: 9px; margin: 0; padding-top: 13px; border-top: 1px solid var(--line); }
+.resultCard dl div { display: flex; justify-content: space-between; gap: 12px; }
+.resultCard dt, .resultCard dd { margin: 0; color: var(--muted); font-size: 11px; }
+.resultCard dd { color: var(--ink); font-weight: 700; }
+.resultCard p { min-height: 38px; margin: 18px 0 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.explain { display: flex; align-items: end; justify-content: space-between; gap: 30px; padding: 28px 0; border-top: 1px solid var(--line); }
+.explain h2 { margin-bottom: 8px; font-size: 22px; }
+.explain p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.explain a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 12px; font-weight: 750; white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .page { width: min(100% - 28px, 600px); padding-top: 34px; }
+  .hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 36px; }
+  .hero h1 { font-size: 44px; }
+  .hero p { font-size: 14px; }
+  .policyNote { max-width: 360px; }
+  .workspace { grid-template-columns: 1fr; gap: 14px; padding: 28px 0 42px; }
+  .input, .result { padding: 20px; }
+  .comparison { grid-template-columns: 1fr; }
+  .thresholdGrid { grid-template-columns: 1fr; }
+  .explain { align-items: start; flex-direction: column; gap: 18px; }
+}

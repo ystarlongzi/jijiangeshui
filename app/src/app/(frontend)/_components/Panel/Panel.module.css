@@ -1,0 +1,6 @@
+.panel {
+  border: 1px solid color-mix(in srgb, var(--line) 88%, var(--surface));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 96%, var(--surface-muted));
+  box-shadow: var(--shadow);
+}

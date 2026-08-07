@@ -1,0 +1,35 @@
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labelRow label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -1px 0 0;
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.error {
+  margin: 7px 0 0;
+  color: var(--orange);
+  font-size: 11px;
+  line-height: 1.5;
+}

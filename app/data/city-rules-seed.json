@@ -1,0 +1,517 @@
+{
+  "cityInfo": {
+    "list": [
+      {
+        "areaId": "beijing",
+        "areaName": "北京市",
+        "shortName": "北京",
+        "areaCode": "beijing",
+        "parentAreaName": "北京"
+      },
+      {
+        "areaId": "shanghai",
+        "areaName": "上海市",
+        "shortName": "上海",
+        "areaCode": "shanghai",
+        "parentAreaName": "上海"
+      },
+      {
+        "areaId": "shenzhen",
+        "areaName": "深圳市",
+        "shortName": "深圳",
+        "areaCode": "shenzhen",
+        "parentAreaName": "广东"
+      },
+      {
+        "areaId": "guangzhou",
+        "areaName": "广州市",
+        "shortName": "广州",
+        "areaCode": "guangzhou",
+        "parentAreaName": "广东"
+      },
+      {
+        "areaId": "hangzhou",
+        "areaName": "杭州市",
+        "shortName": "杭州",
+        "areaCode": "hangzhou",
+        "parentAreaName": "浙江"
+      }
+    ]
+  },
+  "socialInsurancePolicy": {
+    "list": [
+      {
+        "areaId": "beijing",
+        "areaName": "北京市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-07-01",
+        "baseRulesInfo": {
+          "list": [
+            {
+              "baseType": "social",
+              "baseMin": 6326,
+              "baseMax": 31884
+            },
+            {
+              "baseType": "housingFund",
+              "baseMin": 2420,
+              "baseMax": 31884
+            }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 8,
+              "employerCalcMethod": "rate",
+              "employerRate": 16,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "social",
+              "itemCode": "medical",
+              "itemName": "医疗保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 2,
+              "employerCalcMethod": "rate",
+              "employerRate": 9.5,
+              "sortOrder": 20
+            },
+            {
+              "systemType": "social",
+              "itemCode": "unemployment",
+              "itemName": "失业保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.5,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.5,
+              "sortOrder": 30
+            },
+            {
+              "systemType": "social",
+              "itemCode": "injury",
+              "itemName": "工伤保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.2,
+              "sortOrder": 40
+            },
+            {
+              "systemType": "social",
+              "itemCode": "maternity",
+              "itemName": "生育保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.8,
+              "sortOrder": 50
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "baseType": "housingFund",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 12,
+              "employerCalcMethod": "rate",
+              "employerRate": 12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "source": {
+          "title": "北京市社保、公积金规则待接入官方来源",
+          "checkedAt": "2026-07-01"
+        },
+        "status": "success"
+      },
+      {
+        "areaId": "shanghai",
+        "areaName": "上海市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-07-01",
+        "baseRulesInfo": {
+          "list": [
+            {
+              "baseType": "social",
+              "baseMin": 7460,
+              "baseMax": 37302
+            },
+            {
+              "baseType": "housingFund",
+              "baseMin": 2690,
+              "baseMax": 37302
+            }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 8,
+              "employerCalcMethod": "rate",
+              "employerRate": 16,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "social",
+              "itemCode": "medical",
+              "itemName": "医疗保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 2,
+              "employerCalcMethod": "rate",
+              "employerRate": 9.5,
+              "sortOrder": 20
+            },
+            {
+              "systemType": "social",
+              "itemCode": "unemployment",
+              "itemName": "失业保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.5,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.5,
+              "sortOrder": 30
+            },
+            {
+              "systemType": "social",
+              "itemCode": "injury",
+              "itemName": "工伤保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.2,
+              "sortOrder": 40
+            },
+            {
+              "systemType": "social",
+              "itemCode": "maternity",
+              "itemName": "生育保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.8,
+              "sortOrder": 50
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "baseType": "housingFund",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 12,
+              "employerCalcMethod": "rate",
+              "employerRate": 12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "source": {
+          "title": "上海市社保、公积金规则待接入官方来源",
+          "checkedAt": "2026-07-01"
+        },
+        "status": "success"
+      },
+      {
+        "areaId": "shenzhen",
+        "areaName": "深圳市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-07-01",
+        "baseRulesInfo": {
+          "list": [
+            {
+              "baseType": "social",
+              "baseMin": 2520,
+              "baseMax": 38853
+            },
+            {
+              "baseType": "housingFund",
+              "baseMin": 2360,
+              "baseMax": 38853
+            }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 8,
+              "employerCalcMethod": "rate",
+              "employerRate": 14,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "social",
+              "itemCode": "medical",
+              "itemName": "医疗保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 2,
+              "employerCalcMethod": "rate",
+              "employerRate": 5.5,
+              "sortOrder": 20
+            },
+            {
+              "systemType": "social",
+              "itemCode": "unemployment",
+              "itemName": "失业保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.5,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.5,
+              "sortOrder": 30
+            },
+            {
+              "systemType": "social",
+              "itemCode": "injury",
+              "itemName": "工伤保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.2,
+              "sortOrder": 40
+            },
+            {
+              "systemType": "social",
+              "itemCode": "maternity",
+              "itemName": "生育保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.8,
+              "sortOrder": 50
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "baseType": "housingFund",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 12,
+              "employerCalcMethod": "rate",
+              "employerRate": 12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "source": {
+          "title": "深圳市社保、公积金规则待接入官方来源",
+          "checkedAt": "2026-07-01"
+        },
+        "status": "success"
+      },
+      {
+        "areaId": "guangzhou",
+        "areaName": "广州市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-07-01",
+        "baseRulesInfo": {
+          "list": [
+            {
+              "baseType": "social",
+              "baseMin": 2300,
+              "baseMax": 38082
+            },
+            {
+              "baseType": "housingFund",
+              "baseMin": 2300,
+              "baseMax": 39528
+            }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 8,
+              "employerCalcMethod": "rate",
+              "employerRate": 14,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "social",
+              "itemCode": "medical",
+              "itemName": "医疗保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 2,
+              "employerCalcMethod": "rate",
+              "employerRate": 6,
+              "sortOrder": 20
+            },
+            {
+              "systemType": "social",
+              "itemCode": "unemployment",
+              "itemName": "失业保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.5,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.5,
+              "sortOrder": 30
+            },
+            {
+              "systemType": "social",
+              "itemCode": "injury",
+              "itemName": "工伤保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.2,
+              "sortOrder": 40
+            },
+            {
+              "systemType": "social",
+              "itemCode": "maternity",
+              "itemName": "生育保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.8,
+              "sortOrder": 50
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "baseType": "housingFund",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 12,
+              "employerCalcMethod": "rate",
+              "employerRate": 12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "source": {
+          "title": "广州市社保、公积金规则待接入官方来源",
+          "checkedAt": "2026-07-01"
+        },
+        "status": "success"
+      },
+      {
+        "areaId": "hangzhou",
+        "areaName": "杭州市",
+        "policyYear": 2026,
+        "effectiveFrom": "2026-01-01",
+        "baseRulesInfo": {
+          "list": [
+            {
+              "baseType": "social",
+              "baseMin": 4986,
+              "baseMax": 25299
+            },
+            {
+              "baseType": "housingFund",
+              "baseMin": 2490,
+              "baseMax": 39000
+            }
+          ]
+        },
+        "itemRulesInfo": {
+          "list": [
+            {
+              "systemType": "social",
+              "itemCode": "pension",
+              "itemName": "养老保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 8,
+              "employerCalcMethod": "rate",
+              "employerRate": 16,
+              "sortOrder": 10
+            },
+            {
+              "systemType": "social",
+              "itemCode": "medical",
+              "itemName": "医疗保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 2,
+              "employerCalcMethod": "rate",
+              "employerRate": 9.5,
+              "sortOrder": 20
+            },
+            {
+              "systemType": "social",
+              "itemCode": "unemployment",
+              "itemName": "失业保险",
+              "baseType": "social",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 0.5,
+              "employerCalcMethod": "rate",
+              "employerRate": 0.5,
+              "sortOrder": 30
+            },
+            {
+              "systemType": "social",
+              "itemCode": "injury",
+              "itemName": "工伤保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.2,
+              "sortOrder": 40
+            },
+            {
+              "systemType": "social",
+              "itemCode": "maternity",
+              "itemName": "生育保险",
+              "baseType": "social",
+              "employeeCalcMethod": "none",
+              "employerCalcMethod": "rate",
+              "employerRate": 0.8,
+              "sortOrder": 50
+            },
+            {
+              "systemType": "housingFund",
+              "itemCode": "housing-fund",
+              "itemName": "公积金",
+              "baseType": "housingFund",
+              "employeeCalcMethod": "rate",
+              "employeeRate": 12,
+              "employerCalcMethod": "rate",
+              "employerRate": 12,
+              "sortOrder": 60
+            }
+          ]
+        },
+        "source": {
+          "title": "杭州市社保、公积金规则待接入官方来源",
+          "checkedAt": "2026-01-01"
+        },
+        "status": "success"
+      }
+    ]
+  },
+  "crawlJob": {
+    "source": "fallback",
+    "status": "success",
+    "triggerType": "manual",
+    "startedAt": "2026-08-01T11:56:48.873Z",
+    "finishedAt": "2026-08-01T11:56:48.873Z"
+  }
+}

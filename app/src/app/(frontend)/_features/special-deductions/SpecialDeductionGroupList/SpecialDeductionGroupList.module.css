@@ -1,0 +1,134 @@
+.list {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding: 18px 22px;
+}
+
+.group {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.group.disabled {
+  background: var(--surface-muted);
+}
+
+.group.disabled p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.status {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.status.selected {
+  border-color: var(--accent);
+  background: radial-gradient(circle at center, var(--accent) 0 42%, transparent 46%);
+}
+
+.heading > span {
+  display: grid;
+  gap: 4px;
+}
+
+.heading strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.heading strong b {
+  margin-left: 8px;
+  color: var(--accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.heading small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.heading svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+.heading[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-muted);
+}
+
+.option input {
+  accent-color: var(--accent);
+}
+
+.option span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.option b {
+  grid-column: 2;
+  color: var(--accent-deep);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.option.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+@media (max-width: 760px) {
+  .options {
+    grid-template-columns: 1fr;
+  }
+}

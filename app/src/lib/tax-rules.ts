@@ -1,0 +1,197 @@
+import { defaultHousingRateOptions, fallbackCityRuleConfigs, type CityRuleConfig } from './city-rule-data'
+
+export type KnownContributionBaseType =
+  | 'social'
+  | 'housingFund'
+  | 'pension'
+  | 'medical'
+  | 'unemployment'
+  | 'injury'
+  | 'maternity'
+
+export type ContributionBaseType = KnownContributionBaseType | (string & {})
+
+export type ContributionSystemType = 'social' | 'housingFund'
+
+export type ContributionCalcMethod = 'none' | 'rate' | 'fixed' | 'ratePlusFixed'
+
+export type ContributionSideRule = {
+  method: ContributionCalcMethod
+  rate?: number
+  fixedAmount?: number
+}
+
+/**
+ * 年度税率规则的最小前台结构。
+ *
+ * 这里不直接复用 Payload 文档类型，避免客户端组件依赖 CMS 实现；
+ * CMS 规则会先转换成这个结构，再传给计算器。
+ */
+export type TaxBracket = {
+  ceiling: number
+  rate: number
+  quick: number
+  rangeLabel?: string
+}
+
+export type ContributionBaseRule = {
+  type: ContributionBaseType
+  label: string
+  min: number
+  max: number
+}
+
+export type ContributionItemRule = {
+  code: string
+  name: string
+  systemType: ContributionSystemType
+  baseType: ContributionBaseType
+  employee: ContributionSideRule
+  employer: ContributionSideRule
+  housing?: boolean
+}
+
+export type ContributionSource = {
+  title: string
+  publisher?: string
+  url?: string
+  checkedAt?: string
+}
+
+export type CityRule = {
+  name: string
+  label: string
+  province: string
+  pinyin: string
+  effective: string
+  effectiveTo?: string
+  baseRules: Record<string, ContributionBaseRule>
+  contributionItems: ContributionItemRule[]
+  housingRateOptions: number[]
+  sources: ContributionSource[]
+  policyVersions?: CityRule[]
+  socialMin: number
+  socialMax: number
+  housingMin: number
+  housingMax: number
+  socialEmployee: number
+  socialEmployer: number
+  medicalEmployee: number
+  medicalEmployer: number
+}
+
+function rate(percent: number): ContributionSideRule {
+  return { method: 'rate', rate: percent }
+}
+
+function none(): ContributionSideRule {
+  return { method: 'none' }
+}
+
+export const contributionBaseLabels: Record<KnownContributionBaseType, string> = {
+  social: '社保缴费基数',
+  housingFund: '公积金缴费基数',
+  pension: '养老保险缴费基数',
+  medical: '医疗保险缴费基数',
+  unemployment: '失业保险缴费基数',
+  injury: '工伤保险缴费基数',
+  maternity: '生育保险缴费基数',
+}
+
+function createCityRule(config: CityRuleConfig): CityRule {
+  const defaultHousingRate = defaultHousingRateOptions[defaultHousingRateOptions.length - 1] || 12
+  const baseRules: CityRule['baseRules'] = {
+    social: { type: 'social', label: contributionBaseLabels.social, min: config.socialMin, max: config.socialMax },
+    housingFund: { type: 'housingFund', label: contributionBaseLabels.housingFund, min: config.housingMin, max: config.housingMax },
+  }
+
+  return {
+    ...config,
+    baseRules,
+    housingRateOptions: defaultHousingRateOptions,
+    sources: config.sources || [{ title: `${config.label}社保、公积金规则依据`, checkedAt: config.effective }],
+    contributionItems: [
+      { code: 'pension', name: '养老保险', systemType: 'social', baseType: 'social', employee: rate(config.socialEmployee), employer: rate(config.socialEmployer) },
+      { code: 'medical', name: '医疗保险', systemType: 'social', baseType: 'social', employee: rate(config.medicalEmployee), employer: rate(config.medicalEmployer) },
+      { code: 'unemployment', name: '失业保险', systemType: 'social', baseType: 'social', employee: rate(0.5), employer: rate(0.5) },
+      { code: 'injury', name: '工伤保险', systemType: 'social', baseType: 'social', employee: none(), employer: rate(0.2) },
+      { code: 'maternity', name: '生育保险', systemType: 'social', baseType: 'social', employee: none(), employer: rate(0.8) },
+      { code: 'housing-fund', name: '公积金', systemType: 'housingFund', baseType: 'housingFund', employee: rate(defaultHousingRate), employer: rate(defaultHousingRate), housing: true },
+    ],
+  }
+}
+
+export const cityRules: Record<string, CityRule> = Object.fromEntries(
+  Object.entries(fallbackCityRuleConfigs).map(([code, config]) => [code, createCityRule(config)]),
+)
+
+export const housingRateOptions = defaultHousingRateOptions
+
+export function getContributionBaseRule(rule: CityRule, type: ContributionBaseType) {
+  if (rule.baseRules[type]) return rule.baseRules[type]
+  return type === 'housingFund' ? rule.baseRules.housingFund : rule.baseRules.social
+}
+
+export function getHousingRateOptions(rule: CityRule) {
+  return rule.housingRateOptions
+}
+
+export function getCityRuleForMonth(rule: CityRule, year: number, month: number) {
+  const normalizedMonth = Math.max(1, Math.min(12, Math.trunc(month || 1)))
+  return selectEffectiveCityRule([rule, ...(rule.policyVersions || [])], `${year}-${String(normalizedMonth).padStart(2, '0')}-01`) || rule
+}
+
+/**
+ * 严格查找指定月份的城市政策版本。
+ *
+ * 与 getCityRuleForMonth 的“找不到时取最近版本”不同，计算器在用户主动选择历史年度时
+ * 必须知道该年度是否真的有规则，不能把别的年度政策伪装成当前年度结果。
+ */
+export function getCityRuleForMonthStrict(rule: CityRule, year: number, month: number) {
+  const normalizedMonth = Math.max(1, Math.min(12, Math.trunc(month || 1)))
+  return selectEffectiveCityRule(
+    [rule, ...(rule.policyVersions || [])],
+    `${year}-${String(normalizedMonth).padStart(2, '0')}-01`,
+    { allowNearest: false },
+  )
+}
+
+/**
+ * 解析一个月份实际使用的城市规则。
+ *
+ * 如果 CMS 还没有补齐历史月份，先使用同一城市最新的可用版本继续测算；
+ * 调用方必须根据 usedFallback 展示提示，不能把兜底规则伪装成精确历史规则。
+ */
+export function resolveCityRuleForMonth(rule: CityRule, year: number, month: number) {
+  const exactRule = getCityRuleForMonthStrict(rule, year, month)
+  return {
+    rule: exactRule || getCityRuleForMonth(rule, year, month),
+    usedFallback: !exactRule,
+  }
+}
+
+export function selectEffectiveCityRule(rules: CityRule[], targetDate: string, options: { allowNearest?: boolean } = {}) {
+  const sortedRules = [...rules]
+    .filter((rule) => rule.effective)
+    .sort((a, b) => b.effective.localeCompare(a.effective))
+
+  return sortedRules.find((rule) => rule.effective <= targetDate && (!rule.effectiveTo || rule.effectiveTo >= targetDate))
+    || (options.allowNearest === false ? undefined : sortedRules[0])
+}
+
+export const taxBrackets: TaxBracket[] = [
+  { ceiling: 36000, rate: 0.03, quick: 0 },
+  { ceiling: 144000, rate: 0.1, quick: 2520 },
+  { ceiling: 300000, rate: 0.2, quick: 16920 },
+  { ceiling: 420000, rate: 0.25, quick: 31920 },
+  { ceiling: 660000, rate: 0.3, quick: 52920 },
+  { ceiling: 960000, rate: 0.35, quick: 85920 },
+  { ceiling: Infinity, rate: 0.45, quick: 181920 },
+]
+
+export const deductionOptions = [
+  { label: '子女教育', amount: 2000 },
+  { label: '3 岁以下婴幼儿照护', amount: 2000 },
+  { label: '住房租金', amount: 1500 },
+  { label: '赡养老人', amount: 3000 },
+]

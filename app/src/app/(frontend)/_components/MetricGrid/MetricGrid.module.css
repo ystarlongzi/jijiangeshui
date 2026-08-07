@@ -1,0 +1,42 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.item {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border-left: 1px solid var(--line);
+}
+
+.item:first-child {
+  border-left: 0;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.value {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .item:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .item:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}

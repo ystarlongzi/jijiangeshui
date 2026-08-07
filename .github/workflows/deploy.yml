@@ -1,0 +1,168 @@
+name: 构建并部署
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  RELEASE_ID: ${{ github.sha }}-${{ github.run_number }}
+  DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+  NGINX_PATH: ${{ vars.NGINX_PATH }}
+  APP_NAME: ${{ vars.APP_NAME }}
+  APP_HOST: ${{ vars.APP_HOST }}
+  APP_PORT: ${{ vars.APP_PORT }}
+  DOMAIN: ${{ vars.DOMAIN }}
+  SITE_URL: ${{ vars.SITE_URL }}
+
+jobs:
+  build-and-deploy:
+    name: 构建并部署到服务器
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 拉取仓库代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: 安装依赖
+        working-directory: app
+        run: npm ci
+
+      - name: 运行 lint
+        working-directory: app
+        run: npm run lint
+
+      - name: 运行测试
+        working-directory: app
+        run: npm run test
+
+      - name: 运行类型检查
+        working-directory: app
+        run: npm run typecheck
+
+      - name: 构建应用
+        working-directory: app
+        env:
+          PAYLOAD_DB_PUSH: "false"
+        run: npm run build
+
+      - name: 打包 standalone release
+        working-directory: app
+        env:
+          RELEASE_ID: ${{ env.RELEASE_ID }}
+        run: |
+          set -euo pipefail
+
+          ZIP_NAME="jijian-geshui-${RELEASE_ID}.zip"
+          rm -rf .deploy-package "${ZIP_NAME}"
+          mkdir -p .deploy-package/.next
+
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.next' \
+            --exclude 'node_modules' \
+            --exclude '.deploy-tmp' \
+            --exclude '.deploy-package' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'public' \
+            --exclude '.DS_Store' \
+            --exclude 'tsconfig.tsbuildinfo' \
+            --exclude 'ops/backup' \
+            ./ .deploy-package/
+
+          cp -R .next/standalone .deploy-package/.next/standalone
+          mkdir -p .deploy-package/.next/standalone/.next
+          cp -R .next/static .deploy-package/.next/static
+          cp -R .next/static .deploy-package/.next/standalone/.next/static
+          if [ -d public ]; then
+            cp -R public .deploy-package/public
+            cp -R public .deploy-package/.next/standalone/public
+          fi
+
+          test -f .deploy-package/.next/standalone/server.js
+          test -f .deploy-package/package.json
+          (cd .deploy-package && zip -qr "../${ZIP_NAME}" .)
+
+      - name: 上传 release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jijian-geshui-${{ github.sha }}-${{ github.run_number }}
+          path: app/jijian-geshui-${{ github.sha }}-${{ github.run_number }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: 准备 SSH 密钥
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SSH_PRIVATE_KEY}" ]; then
+            echo "Missing required secret: SSH_PRIVATE_KEY" >&2
+            exit 1
+          fi
+
+          install -d -m 700 "${HOME}/.ssh"
+          printf '%s\n' "${SSH_PRIVATE_KEY}" > "${RUNNER_TEMP}/deploy_key"
+          chmod 600 "${RUNNER_TEMP}/deploy_key"
+
+      - name: 通过 SSH 部署
+        working-directory: app
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          ENV_PRODUCTION: ${{ secrets.ENV_PRODUCTION }}
+        run: |
+          set -euo pipefail
+
+          : "${SSH_HOST:?Missing required secret: SSH_HOST}"
+          : "${SSH_USER:?Missing required secret: SSH_USER}"
+          : "${ENV_PRODUCTION:?Missing required secret: ENV_PRODUCTION}"
+
+          SSH_PORT="${SSH_PORT:-27892}"
+          DEPLOY_PATH="${DEPLOY_PATH:-/www/wwwroot/jijian-geshui}"
+          NGINX_PATH="${NGINX_PATH:-/root/websites/nginx-config/conf/}"
+          APP_NAME="${APP_NAME:-jijian-geshui}"
+          APP_HOST="${APP_HOST:-127.0.0.1}"
+          APP_PORT="${APP_PORT:-30020}"
+          DOMAIN="${DOMAIN:-jijiangeshui.com}"
+          SITE_URL="${SITE_URL:-https://jijiangeshui.com}"
+
+          printf '%s\n' "${ENV_PRODUCTION}" > "${RUNNER_TEMP}/env.production"
+          chmod 600 "${RUNNER_TEMP}/env.production"
+
+          npm run deploy:ssr -- \
+            --host "${SSH_HOST}" \
+            --user "${SSH_USER}" \
+            --ssh-port "${SSH_PORT}" \
+            --key "${RUNNER_TEMP}/deploy_key" \
+            --deploy-path "${DEPLOY_PATH}" \
+            --nginx-path "${NGINX_PATH}" \
+            --app-name "${APP_NAME}" \
+            --app-host "${APP_HOST}" \
+            --app-port "${APP_PORT}" \
+            --domain "${DOMAIN}" \
+            --site-url "${SITE_URL}" \
+            --env-file "${RUNNER_TEMP}/env.production" \
+            --artifact "${GITHUB_WORKSPACE}/app/jijian-geshui-${RELEASE_ID}.zip" \
+            --no-prompt \
+            --reload-nginx

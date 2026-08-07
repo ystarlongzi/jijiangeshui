@@ -1,0 +1,143 @@
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labelRow label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 3;
+}
+
+.searchIcon,
+.chevronIcon {
+  position: absolute;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.searchIcon {
+  left: 14px;
+}
+
+.chevronIcon {
+  right: 14px;
+  transition: transform .18s ease;
+}
+
+.open .chevronIcon {
+  transform: rotate(180deg);
+}
+
+.control input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--ink);
+  padding-right: 40px;
+  padding-left: 40px;
+  appearance: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.control:focus-within input {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.invalid input {
+  border-color: color-mix(in srgb, var(--orange) 56%, var(--line-strong));
+  background: var(--orange-soft);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 22px 58px rgba(13, 42, 37, .14);
+}
+
+.popoverHint {
+  padding: 5px 8px 8px;
+  color: var(--subtle);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.option span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.option strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.option small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.option svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.active,
+.option:hover {
+  background: var(--surface-muted);
+}
+
+.selected {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.empty {
+  padding: 18px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}

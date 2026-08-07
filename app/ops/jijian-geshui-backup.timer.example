@@ -1,0 +1,10 @@
+[Unit]
+Description=每日 00:00 备份极简个税 PostgreSQL
+
+[Timer]
+OnCalendar=*-*-* 00:00:00
+Persistent=true
+Unit=jijian-geshui-backup.service
+
+[Install]
+WantedBy=timers.target

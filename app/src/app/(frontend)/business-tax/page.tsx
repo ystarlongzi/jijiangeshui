@@ -1,0 +1,23 @@
+import type { Metadata } from 'next'
+import BusinessTaxClient from '../_features/income-tax-tools/business/BusinessTaxClient'
+import { currentYear, siteName, siteUrl } from '@/lib/site'
+import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
+import { findIncomeTaxRateRule } from '@/lib/income-tax-calculator-rules'
+import JsonLd, { createCalculatorJsonLd } from '../_components/JsonLd'
+
+export const metadata: Metadata = {
+  title: `${currentYear}年经营所得个税计算器｜个体工商户个税｜${siteName}`,
+  description: `输入年度收入、成本费用和损失，按 ${currentYear} 年经营所得五级超额累进税率测算个人所得税。`,
+  alternates: { canonical: '/business-tax' },
+}
+
+export default async function BusinessTaxPage() {
+  const dataset = await getIncomeTaxRuleDataset()
+  const yearRules = dataset.rulesByYear[String(currentYear)]
+  const taxRateRule = findIncomeTaxRateRule(yearRules, 'business', 'notApplicable')
+
+  return <>
+    <JsonLd data={createCalculatorJsonLd({ name: `${currentYear}年经营所得个税计算器`, description: metadata.description, url: `${siteUrl}/business-tax`, siteName })} />
+    <BusinessTaxClient taxRateRule={taxRateRule} taxRateYear={currentYear} />
+  </>
+}

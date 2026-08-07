@@ -1,0 +1,99 @@
+.wrap {
+  overflow-x: auto;
+  scrollbar-color: color-mix(in srgb, var(--accent) 38%, transparent) transparent;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wrap::-webkit-scrollbar {
+  height: 8px;
+}
+
+.wrap::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table[data-header-tone='muted'] th {
+  background: var(--surface-muted);
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+.table td {
+  border-top: 1px dashed var(--line);
+  color: var(--ink);
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table tbody tr:first-child td {
+  border-top: 0;
+}
+
+.table tbody tr[data-tone='highlight'] td {
+  background: var(--accent-soft);
+  border-top-color: transparent;
+  font-weight: 600;
+}
+
+.table tbody tr[data-tone='subtotal'] td {
+  border-top-style: solid;
+  font-weight: 600;
+}
+
+.table tbody tr[data-tone='muted'] td {
+  background: var(--surface-muted);
+}
+
+.table tbody tr:hover td {
+  background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface));
+}
+
+.table td [data-cell-tone='strong'] {
+  font-weight: 600;
+}
+
+.table td [data-cell-tone='muted'] {
+  color: var(--muted);
+}
+
+.table td [data-cell-tone='accent'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.emptyRow td {
+  padding: 28px 18px;
+  color: var(--subtle);
+  text-align: center;
+}

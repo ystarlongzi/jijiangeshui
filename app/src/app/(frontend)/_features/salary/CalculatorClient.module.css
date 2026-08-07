@@ -1,0 +1,1194 @@
+.pageContent {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 54px 0 40px;
+}
+
+.pageContent :global(.page-intro) {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 34px;
+}
+
+.pageContent :global(.page-intro > div:first-child) {
+  flex: 1;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pageContent :global(.intro-copy) {
+  max-width: none;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.pageContent :global(.rule-date) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pageContent :global(.rule-date strong) {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.pageContent :global(.status-dot) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.pageContent :global(.workspace-grid) {
+  display: grid;
+  grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.pageContent :global(.input-panel) {
+  position: sticky;
+  top: 94px;
+  align-self: start;
+  padding: 26px;
+}
+
+.pageContent :global(.input-panel),
+.pageContent :global(.result-panel),
+.pageContent :global(.detail-panel),
+.pageContent :global(.annual-panel) {
+  box-shadow: var(--shadow-strong);
+}
+
+.pageContent :global(.panel-heading),
+.pageContent :global(.section-heading-row),
+.pageContent :global(.result-topline) {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageContent :global(.panel-heading) {
+  margin-bottom: 24px;
+}
+
+.pageContent :global(.compact-heading) {
+  margin: 0 0 14px;
+  align-items: center;
+}
+
+.pageContent :global(.city-actions) {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.formTextAction {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.formTextAction svg {
+  transition: transform 160ms ease;
+}
+
+.formTextAction[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.salaryModeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.salaryModeButton {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.salaryModeButton[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.editBaseButton {
+  font-size: 11px;
+}
+
+.compactField {
+  margin-bottom: 0;
+}
+
+.fieldGrid,
+.ratioGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ratioGrid {
+  margin-top: 18px;
+}
+
+.fieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -1px 0 0;
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.fieldError {
+  margin: 7px 0 0;
+  color: var(--orange);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sectionDivider {
+  height: 1px;
+  margin: 24px 0;
+  background: var(--line);
+}
+
+.pageContent :global(.base-editor) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 2px 0 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.baseField {
+  margin: 0;
+}
+
+.pageContent :global(.base-editor .money-input.is-readonly) {
+  background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));
+}
+
+.pageContent :global(.base-editor input[readonly]) {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.pageContent :global(.base-editor input:not([readonly])) {
+  border-color: var(--accent);
+}
+
+.baseField p {
+  display: block;
+}
+
+.smallInput input,
+.smallInput :global(.amount-tip-track) {
+  font-size: 15px;
+}
+
+.pageContent :global(.monthly-salary-grid) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.monthly-salary-grid label) {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pageContent :global(.monthly-salary-grid label > span) {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.pageContent :global(.monthly-salary-grid .money-input) {
+  min-height: 36px;
+  padding: 0 8px;
+  background: var(--surface);
+}
+
+.pageContent :global(.monthly-salary-grid .money-input input),
+.pageContent :global(.monthly-salary-grid .money-input .amount-tip-track) {
+  min-height: 32px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.pageContent :global(.monthly-salary-grid .money-input .unit) {
+  display: none;
+}
+
+.pageContent :global(.monthly-salary-grid label.current > span) {
+  color: var(--accent);
+}
+
+.pageContent :global(.monthly-salary-grid label.current .money-input) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.deductionBlock {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.deductionBlock :global(.money-input) {
+  width: 100%;
+}
+
+.deductionBlock p {
+  display: block;
+  margin-top: 8px;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.formFootnote {
+  margin: 13px 0 0;
+  color: var(--subtle);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.pageContent :global(.results-column) {
+  display: grid;
+  gap: 24px;
+}
+
+.pageContent :global(.result-panel) {
+  position: relative;
+  overflow: hidden;
+  padding: 26px;
+}
+
+.resultGroup { position: relative; display: grid; gap: 24px; }
+.ruleLoadingOverlay { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; border-radius: 14px; background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(2px); }
+
+.ruleLoading {
+  min-height: 360px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.ruleLoading strong { color: var(--ink); font-size: 15px; }
+.ruleLoading p { margin: 0; font-size: 12px; }
+.ruleLoadingSpinner { width: 22px; height: 22px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: rule-loading-spin 720ms linear infinite; }
+
+@keyframes rule-loading-spin { to { transform: rotate(360deg); } }
+
+.pageContent :global(.result-panel)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--orange) 76%, var(--accent)));
+}
+
+.pageContent :global(.result-panel.is-updated .take-home-block > strong) {
+  animation: result-value-pulse 360ms ease-out;
+}
+
+@keyframes result-value-pulse {
+  0% {
+    color: var(--accent);
+    transform: translateY(3px);
+  }
+
+  100% {
+    color: var(--ink);
+    transform: translateY(0);
+  }
+}
+
+.pageContent :global(.result-context),
+.pageContent :global(.month-label) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.result-badge) {
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.pageContent :global(.take-home-block) {
+  display: grid;
+  gap: 3px;
+  padding: 25px 0 0;
+}
+
+.pageContent :global(.take-home-block > span) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.take-home-block > strong) {
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow: 0 10px 24px rgba(25, 54, 46, 0.08);
+}
+
+.pageContent :global(.take-home-block small) {
+  color: var(--subtle);
+  font-size: 12px;
+}
+
+.pageContent :global(.take-home-block small b) {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.pageContent :global(.wage-flow) {
+  margin: 22px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.wage-flow-heading),
+.pageContent :global(.tax-ladder-heading) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pageContent :global(.wage-flow-heading strong) {
+  font-size: 12px;
+}
+
+.pageContent :global(.wage-flow-heading span) {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.pageContent :global(.flow-bar) {
+  display: flex;
+  height: 13px;
+  gap: 2px;
+  margin: 13px 0 15px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.pageContent :global(.flow-segment) {
+  min-width: 2px;
+  transition: width 260ms ease;
+}
+
+.pageContent :global(.flow-take-home) {
+  background: var(--accent);
+}
+
+.pageContent :global(.flow-social) {
+  background: #75b8a6;
+}
+
+.pageContent :global(.flow-housing) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.flow-tax) {
+  background: var(--orange);
+}
+
+.pageContent :global(.flow-legend) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 18px;
+}
+
+.pageContent :global(.flow-legend > div) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.pageContent :global(.flow-legend strong) {
+  margin-left: auto;
+  color: var(--ink);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.pageContent :global(.flow-dot) {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.pageContent :global(.flow-take-home-dot) {
+  background: var(--accent);
+}
+
+.pageContent :global(.flow-social-dot) {
+  background: #75b8a6;
+}
+
+.pageContent :global(.flow-housing-dot) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.flow-tax-dot) {
+  background: var(--orange);
+}
+
+.pageContent :global(.result-explanation) {
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: color-mix(in srgb, var(--surface-muted) 86%, var(--accent-soft));
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pageContent :global(.tax-ladder) {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pageContent :global(.tax-ladder-heading) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.tax-ladder-heading strong) {
+  color: var(--orange);
+  font-size: 12px;
+}
+
+.pageContent :global(.tax-ladder-rail) {
+  position: relative;
+  height: 6px;
+  margin: 15px 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #75b8a6 0 16.6%, #8bc2af 16.6% 33.2%, #cbb36d 33.2% 49.8%, #d99b59 49.8% 66.4%, #df8750 66.4% 83%, #d87539 83% 100%);
+}
+
+.pageContent :global(.tax-ladder-progress) {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 16.6%;
+  border-radius: inherit;
+  background: rgba(23, 49, 46, 0.22);
+  transition: width 260ms ease;
+}
+
+.pageContent :global(.tax-ladder-marker) {
+  position: absolute;
+  top: 50%;
+  left: 16.6%;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--surface-muted);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+  transform: translate(-50%, -50%);
+  transition: left 260ms ease;
+}
+
+.pageContent :global(.tax-ladder-levels) {
+  display: flex;
+  justify-content: space-between;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.pageContent :global(.tax-ladder-levels span.active) {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.pageContent :global(.calculation-detail),
+.pageContent :global(.employer-detail) {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pageContent :global(.calculation-detail div),
+.pageContent :global(.employer-detail div) {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.calculation-detail strong),
+.pageContent :global(.employer-detail strong) {
+  color: var(--ink);
+}
+
+.pageContent :global(.detail-panel) {
+  padding: 26px;
+}
+
+.pageContent :global(.section-heading-row) {
+  align-items: end;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.pageContent :global(.detail-heading-actions) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pageContent :global(.heading-with-meta) {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pageContent :global(.subtle-label) {
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-chart) {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.contribution-total) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageContent :global(.contribution-total span) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-total strong) {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.pageContent :global(.contribution-stack) {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.pageContent :global(.contribution-segment) {
+  flex: 0 0 var(--segment-width);
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-list) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px 18px;
+}
+
+.pageContent :global(.contribution-item) {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-item-body) {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-item-main) {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-item-main span) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.contribution-item strong) {
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pageContent :global(.contribution-item-value) {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pageContent :global(.contribution-item em) {
+  color: var(--subtle);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.pageContent :global(.contribution-dot) {
+  margin-top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pageContent :global(.personal-social) {
+  background: var(--accent);
+}
+
+.pageContent :global(.personal-housing) {
+  background: #63b6a1;
+}
+
+.pageContent :global(.employer-social) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.employer-housing) {
+  background: var(--orange);
+}
+
+.pageContent :global(.insurance-table th),
+.pageContent :global(.insurance-table td) {
+  padding: 13px 10px;
+}
+
+.pageContent :global(.insurance-table),
+.pageContent :global(.annual-table) {
+  table-layout: fixed;
+}
+
+.pageContent :global(.insurance-table tbody tr.subtotal td) {
+  color: var(--orange);
+}
+
+.pageContent :global(.insurance-table tbody tr.subtotal td:first-child) {
+  color: var(--ink);
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal td),
+.pageContent :global(.insurance-table tbody tr.housing-row td) {
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal:hover td),
+.pageContent :global(.insurance-table tbody tr.housing-row:hover td) {
+  background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface));
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal td) {
+  border-top-style: solid;
+}
+
+.pageContent :global(.insurance-table tbody tr.housing-row td) {
+  border-top-style: solid;
+  font-weight: 700;
+}
+
+.pageContent :global(.insurance-table tbody tr.housing-row .formula) {
+  font-weight: 400;
+}
+
+.pageContent :global(.insurance-table td:not(:first-child)) {
+  vertical-align: middle;
+}
+
+.pageContent :global(.formula) {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.pageContent :global(.table-note) {
+  margin: 14px 0 0;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.pageContent :global(.annual-panel) {
+  margin-top: 24px;
+  padding: 26px;
+}
+
+.pageContent :global(.annual-heading-actions) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exportButton:hover {
+  color: var(--accent-deep);
+}
+
+.pageContent :global(.annual-summary-card) {
+  margin: 22px 0 12px;
+}
+
+.pageContent :global(.annual-tax-chart) {
+  display: grid;
+  gap: 18px;
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.annual-chart-summary) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pageContent :global(.annual-chart-summary div) {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(25, 54, 46, 0.05);
+}
+
+.pageContent :global(.annual-chart-summary span) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.annual-chart-summary strong) {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.annual-tax-bars) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(34px, 1fr));
+  align-items: end;
+  gap: 8px;
+  min-height: 166px;
+}
+
+.pageContent :global(.annual-tax-bar) {
+  display: grid;
+  grid-template-rows: 18px 96px 16px;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.pageContent :global(.annual-tax-bar .bar-value) {
+  overflow: hidden;
+  color: var(--subtle);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.annual-tax-bar .bar-track) {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  height: 96px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.pageContent :global(.annual-tax-bar .bar-fill) {
+  width: min(100%, 18px);
+  height: var(--tax-height);
+  min-height: 0;
+  border-radius: 999px 999px 4px 4px;
+  background: color-mix(in srgb, var(--accent) 72%, var(--surface));
+  transition: height 180ms ease;
+}
+
+.pageContent :global(.annual-tax-bar.current .bar-fill) {
+  background: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-soft);
+}
+
+.pageContent :global(.annual-tax-bar.current .bar-value),
+.pageContent :global(.annual-tax-bar.current .bar-month) {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.pageContent :global(.annual-tax-bar.inactive .bar-fill) {
+  background: transparent;
+}
+
+.pageContent :global(.annual-tax-bar .bar-month) {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pageContent :global(.annual-table th),
+.pageContent :global(.annual-table td) {
+  padding: 12px 13px;
+}
+
+.pageContent :global(.annual-table td:first-child) {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.pageContent :global(.annual-table .take-home-value) {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pageContent :global(.annual-table .before-tax-value) {
+  display: block;
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.pageContent :global(.content-section) {
+  margin-top: 72px;
+}
+
+.pageContent :global(.content-heading) {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 18px;
+}
+
+.pageContent :global(.content-heading-note) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.stacked-heading) {
+  display: grid;
+  justify-content: start;
+  gap: 8px;
+}
+
+.pageContent :global(.stacked-heading p) {
+  max-width: 600px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.rateTablePanel {
+  overflow: hidden;
+}
+
+.rateTableWrap {
+  overflow-x: auto;
+}
+
+.rateTable th,
+.rateTable td {
+  padding: 14px 18px;
+}
+
+.rateTable th {
+  text-align: left;
+}
+
+.rateTable td {
+  text-align: left;
+}
+
+.sourceLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line);
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.sourceLine a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pageContent :global(.faq-section) {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.pageContent :global(.faq-list) {
+  border-top: 1px solid var(--line);
+}
+
+.pageContent :global(.faq-list details) {
+  border-bottom: 1px solid var(--line);
+}
+
+.pageContent :global(.faq-list summary) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pageContent :global(.faq-list summary::-webkit-details-marker) {
+  display: none;
+}
+
+.pageContent :global(.faq-list summary)::after {
+  content: "+";
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.pageContent :global(.faq-list details[open] summary)::after {
+  content: "−";
+}
+
+.pageContent :global(.faq-list details p) {
+  max-width: 650px;
+  margin: -4px 35px 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 980px) {
+  .pageContent :global(.workspace-grid) {
+    grid-template-columns: 1fr;
+  }
+
+  .pageContent :global(.input-panel) {
+    position: static;
+    max-width: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .pageContent {
+    width: min(100% - 28px, 600px);
+    padding-top: 34px;
+  }
+
+  .pageContent :global(.page-intro) {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .pageContent :global(.intro-copy) {
+    font-size: 14px;
+  }
+
+  .pageContent :global(.rule-date) {
+    padding: 0;
+    font-size: 11px;
+  }
+
+  .pageContent :global(.input-panel),
+  .pageContent :global(.result-panel),
+  .pageContent :global(.detail-panel),
+  .pageContent :global(.annual-panel) {
+    padding: 20px;
+  }
+
+  .pageContent :global(.flow-legend) {
+    gap: 8px 12px;
+  }
+
+  .pageContent :global(.base-editor) {
+    grid-template-columns: 1fr;
+  }
+
+  .pageContent :global(.monthly-salary-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pageContent :global(.take-home-block > strong) {
+    font-size: 42px;
+  }
+
+  .pageContent :global(.contribution-list) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pageContent :global(.contribution-total) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pageContent :global(.detail-table-wrap) {
+    margin-inline: -8px;
+  }
+
+  .pageContent :global(.insurance-table) {
+    min-width: 630px;
+  }
+
+  .pageContent :global(.annual-heading-actions) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pageContent :global(.annual-tax-chart) {
+    margin: 18px -4px 18px;
+    padding: 16px 12px;
+    overflow-x: auto;
+  }
+
+  .pageContent :global(.annual-chart-summary) {
+    grid-template-columns: 1fr;
+  }
+
+  .pageContent :global(.annual-tax-bars) {
+    min-width: 610px;
+  }
+
+  .pageContent :global(.annual-table-wrap) {
+    margin-inline: -8px;
+  }
+
+  .pageContent :global(.annual-table) {
+    min-width: 690px;
+  }
+
+  .pageContent :global(.content-section) {
+    margin-top: 48px;
+  }
+
+  .pageContent :global(.content-heading) {
+    display: grid;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .pageContent :global(.content-heading-note) {
+    justify-self: start;
+  }
+
+  .rateTableWrap {
+    overflow-x: auto;
+  }
+
+  .rateTable {
+    min-width: 640px;
+  }
+
+  .sourceLine {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+    padding-inline: 12px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .sourceLine a {
+    white-space: nowrap;
+  }
+
+  .pageContent :global(.faq-section) {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
