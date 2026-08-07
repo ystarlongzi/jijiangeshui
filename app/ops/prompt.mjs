@@ -92,7 +92,7 @@ export async function resolveDatabaseConnection({ nonInteractive }) {
 
   requireInteractive(nonInteractive, '数据库连接')
   const address = await promptText(
-    'PostgreSQL 地址（可输入完整连接串，例如 postgresql://myuser:mypass@localhost:5432/jijian_geshui）',
+    'PostgreSQL 地址（可输入完整连接串）',
     process.env.OPS_DB_HOST,
   )
   if (!address) throw new Error('PostgreSQL 地址不能为空。')
