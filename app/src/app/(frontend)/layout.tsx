@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: siteName,
   description: '看懂工资到手、五险一金与全年预扣变化。',
   alternates: { canonical: '/' },
+  icons: {
+    icon: '/brand-logo.png',
+    shortcut: '/brand-logo.png',
+    apple: '/brand-logo.png',
+  },
   openGraph: { siteName, type: 'website', locale: 'zh_CN' },
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import ThemeToggle from '../ThemeToggle'
 import { useMoneyFormat } from '../MoneyFormatProvider'
 import { trackEvent } from '../../_lib/analytics'
@@ -30,7 +31,7 @@ export default function SiteHeader({ active }: { active?: ActivePage }) {
   const topbarClassName = `${styles.topbar}${menuOpen ? ` ${styles.menuOpen}` : ''}`
 
   return <header className={topbarClassName}>
-    <Link className={styles.brand} href="/" aria-label="极简个税首页"><span className={styles.brandMark}>极</span><span>极简个税</span></Link>
+    <Link className={styles.brand} href="/" aria-label="极简个税首页"><Image className={styles.brandLogo} src="/brand-logo.png" width={34} height={34} alt="" priority /><span>极简个税</span></Link>
     <nav className={styles.nav} aria-label="主导航">
       <Link className={active === 'home' ? styles.active : ''} href="/" onClick={closeMenu}><Home size={15} />首页</Link>
       <Link className={active === 'calculator' ? styles.active : ''} href="/calculator" onClick={closeMenu}><Calculator size={15} />工资薪金</Link>
