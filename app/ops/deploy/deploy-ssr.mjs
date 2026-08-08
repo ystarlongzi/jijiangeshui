@@ -238,7 +238,7 @@ async function main() {
     'case "$available_kb" in ""|*[!0-9]*) echo "Unable to determine free disk space." >&2; exit 1;; esac',
     'case "$available_inodes" in ""|*[!0-9]*) echo "Unable to determine free inodes." >&2; exit 1;; esac',
     `if [ "$available_kb" -lt ${minimumFreeKilobytes} ] && command -v npm >/dev/null 2>&1; then npm cache clean --force --silent >/dev/null 2>&1 || true; available_kb="$(df -Pk ${shellQuote(remoteRelease)} | awk 'NR == 2 { print $4 }')"; fi`,
-    `if [ "$available_kb" -lt ${minimumFreeKilobytes} ] || [ "$available_inodes" -lt ${minimumFreeInodes} ]; then echo "Insufficient remote capacity before install: available ${available_kb} KB / ${available_inodes} inodes; required ${minimumFreeKilobytes} KB / ${minimumFreeInodes} inodes." >&2; df -h ${shellQuote(remoteRelease)} >&2; df -i ${shellQuote(remoteRelease)} >&2; exit 1; fi`,
+    `if [ "$available_kb" -lt ${minimumFreeKilobytes} ] || [ "$available_inodes" -lt ${minimumFreeInodes} ]; then echo "Insufficient remote capacity before install: available $available_kb KB / $available_inodes inodes; required ${minimumFreeKilobytes} KB / ${minimumFreeInodes} inodes." >&2; df -h ${shellQuote(remoteRelease)} >&2; df -i ${shellQuote(remoteRelease)} >&2; exit 1; fi`,
   ].join('\n')
 
   try {
