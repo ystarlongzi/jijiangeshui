@@ -123,6 +123,20 @@ npm run deploy:ssr -- --no-prompt --reload-nginx
 
 `ENV_PRODUCTION` 只在 Workflow 运行器和目标服务器之间传输，生产密钥不会写入 Git。首次启用后建议先通过 `workflow_dispatch` 手动执行一次，确认 SSH、数据库连接、migration、Nginx 和 systemd 服务均正常，再依赖 `main` 分支自动部署。
 
+部署前会自动维护远端容量：`releases/` 保留当前版本和最近 2 个旧版本，`/tmp` 中超过 1 天的本项目 release zip 会被清理。执行远程 `npm ci` 前会检查部署目录所在文件系统，至少需要 1 GiB 可用空间和 100,000 个可用 inode；空间不足时会先尝试清理可重建的 npm cache，仍不足则在安装前失败并输出 `df -h`、`df -i` 信息。进入远程安装、迁移和重启阶段后如果部署失败，本次半成品 release 和临时 zip 会自动删除，不影响当前版本和保留的回滚版本。
+
+如果历史失败部署已经占满磁盘，首次修复前可先登录服务器检查并清理：
+
+```bash
+cd /www/wwwroot/jijian-geshui
+df -h .
+df -i .
+du -sh releases/* /tmp/jijian-geshui-*.zip /root/.npm 2>/dev/null
+readlink -f current
+```
+
+确认 `current` 指向后，只删除不再需要的旧 release 和失败临时 zip，再重新运行 Workflow；不要删除 `current` 指向的版本或最近一个可回滚版本。
+
 ### 数据库迁移
 
 修改 `app/src/collections` 后，开发者必须在本地生成并提交 migration：

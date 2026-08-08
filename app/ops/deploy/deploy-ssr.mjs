@@ -26,6 +26,10 @@ const defaults = {
   siteUrl: 'https://jijiangeshui.com',
 }
 
+const releaseRetention = 2
+const minimumFreeKilobytes = 1024 * 1024
+const minimumFreeInodes = 100000
+
 function printHelp() {
   console.log(`Usage: npm run deploy:ssr -- [options]
 
@@ -198,7 +202,8 @@ async function main() {
   const sshTarget = `${options.user}@${options.host}`
   const sshArgs = ['-i', options.key, '-p', options.sshPort, '-o', 'StrictHostKeyChecking=accept-new']
   const releaseId = new Date().toISOString().replace(/\D/gu, '').slice(0, 17)
-  const remoteRelease = path.posix.join(options.deployPath, 'releases', releaseId)
+  const remoteReleaseRoot = path.posix.join(options.deployPath, 'releases')
+  const remoteRelease = path.posix.join(remoteReleaseRoot, releaseId)
   const remoteCurrent = path.posix.join(options.deployPath, 'current')
   const remoteEnv = path.posix.join(options.deployPath, 'shared', '.env.production')
   const remoteNginx = path.posix.join(options.nginxPath, 'jijiangeshui.conf')
@@ -208,12 +213,40 @@ async function main() {
   const remoteBackupService = `/etc/systemd/system/${backupServiceName}.service`
   const remoteBackupTimer = `/etc/systemd/system/${backupServiceName}.timer`
   const tempFiles = await prepareTempFiles(options, envContent)
+  const remoteCleanupOnExit = [
+    'cleanup_deployment_artifacts() {',
+    '  status=$?',
+    `  if [ "$status" -ne 0 ]; then rm -rf -- ${shellQuote(remoteRelease)} || true; fi`,
+    `  rm -f -- ${shellQuote(remoteArtifact)} || true`,
+    '  exit "$status"',
+    '}',
+    'trap cleanup_deployment_artifacts EXIT',
+  ].join('\n')
+  const remoteMaintenance = [
+    `current_target="$(readlink -f ${shellQuote(remoteCurrent)} 2>/dev/null || true)"`,
+    'kept_releases=0',
+    `find ${shellQuote(remoteReleaseRoot)} -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\\n' 2>/dev/null | sort -rn | while IFS= read -r release_entry; do`,
+    '  candidate="${release_entry#* }"',
+    `  [ "$candidate" = ${shellQuote(remoteRelease)} ] && continue`,
+    '  [ "$candidate" = "$current_target" ] && continue',
+    '  kept_releases=$((kept_releases + 1))',
+    `  if [ "$kept_releases" -gt ${releaseRetention} ]; then rm -rf -- "$candidate"; fi`,
+    'done',
+    `find /tmp -maxdepth 1 -type f -name ${shellQuote(`${options.appName}-*.zip`)} -mtime +1 -delete 2>/dev/null || true`,
+    `available_kb="$(df -Pk ${shellQuote(remoteRelease)} | awk 'NR == 2 { print $4 }')"`,
+    `available_inodes="$(df -Pi ${shellQuote(remoteRelease)} | awk 'NR == 2 { print $4 }')"`,
+    'case "$available_kb" in ""|*[!0-9]*) echo "Unable to determine free disk space." >&2; exit 1;; esac',
+    'case "$available_inodes" in ""|*[!0-9]*) echo "Unable to determine free inodes." >&2; exit 1;; esac',
+    `if [ "$available_kb" -lt ${minimumFreeKilobytes} ] && command -v npm >/dev/null 2>&1; then npm cache clean --force --silent >/dev/null 2>&1 || true; available_kb="$(df -Pk ${shellQuote(remoteRelease)} | awk 'NR == 2 { print $4 }')"; fi`,
+    `if [ "$available_kb" -lt ${minimumFreeKilobytes} ] || [ "$available_inodes" -lt ${minimumFreeInodes} ]; then echo "Insufficient remote capacity before install: available ${available_kb} KB / ${available_inodes} inodes; required ${minimumFreeKilobytes} KB / ${minimumFreeInodes} inodes." >&2; df -h ${shellQuote(remoteRelease)} >&2; df -i ${shellQuote(remoteRelease)} >&2; exit 1; fi`,
+  ].join('\n')
 
   try {
     console.log(`[1/6] Preparing remote directories on ${sshTarget}`)
     await runCommand('ssh', [...sshArgs, sshTarget, [
       'set -euo pipefail',
       `mkdir -p ${shellQuote(remoteRelease)} ${shellQuote(path.posix.join(options.deployPath, 'releases'))} ${shellQuote(path.posix.join(options.deployPath, 'shared'))} ${shellQuote(options.nginxPath)}`,
+      remoteMaintenance,
     ].join('\n')])
 
     if (options.artifact) {
@@ -256,6 +289,8 @@ async function main() {
     ].join('\n')
     const remotePreparation = options.artifact ? [
       'set -euo pipefail',
+      remoteCleanupOnExit,
+      remoteMaintenance,
       "command -v npm >/dev/null 2>&1 || { echo 'npm is required on the server.' >&2; exit 1; }",
       "command -v node >/dev/null 2>&1 || { echo 'node is required on the server.' >&2; exit 1; }",
       `mkdir -p ${shellQuote(remoteRelease)}`,
@@ -269,6 +304,8 @@ async function main() {
       `rm -f ${shellQuote(remoteArtifact)}`,
     ] : [
       'set -euo pipefail',
+      remoteCleanupOnExit,
+      remoteMaintenance,
       `cd ${shellQuote(remoteRelease)}`,
       "command -v npm >/dev/null 2>&1 || { echo 'npm is required on the server.' >&2; exit 1; }",
       "command -v node >/dev/null 2>&1 || { echo 'node is required on the server.' >&2; exit 1; }",
