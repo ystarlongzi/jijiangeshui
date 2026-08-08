@@ -3,7 +3,7 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import { ExternalLink, Info } from 'lucide-react'
 import Link from 'next/link'
-import { currentYear, ruleCheckedDate } from '@/lib/site'
+import { currentYear } from '@/lib/site'
 import { businessTaxBrackets } from '@/lib/business-tax'
 import { taxBrackets as fallbackTaxBrackets, type TaxBracket } from '@/lib/tax-rules'
 import { getTaxRateLabel, getTaxRatePageSeo, getTaxRateUrl, isClassifiedTaxRateType, parseTaxRateSelection, type TaxRateIdentity, type TaxRateIncomeType, type TaxRateSelection } from '@/lib/tax-rate-page'
@@ -180,7 +180,6 @@ export default function TaxRateTabs({ incomeTaxRules, initialSelection }: TaxRat
   const active = getRateTab(identity, activeType, getSalaryRows(yearRules.taxBrackets), yearRules.taxRates)
   const activeRuleWarning = activeRule ? [] : [`${taxYear} 年${getTaxRateLabel({ type: activeType, identity })}规则尚未在 CMS 中发布，当前显示内置参考值。`]
   const boundaryMessages = [...(activeType === 'salary' ? yearRules.missingReasons : []), ...activeRuleWarning]
-  const activeCheckedAt = activeRule?.checkedAt || yearRules.checkedAt || ruleCheckedDate
   const calculatorLink = calculatorLinks[activeType]
   const currentGroup = incomeGroups.find((group) => group.label === (activeGroup === 'comprehensive' ? '综合所得' : '分类所得')) || incomeGroups[0]
   const selectGroup = (group: IncomeGroup) => {
@@ -244,7 +243,7 @@ export default function TaxRateTabs({ incomeTaxRules, initialSelection }: TaxRat
       const selection = { type: activeType, identity: item.id, year: taxYear }
       return <a key={item.id} href={getTaxRateUrl(selection, defaultYear)} className={identity === item.id ? styles.active : ''} role="tab" aria-selected={identity === item.id} onClick={(event) => handleSelectionLinkClick(event, () => selectIdentity(item.id))}>{item.label}</a>
     })}</div></div>}
-    <Panel className={styles.tabPanel} role="tabpanel"><div className={styles.tableHeading}><div><h2>{active.title}</h2><p>{active.description}</p></div><div><SelectField className={styles.yearLabel} label="纳税年度" value={taxYear} onChange={selectYear} options={(incomeTaxRules?.availableYears || [currentYear]).map((year) => ({ value: year, label: `${year} 年` }))} /></div></div><RuleBoundaryNotice messages={boundaryMessages} title="当前年度规则待补充" tone={activeType === 'salary' ? 'error' : 'warning'} />{active.rows ? <DataTable ariaLabel={active.title} columns={rateColumns} rows={rateRows} headerTone="muted" wrapperClassName={styles.tableWrap} tableClassName={styles.table} /> : <div className={styles.simpleRatePanel}><div className={styles.simpleRateCopy}><strong>{active.rate}</strong><p>{active.note}</p></div></div>}{active.rows && <div className={styles.tabNote}><Info size={15} /><span>{active.note}</span></div>}<div className={styles.sourceLine}><span>来源：CMS 所得税率规则（未发布时显示内置参考值）；规则核对日期：{activeCheckedAt}</span><a href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看个人所得税法 <ExternalLink size={13} /></a></div></Panel>
+    <Panel className={styles.tabPanel} role="tabpanel"><div className={styles.tableHeading}><div><h2>{active.title}</h2><p>{active.description}</p></div><div><SelectField className={styles.yearLabel} label="纳税年度" value={taxYear} onChange={selectYear} options={(incomeTaxRules?.availableYears || [currentYear]).map((year) => ({ value: year, label: `${year} 年` }))} /></div></div><RuleBoundaryNotice messages={boundaryMessages} title="当前年度规则待补充" tone={activeType === 'salary' ? 'error' : 'warning'} />{active.rows ? <DataTable ariaLabel={active.title} columns={rateColumns} rows={rateRows} headerTone="muted" wrapperClassName={styles.tableWrap} tableClassName={styles.table} /> : <div className={styles.simpleRatePanel}><div className={styles.simpleRateCopy}><strong>{active.rate}</strong><p>{active.note}</p></div></div>}<div className={styles.tableFooter}>{active.rows && <div className={styles.tabNote}><Info size={15} /><span>{active.note}</span></div>}<a className={styles.officialLink} href="https://fgk.chinatax.gov.cn/zcfgk/c100012/c5194838/content.html" target="_blank" rel="noreferrer">查看个人所得税法 <ExternalLink size={13} /></a></div></Panel>
     <section className={styles.nextCard}><div><h2>看完税率表，直接测算</h2><p>税率只决定计算口径，实际结果还要结合收入、扣除、成本或费用。</p></div><Link href={calculatorLink.href}>{calculatorLink.label} <ExternalLink size={13} /></Link></section>
   </section>
 }
