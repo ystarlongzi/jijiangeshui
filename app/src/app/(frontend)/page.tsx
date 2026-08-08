@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import TrackedLink from './_components/TrackedLink'
 import styles from './page.module.css'
 import {
@@ -63,7 +64,7 @@ const highlights = [
   { icon: BarChart3, title: '结果解释', text: '不只告诉你数字，还说明本月为什么变化。' },
 ]
 
-const preferredCityKeys = ['beijing', 'shanghai', 'shenzhen', 'guangzhou', 'hangzhou']
+const preferredCityKeys = ['beijing', 'shanghai', 'shenzhen', 'guangzhou', 'hangzhou', 'chengdu', 'wuhan', 'changsha', 'xian']
 
 export default async function HomePage() {
   const cities = await getAvailableCities({ all: true })
@@ -85,6 +86,10 @@ export default async function HomePage() {
           <div className={styles.actions}><PrimaryActionLink href="/calculator" eventPayload={{ module: 'home_hero', label: '开始算工资' }}>开始算工资 <ArrowRight size={17} /></PrimaryActionLink><TrackedLink className={styles.secondaryAction} href="/tax-rate" eventPayload={{ module: 'home_hero', label: '先看税率表' }}>先看税率表</TrackedLink></div>
           <div className={styles.heroNote}><span className="status-dot" /><span>规则核对日期</span><strong>{ruleCheckedDate}</strong></div>
         </div>
+        <nav className={styles.heroCityEntry} aria-label="热门城市">
+          <div className={styles.heroCityHeading}><span><MapPin size={15} />按城市查看规则</span><Link href="/city">全部城市 <ArrowRight size={14} /></Link></div>
+          <div className={styles.heroCityLinks}>{popularCities.map((city) => <Link className={styles.heroCityLink} href={`/city/${city.key}`} key={city.key}>{city.label}</Link>)}</div>
+        </nav>
       </div>
       <div className={styles.snapshot} aria-label="工资去向概览">
         <div className={styles.snapshotTop}><span>工资去向概览</span><strong>{currentYear}</strong></div>

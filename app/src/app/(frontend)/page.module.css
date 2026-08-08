@@ -78,6 +78,73 @@
   color: var(--ink);
 }
 
+.heroCityEntry {
+  display: grid;
+  gap: 11px;
+  max-width: 650px;
+  margin-top: 25px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.heroCityHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.heroCityHeading > span,
+.heroCityHeading a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heroCityHeading svg {
+  color: var(--accent);
+}
+
+.heroCityHeading a {
+  color: var(--accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.heroCityHeading a:hover {
+  color: var(--accent-deep);
+}
+
+.heroCityLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.heroCityLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.heroCityLink:hover {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .snapshot {
   position: relative;
   align-self: center;
@@ -496,6 +563,10 @@
   .lead {
     font-size: 16px;
     white-space: normal;
+  }
+
+  .heroCityEntry {
+    margin-top: 22px;
   }
 
   .snapshot {
