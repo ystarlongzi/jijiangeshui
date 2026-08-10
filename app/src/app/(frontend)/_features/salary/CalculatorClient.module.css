@@ -1,44 +1,44 @@
 .pageContent {
-  composes: pageContent from './CalculatorClient.layout.module.css';
-  composes: pageContent from './CalculatorClient.result.module.css';
-  composes: pageContent from './CalculatorClient.detail.module.css';
-  composes: pageContent from './CalculatorClient.content.module.css';
-  composes: pageContent from './CalculatorClient.responsive.module.css';
+  composes: pageContent from './styles/CalculatorClient.layout.module.css';
+  composes: pageContent from './styles/CalculatorClient.result.module.css';
+  composes: pageContent from './styles/CalculatorClient.detail.module.css';
+  composes: pageContent from './styles/CalculatorClient.content.module.css';
+  composes: pageContent from './styles/CalculatorClient.responsive.module.css';
 }
 
-.eyebrow { composes: eyebrow from './CalculatorClient.layout.module.css'; }
-.formTextAction { composes: formTextAction from './CalculatorClient.layout.module.css'; }
-.salaryModeRow { composes: salaryModeRow from './CalculatorClient.layout.module.css'; }
-.salaryModeButton { composes: salaryModeButton from './CalculatorClient.layout.module.css'; }
-.editBaseButton { composes: editBaseButton from './CalculatorClient.layout.module.css'; }
-.compactField { composes: compactField from './CalculatorClient.layout.module.css'; }
-.fieldGrid { composes: fieldGrid from './CalculatorClient.layout.module.css'; }
-.ratioGrid { composes: ratioGrid from './CalculatorClient.layout.module.css'; }
-.fieldError { composes: fieldError from './CalculatorClient.layout.module.css'; }
-.sectionDivider { composes: sectionDivider from './CalculatorClient.layout.module.css'; }
-.baseField { composes: baseField from './CalculatorClient.layout.module.css'; }
-.smallInput { composes: smallInput from './CalculatorClient.layout.module.css'; }
-.deductionBlock { composes: deductionBlock from './CalculatorClient.layout.module.css'; }
-.formActions { composes: formActions from './CalculatorClient.layout.module.css'; }
-.formFootnote { composes: formFootnote from './CalculatorClient.layout.module.css'; }
+.eyebrow { composes: eyebrow from './styles/CalculatorClient.layout.module.css'; }
+.formTextAction { composes: formTextAction from './styles/CalculatorClient.layout.module.css'; }
+.salaryModeRow { composes: salaryModeRow from './styles/CalculatorClient.layout.module.css'; }
+.salaryModeButton { composes: salaryModeButton from './styles/CalculatorClient.layout.module.css'; }
+.editBaseButton { composes: editBaseButton from './styles/CalculatorClient.layout.module.css'; }
+.compactField { composes: compactField from './styles/CalculatorClient.layout.module.css'; }
+.fieldGrid { composes: fieldGrid from './styles/CalculatorClient.layout.module.css'; }
+.ratioGrid { composes: ratioGrid from './styles/CalculatorClient.layout.module.css'; }
+.fieldError { composes: fieldError from './styles/CalculatorClient.layout.module.css'; }
+.sectionDivider { composes: sectionDivider from './styles/CalculatorClient.layout.module.css'; }
+.baseField { composes: baseField from './styles/CalculatorClient.layout.module.css'; }
+.smallInput { composes: smallInput from './styles/CalculatorClient.layout.module.css'; }
+.deductionBlock { composes: deductionBlock from './styles/CalculatorClient.layout.module.css'; }
+.formActions { composes: formActions from './styles/CalculatorClient.layout.module.css'; }
+.formFootnote { composes: formFootnote from './styles/CalculatorClient.layout.module.css'; }
 
-.resultGroup { composes: resultGroup from './CalculatorClient.result.module.css'; }
-.ruleLoading { composes: ruleLoading from './CalculatorClient.result.module.css'; }
-.ruleLoadingOverlay { composes: ruleLoadingOverlay from './CalculatorClient.result.module.css'; }
-.ruleLoadingSpinner { composes: ruleLoadingSpinner from './CalculatorClient.result.module.css'; }
+.resultGroup { composes: resultGroup from './styles/CalculatorClient.result.module.css'; }
+.ruleLoading { composes: ruleLoading from './styles/CalculatorClient.result.module.css'; }
+.ruleLoadingOverlay { composes: ruleLoadingOverlay from './styles/CalculatorClient.result.module.css'; }
+.ruleLoadingSpinner { composes: ruleLoadingSpinner from './styles/CalculatorClient.result.module.css'; }
 
-.exportButton { composes: exportButton from './CalculatorClient.detail.module.css'; }
+.exportButton { composes: exportButton from './styles/CalculatorClient.detail.module.css'; }
 
-.rateTablePanel { composes: rateTablePanel from './CalculatorClient.content.module.css'; }
+.rateTablePanel { composes: rateTablePanel from './styles/CalculatorClient.content.module.css'; }
 .rateTableWrap {
-  composes: rateTableWrap from './CalculatorClient.content.module.css';
-  composes: rateTableWrap from './CalculatorClient.responsive.module.css';
+  composes: rateTableWrap from './styles/CalculatorClient.content.module.css';
+  composes: rateTableWrap from './styles/CalculatorClient.responsive.module.css';
 }
 .rateTable {
-  composes: rateTable from './CalculatorClient.content.module.css';
-  composes: rateTable from './CalculatorClient.responsive.module.css';
+  composes: rateTable from './styles/CalculatorClient.content.module.css';
+  composes: rateTable from './styles/CalculatorClient.responsive.module.css';
 }
 .sourceLine {
-  composes: sourceLine from './CalculatorClient.content.module.css';
-  composes: sourceLine from './CalculatorClient.responsive.module.css';
+  composes: sourceLine from './styles/CalculatorClient.content.module.css';
+  composes: sourceLine from './styles/CalculatorClient.responsive.module.css';
 }
