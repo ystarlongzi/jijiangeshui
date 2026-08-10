@@ -17,6 +17,7 @@
 .fieldError { composes: fieldError from './styles/CalculatorClient.layout.module.css'; }
 .sectionDivider { composes: sectionDivider from './styles/CalculatorClient.layout.module.css'; }
 .baseField { composes: baseField from './styles/CalculatorClient.layout.module.css'; }
+.baseInputWrap { composes: baseInputWrap from './styles/CalculatorClient.layout.module.css'; }
 .smallInput { composes: smallInput from './styles/CalculatorClient.layout.module.css'; }
 .deductionBlock { composes: deductionBlock from './styles/CalculatorClient.layout.module.css'; }
 .formActions { composes: formActions from './styles/CalculatorClient.layout.module.css'; }

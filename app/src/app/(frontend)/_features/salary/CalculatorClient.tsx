@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronDown, Copy, Download } from 'lucide-react'
 import { cityRules as fallbackCityRules, getCityRuleForMonth, getContributionBaseRule, resolveCityRuleForMonth, taxBrackets as fallbackTaxBrackets, type CityRule } from '@/lib/tax-rules'
 import type { CityRuleLoadStatus, CitySummary } from '@/lib/city-rule-types'
 import { calculateInsurance, calculateMonthFromSeries, clamp, type InsuranceItem } from '@/lib/tax-calculator'
 import { auditCityRule, getRuleQualityStatus } from '@/lib/city-rule-quality'
-import { getValidatedHousingRateOptions, validateCityRuleInputs } from '@/lib/city-rule-validation'
+import { getEffectiveHousingRate, getValidatedHousingRateOptions, validateCityRuleInputs } from '@/lib/city-rule-validation'
 import { currentYear } from '@/lib/site'
 import { specialDeductionGroups as fallbackDeductionGroups, specialDeductionItems as fallbackDeductionItems } from '@/lib/special-deductions'
 import type { IncomeTaxRuleDataset, IncomeTaxYearRules } from '@/lib/income-tax-rule-types'
@@ -27,6 +27,7 @@ import DataTable from '../../_components/DataTable'
 import TrackedLink from '../../_components/TrackedLink'
 import ValidationPanel from '../../_components/ValidationPanel'
 import RuleBoundaryNotice from '../../_components/RuleBoundaryNotice'
+import RangeTooltip from '../../_components/RangeTooltip'
 import ResultActions, { ResultActionButton } from '../../_components/ResultActions/ResultActions'
 import useCityLocator from '../../_hooks/useCityLocator'
 import useCityRule from '../../_hooks/useCityRule'
@@ -101,12 +102,6 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
   const cityHousingRateOptions = useMemo(() => getValidatedHousingRateOptions(rule), [rule])
-  const inputValidation = useMemo(() => validateCityRuleInputs(rule, {
-    socialBase,
-    housingBase,
-    employeeHousingRate,
-    employerHousingRate,
-  }), [rule, socialBase, housingBase, employeeHousingRate, employerHousingRate])
   // sources 仅供 CMS 内部审计，接口不会下发，不能阻断前端计算。
   const ruleQualityIssues = useMemo(() => auditCityRule(city, rule, { includeSourceChecks: false }), [city, rule])
   const hasRuleQualityErrors = getRuleQualityStatus(ruleQualityIssues) === 'error'
@@ -115,6 +110,17 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   const activeSalary = salaryMode === 'fixed' ? salary : monthlySalaries[month - 1] || 0
   const salaryForBase = salaryMode === 'fixed' ? salary : activeSalary
   const salariesForCalculation = useMemo(() => salaryMode === 'fixed' ? Array.from({ length: 12 }, () => salary) : monthlySalaries, [salaryMode, salary, monthlySalaries])
+  // 未手动编辑时，当前规则的有效值必须同步派生，避免城市切换后先用旧基数触发一帧错误校验。
+  const effectiveSocialBase = editingSocial ? socialBase : clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max)
+  const effectiveHousingBase = editingHousing ? housingBase : clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max)
+  const effectiveEmployeeHousingRate = getEffectiveHousingRate(employeeHousingRate, cityHousingRateOptions)
+  const effectiveEmployerHousingRate = getEffectiveHousingRate(employerHousingRate, cityHousingRateOptions)
+  const inputValidation = useMemo(() => validateCityRuleInputs(rule, {
+    socialBase: effectiveSocialBase,
+    housingBase: effectiveHousingBase,
+    employeeHousingRate: effectiveEmployeeHousingRate,
+    employerHousingRate: effectiveEmployerHousingRate,
+  }), [rule, effectiveSocialBase, effectiveHousingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate])
 
   useEffect(() => {
     if (!editingSocial) setSocialBase(clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max))
@@ -138,8 +144,8 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
     // 未手动编辑基数时，每月按当月工资和当月城市规则重新取值；手动编辑则沿用用户输入。
     const monthSocialBase = editingSocial ? socialBase : clamp(monthSalary, monthSocialBaseRule.min, monthSocialBaseRule.max)
     const monthHousingBase = editingHousing ? housingBase : clamp(monthSalary, monthHousingBaseRule.min, monthHousingBaseRule.max)
-    return calculateInsurance(monthRule, monthSocialBase, monthHousingBase, employeeHousingRate, employerHousingRate)
-  }), [selectedCityRule, taxYear, salaryMode, salary, monthlySalaries, editingSocial, editingHousing, socialBase, housingBase, employeeHousingRate, employerHousingRate])
+    return calculateInsurance(monthRule, monthSocialBase, monthHousingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate)
+  }), [selectedCityRule, taxYear, salaryMode, salary, monthlySalaries, editingSocial, editingHousing, socialBase, housingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate])
   // 固定当前月份的数组引用，避免空数组在每次渲染时变化并触发下游计算。
   const insurance = useMemo(() => insuranceByMonth[month - 1] || [], [insuranceByMonth, month])
   const result = useMemo(() => calculateMonthFromSeries(
@@ -185,37 +191,15 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
     hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠测算，请稍后再试或查看城市规则。` : '',
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
-    isSocialBaseInvalid ? `社保缴费基数需要在 ${wholeMoney(socialBaseRule.min)} - ${wholeMoney(socialBaseRule.max)} 之间。` : '',
-    isHousingBaseInvalid ? `公积金缴费基数需要在 ${wholeMoney(housingBaseRule.min)} - ${wholeMoney(housingBaseRule.max)} 之间。` : '',
     isEmployeeHousingRateInvalid ? cityHousingRateOptions.length > 0 ? `公积金个人比例需从 ${housingRateOptionsText} 中选择。` : '当前城市暂无可用的公积金缴费比例规则，暂时无法可靠测算。' : '',
     isEmployerHousingRateInvalid ? cityHousingRateOptions.length > 0 ? `公积金单位比例需从 ${housingRateOptionsText} 中选择。` : '当前城市暂无可用的公积金缴费比例规则，暂时无法可靠测算。' : '',
     isDeductionInvalid ? '专项附加扣除已超过税前月薪，请确认是否填入了月度扣除额。' : '',
-  ].filter(Boolean)
-  const socialSalaryOutsideRange = !editingSocial && activeSalary > 0 && (activeSalary < socialBaseRule.min || activeSalary > socialBaseRule.max)
-  const housingSalaryOutsideRange = !editingHousing && activeSalary > 0 && (activeSalary < housingBaseRule.min || activeSalary > housingBaseRule.max)
-  const boundaryMessages = [
-    socialSalaryOutsideRange
-      ? `税前收入超出社保缴费基数范围，当前按${activeSalary < socialBaseRule.min ? '最低' : '最高'}基数 ${wholeMoney(socialBase)} 估算。`
-      : !isSocialBaseInvalid && socialBase === socialBaseRule.min
-        ? `社保缴费基数已达到城市允许的最低值 ${wholeMoney(socialBaseRule.min)}。`
-        : !isSocialBaseInvalid && socialBase === socialBaseRule.max
-          ? `社保缴费基数已达到城市允许的最高值 ${wholeMoney(socialBaseRule.max)}。`
-          : '',
-    housingSalaryOutsideRange
-      ? `税前收入超出公积金缴费基数范围，当前按${activeSalary < housingBaseRule.min ? '最低' : '最高'}基数 ${wholeMoney(housingBase)} 估算。`
-      : !isHousingBaseInvalid && housingBase === housingBaseRule.min
-        ? `公积金缴费基数已达到城市允许的最低值 ${wholeMoney(housingBaseRule.min)}。`
-        : !isHousingBaseInvalid && housingBase === housingBaseRule.max
-          ? `公积金缴费基数已达到城市允许的最高值 ${wholeMoney(housingBaseRule.max)}。`
-          : '',
   ].filter(Boolean)
   const calculationBlocked = [
     ...blockingRuleMessages,
     hasRuleQualityErrors ? `${rule.label} 当前规则信息不完整，暂时无法可靠测算，请稍后再试或查看城市规则。` : '',
     isSalaryInvalid ? '税前月薪需要大于 0，才能计算工资到手和个人所得税。' : '',
     isMonthInvalid ? '计算月份不能早于入职月份，请调整月份后再查看结果。' : '',
-    isSocialBaseInvalid ? '社保缴费基数超出允许范围。' : '',
-    isHousingBaseInvalid ? '公积金缴费基数超出允许范围。' : '',
     isEmployeeHousingRateInvalid ? '公积金个人比例不在当前城市规则范围内。' : '',
     isEmployerHousingRateInvalid ? '公积金单位比例不在当前城市规则范围内。' : '',
     isDeductionInvalid ? '专项附加扣除已超过税前月薪。' : '',
@@ -408,13 +392,12 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
           <div className={styles.sectionDivider} />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
           <div className="base-editor">
-            <BaseField label={socialBaseRule.label} value={socialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
-            <BaseField label={housingBaseRule.label} value={housingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
+            <BaseField label={socialBaseRule.label} value={effectiveSocialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
+            <BaseField label={housingBaseRule.label} value={effectiveHousingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
           </div>
-          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={employeeHousingRate} options={cityHousingRateOptions} invalid={isEmployeeHousingRateInvalid} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={employerHousingRate} options={cityHousingRateOptions} invalid={isEmployerHousingRateInvalid} onChange={setEmployerHousingRate} /></div>
+          <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={effectiveEmployeeHousingRate} options={cityHousingRateOptions} invalid={isEmployeeHousingRateInvalid} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={effectiveEmployerHousingRate} options={cityHousingRateOptions} invalid={isEmployerHousingRateInvalid} onChange={setEmployerHousingRate} /></div>
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button className={styles.formTextAction} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : ''} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
           <ValidationPanel messages={validationMessages} title="请确认输入" />
-          <RuleBoundaryNotice messages={boundaryMessages} title="边界提醒" />
           <div className={styles.formActions}><Button variant="primary" type="submit" disabled={calculationBlocked}>开始计算</Button><Button variant="secondary" type="button" onClick={reset}>清空</Button></div><p className={styles.formFootnote}>结果仅供测算，最终以个税 APP、扣缴单位或税务机关口径为准。</p>
         </Panel>
 
@@ -459,8 +442,11 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
 
 function BaseField({ label, value, min, max, invalid, editing, onEdit, onChange }: { label: string; value: number; min: number; max: number; invalid: boolean; editing: boolean; onEdit: () => void; onChange: (value: number) => void }) {
   const { money } = useMoneyFormat()
+  const tooltipId = useId()
+  const [focused, setFocused] = useState(false)
   const range = (min: number, max: number) => `${money(min, 0)} - ${money(max, 0)}`
-  return <FormField className={styles.baseField} label={label} action={<Button className={styles.editBaseButton} variant="text" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</Button>} meta={`允许范围：${range(min, max)}`} error={invalid ? `${label}需要在允许范围内。` : ''}><MoneyInput className={[styles.smallInput, invalid ? 'input-error' : ''].filter(Boolean).join(' ')} value={value} min={min} max={max} readOnly={!editing} onChange={onChange} /></FormField>
+  const showRangeTip = focused && invalid
+  return <FormField className={styles.baseField} label={label} action={<Button className={styles.editBaseButton} variant="text" type="button" aria-pressed={editing} onClick={onEdit}>{editing ? '完成' : '编辑'}</Button>} meta={`允许范围：${range(min, max)}`}><div className={styles.baseInputWrap}><MoneyInput className={styles.smallInput} value={value} readOnly={!editing} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} aria-describedby={showRangeTip ? tooltipId : undefined} />{showRangeTip && <RangeTooltip id={tooltipId} message={`${label}建议在 ${range(min, max)} 之间。`} />}</div></FormField>
 }
 
 function RateSelect({ label, value, options, invalid, onChange }: { label: string; value: number; options: number[]; invalid: boolean; onChange: (value: number) => void }) {

@@ -25,6 +25,12 @@ export function getValidatedHousingRateOptions(rule: CityRule) {
   return [...new Set(options.filter((rate) => Number.isFinite(rate)))].sort((a, b) => a - b)
 }
 
+// 城市切换后，先用当前规则允许的最高比例参与计算，避免等待状态回填时短暂使用旧城市比例。
+export function getEffectiveHousingRate(value: number, options: number[]) {
+  if (options.length === 0 || options.includes(value)) return value
+  return options[options.length - 1]
+}
+
 export function validateHousingRateInputs(rule: CityRule, employeeHousingRate: number, employerHousingRate: number): HousingRateInputValidation {
   const options = getValidatedHousingRateOptions(rule)
 

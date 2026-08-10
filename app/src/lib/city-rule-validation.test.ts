@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { cityRules, type CityRule } from './tax-rules'
-import { getValidatedHousingRateOptions, validateCityRuleInputs, validateHousingRateInputs } from './city-rule-validation'
+import { getEffectiveHousingRate, getValidatedHousingRateOptions, validateCityRuleInputs, validateHousingRateInputs } from './city-rule-validation'
 
 test('城市规则输入校验：默认基数和公积金比例均有效', () => {
   const validation = validateCityRuleInputs(cityRules.beijing, {
@@ -40,4 +40,10 @@ test('城市规则输入校验：空比例规则不会被当成可用配置', ()
   assert.deepEqual(getValidatedHousingRateOptions(brokenRule), [])
   assert.equal(validation.employeeHousingRate.valid, false)
   assert.equal(validation.employerHousingRate.valid, false)
+})
+
+test('城市规则输入校验：城市切换时无效比例回退到当前规则上限', () => {
+  assert.equal(getEffectiveHousingRate(12, [5, 7]), 7)
+  assert.equal(getEffectiveHousingRate(7, [5, 7]), 7)
+  assert.equal(getEffectiveHousingRate(12, []), 12)
 })

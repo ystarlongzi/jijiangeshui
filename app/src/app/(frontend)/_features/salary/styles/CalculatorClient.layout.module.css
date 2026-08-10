@@ -186,6 +186,10 @@
   margin: 0;
 }
 
+.baseInputWrap {
+  position: relative;
+}
+
 .pageContent :global(.base-editor .money-input.is-readonly) {
   background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));
 }
@@ -285,4 +289,3 @@
   font-size: 10px;
   line-height: 1.55;
 }
-

@@ -1,4 +1,4 @@
-import type { ChangeEvent, FocusEvent, ReactNode } from 'react'
+import type { ChangeEvent, FocusEvent, FocusEventHandler, ReactNode } from 'react'
 import styles from './MoneyInput.module.css'
 
 const defaultMax = 99999999
@@ -20,6 +20,9 @@ type MoneyInputProps = {
   className?: string
   prefix?: ReactNode
   unit?: ReactNode
+  onFocus?: FocusEventHandler<HTMLInputElement>
+  onBlur?: FocusEventHandler<HTMLInputElement>
+  'aria-describedby'?: string
 }
 
 export default function MoneyInput({
@@ -33,6 +36,9 @@ export default function MoneyInput({
   className = '',
   prefix = '¥',
   unit = '元',
+  onFocus,
+  onBlur,
+  'aria-describedby': ariaDescribedBy,
 }: MoneyInputProps) {
   const digits = String(Math.trunc(Math.abs(value || 0)))
   const tip = rankTips[digits.length]
@@ -57,7 +63,7 @@ export default function MoneyInput({
   return <div className={rootClassName}>
     <span>{prefix}</span>
     <span className={`${styles.box} amount-input-box`}>
-      <input id={id} type="number" min={min} max={max} step={step} value={value} readOnly={readOnly} onFocus={selectZero} onChange={updateValue} inputMode="decimal" />
+      <input id={id} type="number" min={min} max={max} step={step} value={value} readOnly={readOnly} onFocus={(event) => { selectZero(event); onFocus?.(event) }} onBlur={onBlur} aria-describedby={ariaDescribedBy} onChange={updateValue} inputMode="decimal" />
       {tip && <span className={`${styles.tipTrack} amount-tip-track`} aria-hidden="true"><span className={styles.tipDigits}><span className={styles.rankTip}>{tip}</span>{digits}</span></span>}
     </span>
     <span className={`${styles.unit} unit`}>{unit}</span>
