@@ -64,6 +64,8 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   const [startMonth, setStartMonth] = useState(1)
   const [socialBase, setSocialBase] = useState(20000)
   const [housingBase, setHousingBase] = useState(20000)
+  const [socialBaseOverride, setSocialBaseOverride] = useState(false)
+  const [housingBaseOverride, setHousingBaseOverride] = useState(false)
   const [editingSocial, setEditingSocial] = useState(false)
   const [editingHousing, setEditingHousing] = useState(false)
   const [employeeHousingRate, setEmployeeHousingRate] = useState(12)
@@ -111,8 +113,8 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   const salaryForBase = salaryMode === 'fixed' ? salary : activeSalary
   const salariesForCalculation = useMemo(() => salaryMode === 'fixed' ? Array.from({ length: 12 }, () => salary) : monthlySalaries, [salaryMode, salary, monthlySalaries])
   // 未手动编辑时，当前规则的有效值必须同步派生，避免城市切换后先用旧基数触发一帧错误校验。
-  const effectiveSocialBase = editingSocial ? socialBase : clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max)
-  const effectiveHousingBase = editingHousing ? housingBase : clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max)
+  const effectiveSocialBase = socialBaseOverride ? socialBase : clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max)
+  const effectiveHousingBase = housingBaseOverride ? housingBase : clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max)
   const effectiveEmployeeHousingRate = getEffectiveHousingRate(employeeHousingRate, cityHousingRateOptions)
   const effectiveEmployerHousingRate = getEffectiveHousingRate(employerHousingRate, cityHousingRateOptions)
   const inputValidation = useMemo(() => validateCityRuleInputs(rule, {
@@ -123,9 +125,9 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   }), [rule, effectiveSocialBase, effectiveHousingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate])
 
   useEffect(() => {
-    if (!editingSocial) setSocialBase(clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max))
-    if (!editingHousing) setHousingBase(clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max))
-  }, [city, taxYear, salaryForBase, rule, editingSocial, editingHousing, socialBaseRule.min, socialBaseRule.max, housingBaseRule.min, housingBaseRule.max])
+    if (!editingSocial && !socialBaseOverride) setSocialBase(clamp(salaryForBase, socialBaseRule.min, socialBaseRule.max))
+    if (!editingHousing && !housingBaseOverride) setHousingBase(clamp(salaryForBase, housingBaseRule.min, housingBaseRule.max))
+  }, [city, taxYear, salaryForBase, rule, editingSocial, editingHousing, socialBaseOverride, housingBaseOverride, socialBaseRule.min, socialBaseRule.max, housingBaseRule.min, housingBaseRule.max])
 
   useEffect(() => {
     if (cityHousingRateOptions.length === 0) return
@@ -142,10 +144,10 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
     const monthSocialBaseRule = getContributionBaseRule(monthRule, 'social')
     const monthHousingBaseRule = getContributionBaseRule(monthRule, 'housingFund')
     // 未手动编辑基数时，每月按当月工资和当月城市规则重新取值；手动编辑则沿用用户输入。
-    const monthSocialBase = editingSocial ? socialBase : clamp(monthSalary, monthSocialBaseRule.min, monthSocialBaseRule.max)
-    const monthHousingBase = editingHousing ? housingBase : clamp(monthSalary, monthHousingBaseRule.min, monthHousingBaseRule.max)
+    const monthSocialBase = socialBaseOverride ? socialBase : clamp(monthSalary, monthSocialBaseRule.min, monthSocialBaseRule.max)
+    const monthHousingBase = housingBaseOverride ? housingBase : clamp(monthSalary, monthHousingBaseRule.min, monthHousingBaseRule.max)
     return calculateInsurance(monthRule, monthSocialBase, monthHousingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate)
-  }), [selectedCityRule, taxYear, salaryMode, salary, monthlySalaries, editingSocial, editingHousing, socialBase, housingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate])
+  }), [selectedCityRule, taxYear, salaryMode, salary, monthlySalaries, socialBaseOverride, housingBaseOverride, socialBase, housingBase, effectiveEmployeeHousingRate, effectiveEmployerHousingRate])
   // 固定当前月份的数组引用，避免空数组在每次渲染时变化并触发下游计算。
   const insurance = useMemo(() => insuranceByMonth[month - 1] || [], [insuranceByMonth, month])
   const result = useMemo(() => calculateMonthFromSeries(
@@ -234,10 +236,12 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
     }
     if (requestedSocialBase > 0) {
       setSocialBase(requestedSocialBase)
+      setSocialBaseOverride(true)
       setEditingSocial(true)
     }
     if (requestedHousingBase > 0) {
       setHousingBase(requestedHousingBase)
+      setHousingBaseOverride(true)
       setEditingHousing(true)
     }
     if (requestedMonth) setMonth(requestedMonth)
@@ -268,7 +272,7 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
   }, [city, cityRuleState.loading, cityRuleState.rule, month, taxYear])
 
   const reset = () => {
-    setCity('beijing'); setTaxYear(incomeTaxRules?.availableYears[0] || currentYear); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000)
+    setCity('beijing'); setTaxYear(incomeTaxRules?.availableYears[0] || currentYear); setSalary(20000); setMonth(8); setStartMonth(1); setSocialBase(20000); setHousingBase(20000); setSocialBaseOverride(false); setHousingBaseOverride(false)
     setSalaryMode('fixed'); setMonthlySalaries(Array.from({ length: 12 }, () => 20000)); setEditingSocial(false); setEditingHousing(false); setEmployeeHousingRate(12); setEmployerHousingRate(12); setDeductionAmount(0); setDeductionSelections({}); setDeductionDialogOpen(false); setCalculationOpen(false)
     notify('已恢复城市默认设置')
   }
@@ -392,8 +396,8 @@ export default function CalculatorClient({ cities = fallbackCities, initialRule,
           <div className={styles.sectionDivider} />
           <div className="panel-heading compact-heading"><h3>缴费基数与比例</h3></div>
           <div className="base-editor">
-            <BaseField label={socialBaseRule.label} value={effectiveSocialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={setSocialBase} />
-            <BaseField label={housingBaseRule.label} value={effectiveHousingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={setHousingBase} />
+            <BaseField label={socialBaseRule.label} value={effectiveSocialBase} min={socialBaseRule.min} max={socialBaseRule.max} invalid={isSocialBaseInvalid} editing={editingSocial} onEdit={() => setEditingSocial(!editingSocial)} onChange={(value) => { setSocialBase(value); setSocialBaseOverride(true) }} />
+            <BaseField label={housingBaseRule.label} value={effectiveHousingBase} min={housingBaseRule.min} max={housingBaseRule.max} invalid={isHousingBaseInvalid} editing={editingHousing} onEdit={() => setEditingHousing(!editingHousing)} onChange={(value) => { setHousingBase(value); setHousingBaseOverride(true) }} />
           </div>
           <div className={styles.ratioGrid}><RateSelect label="公积金个人比例" value={effectiveEmployeeHousingRate} options={cityHousingRateOptions} invalid={isEmployeeHousingRateInvalid} onChange={setEmployeeHousingRate} /><RateSelect label="公积金单位比例" value={effectiveEmployerHousingRate} options={cityHousingRateOptions} invalid={isEmployerHousingRateInvalid} onChange={setEmployerHousingRate} /></div>
           <FormField className={styles.deductionBlock} htmlFor="deductionAmount" label="专项附加扣除" action={<Button className={styles.formTextAction} variant="text" type="button" onClick={() => setDeductionDialogOpen(true)}>选择项目</Button>} meta={selectedDeductionItems.length > 0 ? `已选择 ${selectedDeductionItems.map((item) => item?.label).join('、')}。` : ''} error={isDeductionInvalid ? '这里填写的是本月扣除额，不能高于税前月薪。' : ''}><MoneyInput id="deductionAmount" className={isDeductionInvalid ? 'input-error' : ''} value={deductionAmount} onChange={(value) => { setDeductionAmount(value); setDeductionSelections({}) }} /></FormField>
