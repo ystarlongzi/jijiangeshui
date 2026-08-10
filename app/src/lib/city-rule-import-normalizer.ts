@@ -5,6 +5,7 @@ import {
   type CrawlPolicyEntry,
   type WrappedPolicy,
 } from './city-rule-import-schema'
+import { canonicalCitySlug } from './city-slugs'
 
 type NormalizedContributionSideRule = {
   calcMethod: NormalizedCalcMethod
@@ -75,11 +76,12 @@ export function slugifyRuleEntity(city: CrawlCity | CrawlPolicy) {
   // 优先使用 areaCode/areaId 这类稳定标识；没有时才退回城市名。
   // 生成的 slug 需要和城市集合中的 slug 保持一致，政策导入和审计都会靠它关联城市。
   const source = ('areaCode' in city ? city.areaCode : undefined) || city.areaId || city.areaName || 'unknown-city'
-  return String(source)
+  const slug = String(source)
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
     .replace(/^-+|-+$/g, '')
+  return canonicalCitySlug(slug)
 }
 
 export function isWrappedPolicyEntry(entry: CrawlPolicyEntry): entry is WrappedPolicy {

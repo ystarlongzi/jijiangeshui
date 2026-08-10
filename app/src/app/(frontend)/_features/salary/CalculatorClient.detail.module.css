@@ -1,0 +1,386 @@
+.pageContent :global(.detail-panel) {
+  padding: 26px;
+}
+
+.pageContent :global(.section-heading-row) {
+  align-items: end;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.pageContent :global(.detail-heading-actions) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pageContent :global(.heading-with-meta) {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pageContent :global(.subtle-label) {
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-chart) {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.contribution-total) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageContent :global(.contribution-total span) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-total strong) {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.pageContent :global(.contribution-stack) {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.pageContent :global(.contribution-segment) {
+  flex: 0 0 var(--segment-width);
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-list) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px 18px;
+}
+
+.pageContent :global(.contribution-item) {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.contribution-item-body) {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-item-main) {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.pageContent :global(.contribution-item-main span) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.contribution-item strong) {
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pageContent :global(.contribution-item-value) {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pageContent :global(.contribution-item em) {
+  color: var(--subtle);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.pageContent :global(.contribution-dot) {
+  margin-top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pageContent :global(.personal-social) {
+  background: var(--accent);
+}
+
+.pageContent :global(.personal-housing) {
+  background: #63b6a1;
+}
+
+.pageContent :global(.employer-social) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.employer-housing) {
+  background: var(--orange);
+}
+
+.pageContent :global(.insurance-table th),
+.pageContent :global(.insurance-table td) {
+  padding: 13px 10px;
+}
+
+.pageContent :global(.insurance-table),
+.pageContent :global(.annual-table) {
+  table-layout: fixed;
+}
+
+.pageContent :global(.insurance-table tbody tr.subtotal td) {
+  color: var(--orange);
+}
+
+.pageContent :global(.insurance-table tbody tr.subtotal td:first-child) {
+  color: var(--ink);
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal td),
+.pageContent :global(.insurance-table tbody tr.housing-row td) {
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal:hover td),
+.pageContent :global(.insurance-table tbody tr.housing-row:hover td) {
+  background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface));
+}
+
+.pageContent :global(.insurance-table tbody tr.social-subtotal td) {
+  border-top-style: solid;
+}
+
+.pageContent :global(.insurance-table tbody tr.housing-row td) {
+  border-top-style: solid;
+  font-weight: 700;
+}
+
+.pageContent :global(.insurance-table tbody tr.housing-row .formula) {
+  font-weight: 400;
+}
+
+.pageContent :global(.insurance-table td:not(:first-child)) {
+  vertical-align: middle;
+}
+
+.pageContent :global(.formula) {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.pageContent :global(.table-note) {
+  margin: 14px 0 0;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.pageContent :global(.annual-panel) {
+  margin-top: 24px;
+  padding: 26px;
+}
+
+.pageContent :global(.annual-heading-actions) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exportButton:hover {
+  color: var(--accent-deep);
+}
+
+.pageContent :global(.annual-summary-card) {
+  margin: 22px 0 12px;
+}
+
+.pageContent :global(.annual-tax-chart) {
+  display: grid;
+  gap: 18px;
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.annual-chart-summary) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pageContent :global(.annual-chart-summary div) {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(25, 54, 46, 0.05);
+}
+
+.pageContent :global(.annual-chart-summary span) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.annual-chart-summary strong) {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.annual-tax-bars) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(34px, 1fr));
+  align-items: end;
+  gap: 8px;
+  min-height: 166px;
+}
+
+.pageContent :global(.annual-tax-bar) {
+  display: grid;
+  grid-template-rows: 18px 96px 16px;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.pageContent :global(.annual-tax-bar .bar-value) {
+  overflow: hidden;
+  color: var(--subtle);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageContent :global(.annual-tax-bar .bar-track) {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  height: 96px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.pageContent :global(.annual-tax-bar .bar-fill) {
+  width: min(100%, 18px);
+  height: var(--tax-height);
+  min-height: 0;
+  border-radius: 999px 999px 4px 4px;
+  background: color-mix(in srgb, var(--accent) 72%, var(--surface));
+  transition: height 180ms ease;
+}
+
+.pageContent :global(.annual-tax-bar.current .bar-fill) {
+  background: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-soft);
+}
+
+.pageContent :global(.annual-tax-bar.current .bar-value),
+.pageContent :global(.annual-tax-bar.current .bar-month) {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.pageContent :global(.annual-tax-bar.inactive .bar-fill) {
+  background: transparent;
+}
+
+.pageContent :global(.annual-tax-bar .bar-month) {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pageContent :global(.annual-table th),
+.pageContent :global(.annual-table td) {
+  padding: 12px 13px;
+}
+
+.pageContent :global(.annual-table td:first-child) {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.pageContent :global(.annual-table .take-home-value) {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pageContent :global(.annual-table .before-tax-value) {
+  display: block;
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.pageContent :global(.content-section) {
+  margin-top: 72px;
+}
+
+.pageContent :global(.content-heading) {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 18px;
+}
+
+.pageContent :global(.content-heading-note) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.stacked-heading) {
+  display: grid;
+  justify-content: start;
+  gap: 8px;
+}
+
+.pageContent :global(.stacked-heading p) {
+  max-width: 600px;
+  margin: 0;
+  color: var(--muted);
+}
+

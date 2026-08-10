@@ -1,0 +1,288 @@
+.pageContent {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 54px 0 40px;
+}
+
+.pageContent :global(.page-intro) {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 34px;
+}
+
+.pageContent :global(.page-intro > div:first-child) {
+  flex: 1;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pageContent :global(.intro-copy) {
+  max-width: none;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.pageContent :global(.rule-date) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pageContent :global(.rule-date strong) {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.pageContent :global(.status-dot) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.pageContent :global(.workspace-grid) {
+  display: grid;
+  grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.pageContent :global(.input-panel) {
+  position: sticky;
+  top: 94px;
+  align-self: start;
+  padding: 26px;
+}
+
+.pageContent :global(.input-panel),
+.pageContent :global(.result-panel),
+.pageContent :global(.detail-panel),
+.pageContent :global(.annual-panel) {
+  box-shadow: var(--shadow-strong);
+}
+
+.pageContent :global(.panel-heading),
+.pageContent :global(.section-heading-row),
+.pageContent :global(.result-topline) {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageContent :global(.panel-heading) {
+  margin-bottom: 24px;
+}
+
+.pageContent :global(.compact-heading) {
+  margin: 0 0 14px;
+  align-items: center;
+}
+
+.pageContent :global(.city-actions) {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.formTextAction {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.formTextAction svg {
+  transition: transform 160ms ease;
+}
+
+.formTextAction[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.salaryModeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.salaryModeButton {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.salaryModeButton[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.editBaseButton {
+  font-size: 11px;
+}
+
+.compactField {
+  margin-bottom: 0;
+}
+
+.fieldGrid,
+.ratioGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ratioGrid {
+  margin-top: 18px;
+}
+
+.fieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -1px 0 0;
+  color: var(--subtle);
+  font-size: 11px;
+}
+
+.fieldError {
+  margin: 7px 0 0;
+  color: var(--orange);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sectionDivider {
+  height: 1px;
+  margin: 24px 0;
+  background: var(--line);
+}
+
+.pageContent :global(.base-editor) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 2px 0 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.baseField {
+  margin: 0;
+}
+
+.pageContent :global(.base-editor .money-input.is-readonly) {
+  background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));
+}
+
+.pageContent :global(.base-editor input[readonly]) {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.pageContent :global(.base-editor input:not([readonly])) {
+  border-color: var(--accent);
+}
+
+.baseField p {
+  display: block;
+}
+
+.smallInput input,
+.smallInput :global(.amount-tip-track) {
+  font-size: 15px;
+}
+
+.pageContent :global(.monthly-salary-grid) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.monthly-salary-grid label) {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pageContent :global(.monthly-salary-grid label > span) {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.pageContent :global(.monthly-salary-grid .money-input) {
+  min-height: 36px;
+  padding: 0 8px;
+  background: var(--surface);
+}
+
+.pageContent :global(.monthly-salary-grid .money-input input),
+.pageContent :global(.monthly-salary-grid .money-input .amount-tip-track) {
+  min-height: 32px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.pageContent :global(.monthly-salary-grid .money-input .unit) {
+  display: none;
+}
+
+.pageContent :global(.monthly-salary-grid label.current > span) {
+  color: var(--accent);
+}
+
+.pageContent :global(.monthly-salary-grid label.current .money-input) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.deductionBlock {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.deductionBlock :global(.money-input) {
+  width: 100%;
+}
+
+.deductionBlock p {
+  display: block;
+  margin-top: 8px;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.formFootnote {
+  margin: 13px 0 0;
+  color: var(--subtle);
+  font-size: 10px;
+  line-height: 1.55;
+}
+

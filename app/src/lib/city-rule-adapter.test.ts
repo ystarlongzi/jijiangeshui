@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
+import { canonicalCitySlug } from './city-slugs'
 import { cityRules, getCityRuleForMonth, resolveCityRuleForMonth, selectEffectiveCityRule, type CityRule } from './tax-rules'
 
 test('Payload 社保规则：小数比例转换为前端计算使用的百分数', () => {
@@ -89,4 +90,9 @@ test('城市规则版本：历史月份缺失时按最近可用规则继续估�
 
   assert.equal(resolved.rule.effective, '2026-07-01')
   assert.equal(resolved.usedFallback, true)
+})
+
+test('城市 slug：深圳第三方编码归一化为前台 slug', () => {
+  assert.equal(canonicalCitySlug('shenzhenszzf'), 'shenzhen')
+  assert.equal(canonicalCitySlug(' Shenzhen '), 'shenzhen')
 })

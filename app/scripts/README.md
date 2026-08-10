@@ -33,6 +33,14 @@
    - 只读 Payload CMS，检查目标年度 13 条个人所得税必需规则的 active 覆盖、重复、来源和警告。
    - 适合正式环境导入并人工审核后做上线前验收。
 
+8. `special-deduction-rules-summary.ts`
+   - 严格检查 6 项专项附加扣除规则的 active 覆盖、重复、生效期、来源、warning 和金额/分摊方案结构。
+   - 与所得税率汇总命令配套，适合正式环境发布前验收。
+
+9. `normalize-city-slugs.ts`
+   - 归一化 CMS 城市 URL 标识；当前将第三方深圳编码 `shenzhenszzf` 统一为 `shenzhen`。
+   - 默认只预览；确认数据库备份后追加 `--write` 执行，已有政策关系会保留或在 slug 冲突时迁移到规范城市。
+
 ## 常用命令
 
 如果只是日常维护，优先按下面几种场景选择命令：
@@ -41,6 +49,8 @@
 | --- | --- | --- |
 | 想知道 CMS 里现在有多少城市规则 | `npm run rules:cms-summary -- --policy-year 2026` | 看 `active` 覆盖、未覆盖城市数量、来源 URL 覆盖率、核对日期覆盖率。这个命令只读数据库，不会改数据。 |
 | 想验收税率 CMS 是否可供前台读取 | `npm run rules:income-tax-summary -- --rule-year 2026 --strict` | 检查 13 条必需税率是否 active、是否重复、是否缺来源或有警告；`--strict` 不通过时返回失败状态。 |
+| 想验收专项附加扣除 CMS 是否可供前台读取 | `npm run rules:special-deduction-summary -- --rule-year 2026 --strict` | 检查 6 项规则是否 active、重复、来源完整、结构有效；`--strict` 不通过时返回失败状态。 |
+| 想统一 CMS 城市 URL 标识 | `npm run rules:normalize-city-slugs -- --json` | 只读预览 alias 和关联政策数量；确认备份后追加 `--write` 回填。 |
 | 想预演税率和专项扣除导入 | `npm run rules:import-income-tax:dry-run` | 只生成导入清单，不连接数据库、不写入 CMS。 |
 | 想写入 CMS 待审核草稿 | `npm run rules:import-income-tax` | 幂等写入 13 条税率和 6 条专项扣除，默认 `pendingReview`，不会影响前台。 |
 | 已完成人工核对，想发布税率和专项扣除 | `npm run rules:import-income-tax:publish` | 明确写入 `active`，执行前应先完成来源和数字复核。 |
@@ -73,6 +83,8 @@ npm run rules:import-seed:dry-run
 npm run rules:publish -- --policy-year 2026
 npm run rules:publish -- --policy-year 2026 --write --clear-warnings
 npm run rules:cms-summary -- --policy-year 2026
+npm run rules:special-deduction-summary -- --rule-year 2026 --strict
+npm run rules:normalize-city-slugs -- --json
 npm run rules:sources
 npm run rules:sources -- --gaps
 

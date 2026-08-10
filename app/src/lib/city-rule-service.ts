@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 
 import config from '@payload-config'
 import { adaptCmsPolicyToCityRule } from './city-rule-adapter'
+import { canonicalCitySlug } from './city-slugs'
 import { cityRules, selectEffectiveCityRule, type CityRule } from './tax-rules'
 import type { CityRuleLoadStatus, CitySummary } from './city-rule-types'
 
@@ -127,9 +128,12 @@ async function readCityDirectoryFromPayload(): Promise<CityDirectoryEntry[]> {
     where: { enabled: { equals: true } },
   })
 
-  return (result.docs as CmsCityDoc[])
+  const entries = (result.docs as CmsCityDoc[])
     .filter(hasSlug)
     .map(toCitySummary)
+
+  // 兼容 CMS 尚未完成 slug 回填的窗口；同一规范 slug 只保留一条目录项。
+  return [...new Map(entries.map((entry) => [entry.slug, entry])).values()]
 }
 
 async function readCityRuleFromPayload(city: CityDirectoryEntry): Promise<CityRule | undefined> {
@@ -177,13 +181,14 @@ function hasSlug(city: CmsCityDoc): city is CmsCityDoc & { slug: string } {
 
 function toCitySummary(city: CmsCityDoc & { slug: string }): CityDirectoryEntry {
   const label = city.name || city.shortName || city.slug
+  const slug = canonicalCitySlug(city.slug)
   return {
     id: city.id,
-    slug: city.slug,
+    slug,
     name: city.shortName || city.name || city.slug,
     label,
     province: city.provinceName || label,
-    pinyin: city.slug,
+    pinyin: slug,
   }
 }
 
@@ -216,5 +221,5 @@ function normalizeLimit(value?: number) {
 }
 
 function normalizeSlug(value: string) {
-  return value.trim().toLowerCase()
+  return canonicalCitySlug(value)
 }

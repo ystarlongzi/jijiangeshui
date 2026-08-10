@@ -1,0 +1,291 @@
+.pageContent :global(.results-column) {
+  display: grid;
+  gap: 24px;
+}
+
+.pageContent :global(.result-panel) {
+  position: relative;
+  overflow: hidden;
+  padding: 26px;
+}
+
+.resultGroup { position: relative; display: grid; gap: 24px; }
+.ruleLoadingOverlay { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; border-radius: 14px; background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(2px); }
+
+.ruleLoading {
+  min-height: 360px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.ruleLoading strong { color: var(--ink); font-size: 15px; }
+.ruleLoading p { margin: 0; font-size: 12px; }
+.ruleLoadingSpinner { width: 22px; height: 22px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: rule-loading-spin 720ms linear infinite; }
+
+@keyframes rule-loading-spin { to { transform: rotate(360deg); } }
+
+.pageContent :global(.result-panel)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--orange) 76%, var(--accent)));
+}
+
+.pageContent :global(.result-panel.is-updated .take-home-block > strong) {
+  animation: result-value-pulse 360ms ease-out;
+}
+
+@keyframes result-value-pulse {
+  0% {
+    color: var(--accent);
+    transform: translateY(3px);
+  }
+
+  100% {
+    color: var(--ink);
+    transform: translateY(0);
+  }
+}
+
+.pageContent :global(.result-context),
+.pageContent :global(.month-label) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.result-badge) {
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.pageContent :global(.take-home-block) {
+  display: grid;
+  gap: 3px;
+  padding: 25px 0 0;
+}
+
+.pageContent :global(.take-home-block > span) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.take-home-block > strong) {
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow: 0 10px 24px rgba(25, 54, 46, 0.08);
+}
+
+.pageContent :global(.take-home-block small) {
+  color: var(--subtle);
+  font-size: 12px;
+}
+
+.pageContent :global(.take-home-block small b) {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.pageContent :global(.wage-flow) {
+  margin: 22px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.pageContent :global(.wage-flow-heading),
+.pageContent :global(.tax-ladder-heading) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pageContent :global(.wage-flow-heading strong) {
+  font-size: 12px;
+}
+
+.pageContent :global(.wage-flow-heading span) {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.pageContent :global(.flow-bar) {
+  display: flex;
+  height: 13px;
+  gap: 2px;
+  margin: 13px 0 15px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.pageContent :global(.flow-segment) {
+  min-width: 2px;
+  transition: width 260ms ease;
+}
+
+.pageContent :global(.flow-take-home) {
+  background: var(--accent);
+}
+
+.pageContent :global(.flow-social) {
+  background: #75b8a6;
+}
+
+.pageContent :global(.flow-housing) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.flow-tax) {
+  background: var(--orange);
+}
+
+.pageContent :global(.flow-legend) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 18px;
+}
+
+.pageContent :global(.flow-legend > div) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.pageContent :global(.flow-legend strong) {
+  margin-left: auto;
+  color: var(--ink);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.pageContent :global(.flow-dot) {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.pageContent :global(.flow-take-home-dot) {
+  background: var(--accent);
+}
+
+.pageContent :global(.flow-social-dot) {
+  background: #75b8a6;
+}
+
+.pageContent :global(.flow-housing-dot) {
+  background: #d9a14f;
+}
+
+.pageContent :global(.flow-tax-dot) {
+  background: var(--orange);
+}
+
+.pageContent :global(.result-explanation) {
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: color-mix(in srgb, var(--surface-muted) 86%, var(--accent-soft));
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pageContent :global(.tax-ladder) {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pageContent :global(.tax-ladder-heading) {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pageContent :global(.tax-ladder-heading strong) {
+  color: var(--orange);
+  font-size: 12px;
+}
+
+.pageContent :global(.tax-ladder-rail) {
+  position: relative;
+  height: 6px;
+  margin: 15px 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #75b8a6 0 16.6%, #8bc2af 16.6% 33.2%, #cbb36d 33.2% 49.8%, #d99b59 49.8% 66.4%, #df8750 66.4% 83%, #d87539 83% 100%);
+}
+
+.pageContent :global(.tax-ladder-progress) {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 16.6%;
+  border-radius: inherit;
+  background: rgba(23, 49, 46, 0.22);
+  transition: width 260ms ease;
+}
+
+.pageContent :global(.tax-ladder-marker) {
+  position: absolute;
+  top: 50%;
+  left: 16.6%;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--surface-muted);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+  transform: translate(-50%, -50%);
+  transition: left 260ms ease;
+}
+
+.pageContent :global(.tax-ladder-levels) {
+  display: flex;
+  justify-content: space-between;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.pageContent :global(.tax-ladder-levels span.active) {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.pageContent :global(.calculation-detail),
+.pageContent :global(.employer-detail) {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pageContent :global(.calculation-detail div),
+.pageContent :global(.employer-detail div) {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pageContent :global(.calculation-detail strong),
+.pageContent :global(.employer-detail strong) {
+  color: var(--ink);
+}
+

@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ArrowRight, Calculator, MapPin, ShieldCheck } from 'lucide-react'
 import { getContributionBaseRule, getHousingRateOptions } from '@/lib/tax-rules'
 import { getAvailableCityRule } from '@/lib/city-rule-service'
 import { calculateInsurance, calculateMonth } from '@/lib/tax-calculator'
 import { currentYear, siteName } from '@/lib/site'
+import { canonicalCitySlug } from '@/lib/city-slugs'
 import SiteHeader from '../../_components/SiteHeader'
 import SiteFooter from '../../_components/SiteFooter'
 import DataTable from '../../_components/DataTable'
@@ -23,13 +25,15 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { city } = await params
   const rule = await getAvailableCityRule(city)
-  return rule ? { title: `${rule.label}个税计算器｜${currentYear}年工资税后与五险一金｜${siteName}`, description: `按${rule.label}${currentYear}年社保公积金规则，测算工资到手、五险一金和全年预扣个税变化。`, alternates: { canonical: `/city/${city}` } } : { title: `城市个税计算器｜${siteName}` }
+  return rule ? { title: `${rule.label}个税计算器｜${currentYear}年工资税后与五险一金｜${siteName}`, description: `按${rule.label}${currentYear}年社保公积金规则，测算工资到手、五险一金和全年预扣个税变化。`, alternates: { canonical: `/city/${canonicalCitySlug(city)}` } } : { title: `城市个税计算器｜${siteName}` }
 }
 
 export default async function CityPage({ params }: CityPageProps) {
   const { city } = await params
   const rule = await getAvailableCityRule(city)
   if (!rule) return <main className={styles.page}><h1>暂未收录这个城市</h1><p>请返回选择其他城市，或直接使用通用工资薪金计算器。</p><PrimaryActionLink href="/calculator">打开计算器 <ArrowRight size={16} /></PrimaryActionLink></main>
+  const canonicalSlug = canonicalCitySlug(city)
+  if (canonicalSlug !== city) redirect(`/city/${canonicalSlug}`)
   const exampleSalary = 20000
   const socialBaseRule = getContributionBaseRule(rule, 'social')
   const housingBaseRule = getContributionBaseRule(rule, 'housingFund')
