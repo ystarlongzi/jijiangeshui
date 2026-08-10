@@ -12,6 +12,14 @@
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.group:not(.disabled):hover,
+.group:not(.disabled):focus-within {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line));
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 
 .group.disabled {
@@ -102,10 +110,20 @@
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--surface-muted);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.option:hover,
+.option:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface-muted));
+  transform: translateY(-1px);
 }
 
 .option input {
   accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .option span {
