@@ -78,6 +78,29 @@
   transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
 }
 
+.payload-field-help__bubble--portal {
+  position: fixed;
+  display: block;
+  z-index: var(--z-popup);
+  box-sizing: border-box;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  width: 200px;
+  max-width: calc(100vw - 1rem);
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.5;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
 .payload-field-help__bubble::after {
   position: absolute;
   bottom: -0.35rem;
@@ -96,4 +119,15 @@
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, 0);
+}
+
+.payload-field-help__bubble--portal.payload-field-help__bubble--below::after {
+  top: -0.35rem;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  border-top: 1px solid var(--theme-elevation-300);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 1px solid var(--theme-elevation-300);
 }
