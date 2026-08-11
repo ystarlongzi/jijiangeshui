@@ -33,6 +33,7 @@ type CmsContributionItemRule = {
   systemType?: string | null
   itemCode?: string | null
   itemName?: string | null
+  // 兼容旧 CMS 文档；新模型由 systemType 唯一决定基数类型。
   baseType?: string | null
   employee?: CmsContributionSideRule | null
   employer?: CmsContributionSideRule | null
@@ -126,14 +127,14 @@ function normalizeContributionItems(itemRules: CmsContributionItemRule[] | null 
   return [...(itemRules || [])]
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .flatMap((item, index) => {
-      if (!isSystemType(item.systemType) || !isBaseType(item.baseType)) return []
+      if (!isSystemType(item.systemType)) return []
       const code = item.itemCode || `unknown-${index + 1}`
 
       return {
         code,
         name: item.itemName || `未命名项目 ${index + 1}`,
         systemType: item.systemType,
-        baseType: item.baseType,
+        baseType: item.systemType,
         employee: normalizeSideRule(item.employee),
         employer: normalizeSideRule(item.employer),
         housing: item.systemType === 'housingFund' || code === 'housing-fund',

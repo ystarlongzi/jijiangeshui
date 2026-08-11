@@ -12,6 +12,23 @@ const incomeTypeOptions = [
   { label: '偶然所得', value: 'accidental' },
 ]
 
+const tooltipComponents = {
+  Description: {
+    exportName: 'TooltipFieldDescription',
+    path: '@/components/admin/TooltipFieldLabel',
+  },
+  Label: {
+    exportName: 'TooltipFieldLabel',
+    path: '@/components/admin/TooltipFieldLabel',
+  },
+}
+
+const tooltip = (description: string) => ({
+  components: tooltipComponents,
+  custom: { tooltip: description },
+  description,
+})
+
 export const TaxRateRules: CollectionConfig = {
   slug: 'tax-rate-rules',
   dbName: 'trr',
@@ -61,108 +78,170 @@ export const TaxRateRules: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'ruleTitle', label: '规则名称', type: 'text', required: true },
-    { name: 'ruleYear', label: '规则年度', type: 'number', required: true, min: 2000, max: 2100, admin: { description: '用于税率表页面和各计算器按年份取数。' } },
     {
-      name: 'incomeCategory',
-      label: '所得大类',
-      type: 'select',
-      admin: {
-        description: '综合所得包含工资薪金、劳务报酬、稿酬、特许权使用费；分类所得不再区分居民和非居民 tab。',
-      },
-      options: [
-        { label: '综合所得', value: 'comprehensive' },
-        { label: '分类所得', value: 'classified' },
+      type: 'collapsible',
+      label: '基础字段',
+      admin: { initCollapsed: false, className: 'tax-rate-basic-card' },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'ruleTitle', label: '规则名称', type: 'text', required: true, admin: { width: '25%' } },
+            {
+              name: 'ruleYear',
+              label: '规则年度',
+              type: 'number',
+              required: true,
+              min: 2000,
+              max: 2100,
+              admin: { width: '25%', ...tooltip('用于税率表页面和各计算器按年份取数。') },
+            },
+            {
+              name: 'incomeCategory',
+              label: '所得大类',
+              type: 'select',
+              admin: {
+                width: '25%',
+                ...tooltip('综合所得包含工资薪金、劳务报酬、稿酬、特许权使用费；分类所得不再区分居民和非居民 tab。'),
+              },
+              options: [
+                { label: '综合所得', value: 'comprehensive' },
+                { label: '分类所得', value: 'classified' },
+              ],
+              required: true,
+            },
+            { name: 'incomeType', label: '所得类型', type: 'select', options: incomeTypeOptions, required: true, admin: { width: '25%' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'taxpayerIdentity',
+              label: '纳税身份',
+              type: 'select',
+              defaultValue: 'notApplicable',
+              admin: {
+                width: '33.33%',
+                ...tooltip('分类所得请选择“不区分”；综合所得按规则选择居民个人或非居民个人。'),
+              },
+              options: [
+                { label: '不区分', value: 'notApplicable' },
+                { label: '居民个人', value: 'resident' },
+                { label: '非居民个人', value: 'nonResident' },
+              ],
+              required: true,
+            },
+            {
+              name: 'rateMode',
+              label: '税率形式',
+              type: 'select',
+              defaultValue: 'table',
+              options: [
+                { label: '超额累进表', value: 'table' },
+                { label: '比例税率', value: 'flat' },
+              ],
+              required: true,
+              admin: { width: '33.33%' },
+            },
+            {
+              name: 'flatRate',
+              label: '比例税率',
+              type: 'number',
+              min: 0,
+              max: 1,
+              admin: { width: '33.34%', ...tooltip('比例税率使用小数，例如 20% 填 0.2。') },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'effectiveFrom',
+              label: '生效日期',
+              type: 'date',
+              required: true,
+              admin: { width: '33.33%', date: { pickerAppearance: 'dayOnly', displayFormat: 'yyyy-MM-dd' } },
+            },
+            {
+              name: 'effectiveTo',
+              label: '失效日期',
+              type: 'date',
+              admin: { width: '33.33%', date: { pickerAppearance: 'dayOnly', displayFormat: 'yyyy-MM-dd' } },
+            },
+            {
+              name: 'ruleStatus',
+              label: '业务状态',
+              type: 'select',
+              defaultValue: 'pendingReview',
+              admin: { width: '33.34%', ...tooltip('只有“有效”状态会被前台税率表和计算器读取。') },
+              options: [
+                { label: '待审核', value: 'pendingReview' },
+                { label: '有效', value: 'active' },
+                { label: '已归档', value: 'archived' },
+              ],
+              required: true,
+            },
+          ],
+        },
       ],
-      required: true,
     },
-    {
-      name: 'incomeType',
-      label: '所得类型',
-      type: 'select',
-      options: incomeTypeOptions,
-      required: true,
-    },
-    {
-      name: 'taxpayerIdentity',
-      label: '纳税身份',
-      type: 'select',
-      defaultValue: 'notApplicable',
-      admin: {
-        description: '分类所得请选择“不区分”；综合所得按规则选择居民个人或非居民个人。',
-      },
-      options: [
-        { label: '不区分', value: 'notApplicable' },
-        { label: '居民个人', value: 'resident' },
-        { label: '非居民个人', value: 'nonResident' },
-      ],
-      required: true,
-    },
-    {
-      name: 'rateMode',
-      label: '税率形式',
-      type: 'select',
-      defaultValue: 'table',
-      options: [
-        { label: '超额累进表', value: 'table' },
-        { label: '比例税率', value: 'flat' },
-      ],
-      required: true,
-    },
-    { name: 'flatRate', label: '比例税率', type: 'number', min: 0, max: 1, admin: { description: '比例税率使用小数，例如 20% 填 0.2。' } },
     {
       name: 'tableRows',
       label: '税率区间',
       type: 'array',
       dbName: 'rows',
-      fields: [
-        { name: 'rangeLabel', label: '区间文案', type: 'text', required: true },
-        { name: 'lowerBound', label: '区间下限', type: 'number', min: 0, defaultValue: 0 },
-        { name: 'upperBound', label: '区间上限', type: 'number', min: 0 },
-        { name: 'rate', label: '税率 / 预扣率', type: 'number', required: true, min: 0, max: 1, admin: { description: '使用小数，例如 10% 填 0.1。' } },
-        { name: 'quickDeduction', label: '速算扣除数', type: 'number', defaultValue: 0, min: 0 },
-        { name: 'sortOrder', label: '显示顺序', type: 'number', defaultValue: 10 },
-      ],
-    },
-    {
-      name: 'effectiveFrom',
-      label: '生效日期',
-      type: 'date',
-      required: true,
-      admin: { date: { pickerAppearance: 'dayOnly' } },
-    },
-    {
-      name: 'effectiveTo',
-      label: '失效日期',
-      type: 'date',
-      admin: { date: { pickerAppearance: 'dayOnly' } },
-    },
-    {
-      name: 'ruleStatus',
-      label: '业务状态',
-      type: 'select',
-      defaultValue: 'pendingReview',
-      admin: {
-        description: '只有“有效”状态会被前台税率表和计算器读取。',
+      labels: {
+        singular: '税率区间',
+        plural: '税率区间',
       },
-      options: [
-        { label: '待审核', value: 'pendingReview' },
-        { label: '有效', value: 'active' },
-        { label: '已归档', value: 'archived' },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'rangeLabel', label: '区间文案', type: 'text', required: true, admin: { width: '33.33%' } },
+            { name: 'lowerBound', label: '区间下限', type: 'number', min: 0, defaultValue: 0, admin: { width: '33.33%' } },
+            { name: 'upperBound', label: '区间上限', type: 'number', min: 0, admin: { width: '33.34%' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'rate',
+              label: '税率 / 预扣率',
+              type: 'number',
+              required: true,
+              min: 0,
+              max: 1,
+              admin: { width: '33.33%', ...tooltip('使用小数，例如 10% 填 0.1。') },
+            },
+            { name: 'quickDeduction', label: '速算扣除数', type: 'number', defaultValue: 0, min: 0, admin: { width: '33.33%' } },
+            { name: 'sortOrder', label: '显示顺序', type: 'number', defaultValue: 10, admin: { width: '33.34%' } },
+          ],
+        },
       ],
-      required: true,
     },
     {
       name: 'source',
       label: '规则来源',
       type: 'group',
-      admin: {
-        description: '建议保留国家税务总局或政策文件链接和核对日期。',
-      },
+      admin: { ...tooltip('建议保留国家税务总局或政策文件链接和核对日期。') },
       fields: [
-        { name: 'title', label: '来源标题', type: 'text' },
-        { name: 'url', label: '来源链接', type: 'text' },
-        { name: 'checkedAt', label: '核对日期', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' } } },
+        {
+          type: 'row',
+          fields: [
+            { name: 'title', label: '来源标题', type: 'text', admin: { width: '33.33%' } },
+            { name: 'url', label: '来源链接', type: 'text', admin: { width: '33.33%' } },
+            {
+              name: 'checkedAt',
+              label: '核对日期',
+              type: 'date',
+              admin: { width: '33.34%', date: { pickerAppearance: 'dayOnly', displayFormat: 'yyyy-MM-dd' } },
+            },
+          ],
+        },
         { name: 'remark', label: '备注', type: 'textarea' },
       ],
     },
@@ -173,6 +252,11 @@ export const TaxRateRules: CollectionConfig = {
       type: 'array',
       fields: [{ name: 'message', label: '警告内容', type: 'text', required: true }],
     },
-    { name: 'rawData', label: '原始数据', type: 'json', admin: { description: '用于审计和排查，不参与计算。' } },
+    {
+      name: 'rawData',
+      label: '原始数据',
+      type: 'json',
+      admin: { ...tooltip('用于审计和排查，不参与计算。') },
+    },
   ],
 }

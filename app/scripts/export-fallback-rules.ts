@@ -38,7 +38,6 @@ type ExportedRule = {
           systemType: string
           itemCode: string
           itemName: string
-          baseType: string
           employeeCalcMethod: string
           employeeRate?: number
           employeeFixedAmount?: number
@@ -117,7 +116,6 @@ function createExportPayload(): ExportedRule {
               systemType: item.systemType,
               itemCode: item.code,
               itemName: item.name,
-              baseType: item.baseType,
               employeeCalcMethod: item.employee.method,
               employeeRate: item.employee.rate,
               employeeFixedAmount: item.employee.fixedAmount,

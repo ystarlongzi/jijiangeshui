@@ -17,7 +17,6 @@ type NormalizedContributionItemRule = {
   systemType: NormalizedSystemType
   itemCode: string
   itemName: string
-  baseType: NormalizedItemBaseType
   employee: NormalizedContributionSideRule
   employer: NormalizedContributionSideRule
   sortOrder: number
@@ -58,13 +57,11 @@ export function stringOrUndefined(value: unknown) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
 }
 
-const normalizedBaseTypes = ['social', 'housingFund', 'pension', 'medical', 'unemployment', 'injury', 'maternity'] as const
-const normalizedItemBaseTypes = [...normalizedBaseTypes, 'none'] as const
-const normalizedSystemTypes = ['social', 'housingFund', 'employerCost'] as const
+const normalizedBaseTypes = ['social', 'housingFund'] as const
+const normalizedSystemTypes = normalizedBaseTypes
 const normalizedCalcMethods = ['none', 'rate', 'fixed', 'ratePlusFixed'] as const
 
 type NormalizedBaseType = (typeof normalizedBaseTypes)[number]
-type NormalizedItemBaseType = (typeof normalizedItemBaseTypes)[number]
 type NormalizedSystemType = (typeof normalizedSystemTypes)[number]
 type NormalizedCalcMethod = (typeof normalizedCalcMethods)[number]
 
@@ -95,9 +92,8 @@ export function normalizePolicyEntry(entry: CrawlPolicyEntry): CrawlPolicy {
 
 export function normalizeContributionItemRule(item: Record<string, unknown>, index: number): NormalizedContributionItemRule {
   // 把采集端的扁平字段转换成 Payload collection 里的 employee/employer 嵌套结构。
-  // systemType 会影响默认基数类型：公积金使用 housingFund，企业成本不参与个人基数计算。
+  // CMS 只支持社保和公积金两类；采集端的其他值回退为社保，避免写入后台不支持的枚举。
   const systemType = stringOrUndefined(item.systemType)
-  const explicitBaseType = stringOrUndefined(item.baseType)
   const normalizedSystemType = normalizeEnumValue(systemType, normalizedSystemTypes, 'social')
   const itemName = stringOrUndefined(item.itemName) || `未命名项目 ${index + 1}`
 
@@ -105,11 +101,6 @@ export function normalizeContributionItemRule(item: Record<string, unknown>, ind
     systemType: normalizedSystemType,
     itemCode: normalizeContributionItemCode(item, itemName, index),
     itemName,
-    baseType: normalizeEnumValue(
-      explicitBaseType,
-      normalizedItemBaseTypes,
-      normalizedSystemType === 'housingFund' ? 'housingFund' : normalizedSystemType === 'employerCost' ? 'none' : 'social',
-    ),
     employee: {
       calcMethod: normalizeEnumValue(stringOrUndefined(item.employeeCalcMethod), normalizedCalcMethods, 'none'),
       rate: numberOrNull(item.employeeRate),

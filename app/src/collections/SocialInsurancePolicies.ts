@@ -55,62 +55,83 @@ export const SocialInsurancePolicies: CollectionConfig = {
   },
   fields: [
     {
-      name: 'policyTitle',
-      label: '政策名称',
-      type: 'text',
-      required: true,
-      admin: {
-        description: '例如：北京市 2026 年社保公积金缴费规则。',
-      },
-    },
-    {
-      name: 'city',
-      label: '所属城市',
-      type: 'relationship',
-      relationTo: 'cities',
-      required: true,
-      admin: {
-        description: '选择这条社保公积金规则适用的城市。',
-      },
-    },
-    {
-      name: 'policyYear',
-      label: '政策年度',
-      type: 'number',
-      required: true,
-      min: 2000,
-      max: 2100,
-      admin: {
-        description: '用于前台按年份读取规则，例如 2026。',
-      },
-    },
-    {
-      name: 'effectiveFrom',
-      label: '生效日期',
-      type: 'date',
-      required: true,
-      admin: { date: { pickerAppearance: 'dayOnly' } },
-    },
-    {
-      name: 'effectiveTo',
-      label: '失效日期',
-      type: 'date',
-      admin: { date: { pickerAppearance: 'dayOnly' } },
-    },
-    {
-      name: 'policyStatus',
-      label: '业务状态',
-      type: 'select',
-      defaultValue: 'pendingReview',
-      admin: {
-        description: '只有“有效”状态会作为前台城市规则使用。',
-      },
-      options: [
-        { label: '待审核', value: 'pendingReview' },
-        { label: '有效', value: 'active' },
-        { label: '已归档', value: 'archived' },
+      type: 'collapsible',
+      label: '基础信息',
+      admin: { initCollapsed: false },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'policyTitle',
+              label: '政策名称',
+              type: 'text',
+              required: true,
+              admin: {
+                width: '33.33%',
+                description: '例如：北京市 2026 年社保公积金缴费规则。',
+              },
+            },
+            {
+              name: 'city',
+              label: '所属城市',
+              type: 'relationship',
+              relationTo: 'cities',
+              required: true,
+              admin: {
+                width: '33.33%',
+                description: '选择这条社保公积金规则适用的城市。',
+              },
+            },
+            {
+              name: 'policyYear',
+              label: '政策年度',
+              type: 'number',
+              required: true,
+              min: 2000,
+              max: 2100,
+              admin: {
+                width: '33.34%',
+                description: '用于前台按年份读取规则，例如 2026。',
+              },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'effectiveFrom',
+              label: '生效日期',
+              type: 'date',
+              required: true,
+              admin: { width: '33.33%', date: { pickerAppearance: 'dayOnly' } },
+            },
+            {
+              name: 'effectiveTo',
+              label: '失效日期',
+              type: 'date',
+              admin: { width: '33.33%', date: { pickerAppearance: 'dayOnly' } },
+            },
+            {
+              name: 'policyStatus',
+              label: '业务状态',
+              type: 'select',
+              defaultValue: 'pendingReview',
+              admin: {
+                width: '33.34%',
+                description: '只有“有效”状态会作为前台城市规则使用。',
+              },
+              options: [
+                { label: '待审核', value: 'pendingReview' },
+                { label: '有效', value: 'active' },
+                { label: '已归档', value: 'archived' },
+              ],
+              required: true,
+            },
+          ],
+        },
       ],
-      required: true,
     },
     {
       name: 'source',
@@ -120,9 +141,19 @@ export const SocialInsurancePolicies: CollectionConfig = {
         description: '记录爬虫来源、官方核对链接和人工备注，便于后续追溯。',
       },
       fields: [
-        { name: 'title', label: '来源标题', type: 'text' },
-        { name: 'url', label: '来源链接', type: 'text' },
-        { name: 'checkedAt', label: '核对日期', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' } } },
+        {
+          type: 'row',
+          fields: [
+            { name: 'title', label: '来源标题', type: 'text', admin: { width: '33.33%' } },
+            { name: 'url', label: '来源链接', type: 'text', admin: { width: '33.33%' } },
+            {
+              name: 'checkedAt',
+              label: '核对日期',
+              type: 'date',
+              admin: { width: '33.34%', date: { pickerAppearance: 'dayOnly' } },
+            },
+          ],
+        },
         { name: 'remark', label: '备注', type: 'textarea' },
       ],
     },
@@ -132,27 +163,32 @@ export const SocialInsurancePolicies: CollectionConfig = {
       type: 'array',
       dbName: 'bases',
       minRows: 1,
+      labels: {
+        singular: '缴费基数规则',
+        plural: '缴费基数规则',
+      },
       admin: {
         description: '社保和公积金可分别设置上下限，前台输入超出范围时按上下限估算。',
       },
       fields: [
         {
-          name: 'baseType',
-          label: '基数类型',
-          type: 'select',
-          options: [
-            { label: '社保', value: 'social' },
-            { label: '公积金', value: 'housingFund' },
-            { label: '养老保险', value: 'pension' },
-            { label: '医疗保险', value: 'medical' },
-            { label: '失业保险', value: 'unemployment' },
-            { label: '工伤保险', value: 'injury' },
-            { label: '生育保险', value: 'maternity' },
+          type: 'row',
+          fields: [
+            {
+              name: 'baseType',
+              label: '基数类型',
+              type: 'select',
+              options: [
+                { label: '社保', value: 'social' },
+                { label: '公积金', value: 'housingFund' },
+              ],
+              required: true,
+              admin: { width: '33.33%' },
+            },
+            { name: 'baseMin', label: '最低基数', type: 'number', required: true, min: 0, admin: { width: '33.33%' } },
+            { name: 'baseMax', label: '最高基数', type: 'number', required: true, min: 0, admin: { width: '33.34%' } },
           ],
-          required: true,
         },
-        { name: 'baseMin', label: '最低基数', type: 'number', required: true, min: 0 },
-        { name: 'baseMax', label: '最高基数', type: 'number', required: true, min: 0 },
       ],
     },
     {
@@ -160,47 +196,59 @@ export const SocialInsurancePolicies: CollectionConfig = {
       label: '缴费项目规则',
       type: 'array',
       dbName: 'items',
+      labels: {
+        singular: '缴费项目规则',
+        plural: '缴费项目规则',
+      },
       admin: {
         description: '维护养老、医疗、失业、工伤、生育、公积金等项目的个人和企业缴费方式。',
       },
       fields: [
         {
-          name: 'systemType',
-          label: '系统类型',
-          type: 'select',
-          options: [
-            { label: '社保', value: 'social' },
-            { label: '公积金', value: 'housingFund' },
-            { label: '企业用工成本', value: 'employerCost' },
+          type: 'row',
+          fields: [
+            {
+              name: 'systemType',
+              label: '系统类型',
+              type: 'select',
+              options: [
+                { label: '社保', value: 'social' },
+                { label: '公积金', value: 'housingFund' },
+              ],
+              required: true,
+              admin: { width: '33.33%' },
+            },
+            { name: 'itemCode', label: '项目编码', type: 'text', required: true, admin: { width: '33.33%' } },
+            { name: 'itemName', label: '项目名称', type: 'text', required: true, admin: { width: '33.34%' } },
           ],
-          required: true,
-        },
-        { name: 'itemCode', label: '项目编码', type: 'text', required: true },
-        { name: 'itemName', label: '项目名称', type: 'text', required: true },
-        {
-          name: 'baseType',
-          label: '关联基数',
-          type: 'select',
-          options: [
-            { label: '社保', value: 'social' },
-            { label: '公积金', value: 'housingFund' },
-            { label: '养老保险', value: 'pension' },
-            { label: '医疗保险', value: 'medical' },
-            { label: '失业保险', value: 'unemployment' },
-            { label: '工伤保险', value: 'injury' },
-            { label: '生育保险', value: 'maternity' },
-            { label: '不关联', value: 'none' },
-          ],
-          defaultValue: 'social',
         },
         {
           name: 'employee',
           label: '个人缴纳',
           type: 'group',
           fields: [
-            { name: 'calcMethod', label: '计算方式', type: 'select', options: calculationMethodOptions, required: true },
-            { name: 'rate', label: '比例', type: 'number', min: 0, max: 1, admin: { description: '使用小数，例如 8% 填 0.08。' } },
-            { name: 'fixedAmount', label: '固定金额', type: 'number', min: 0 },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'calcMethod',
+                  label: '计算方式',
+                  type: 'select',
+                  options: calculationMethodOptions,
+                  required: true,
+                  admin: { width: '33.33%' },
+                },
+                {
+                  name: 'rate',
+                  label: '比例',
+                  type: 'number',
+                  min: 0,
+                  max: 1,
+                  admin: { width: '33.33%', description: '使用小数，例如 8% 填 0.08。' },
+                },
+                { name: 'fixedAmount', label: '固定金额', type: 'number', min: 0, admin: { width: '33.34%' } },
+              ],
+            },
           ],
         },
         {
@@ -208,9 +256,28 @@ export const SocialInsurancePolicies: CollectionConfig = {
           label: '企业缴纳',
           type: 'group',
           fields: [
-            { name: 'calcMethod', label: '计算方式', type: 'select', options: calculationMethodOptions, required: true },
-            { name: 'rate', label: '比例', type: 'number', min: 0, max: 1, admin: { description: '使用小数，例如 16% 填 0.16。' } },
-            { name: 'fixedAmount', label: '固定金额', type: 'number', min: 0 },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'calcMethod',
+                  label: '计算方式',
+                  type: 'select',
+                  options: calculationMethodOptions,
+                  required: true,
+                  admin: { width: '33.33%' },
+                },
+                {
+                  name: 'rate',
+                  label: '比例',
+                  type: 'number',
+                  min: 0,
+                  max: 1,
+                  admin: { width: '33.33%', description: '使用小数，例如 16% 填 0.16。' },
+                },
+                { name: 'fixedAmount', label: '固定金额', type: 'number', min: 0, admin: { width: '33.34%' } },
+              ],
+            },
           ],
         },
         { name: 'sortOrder', label: '显示顺序', type: 'number', defaultValue: 10 },
@@ -224,8 +291,13 @@ export const SocialInsurancePolicies: CollectionConfig = {
         description: '保留采集平台的方案编码，方便增量更新或排查匹配问题。',
       },
       fields: [
-        { name: 'social', label: '社保方案编码', type: 'text' },
-        { name: 'housingFund', label: '公积金方案编码', type: 'text' },
+        {
+          type: 'row',
+          fields: [
+            { name: 'social', label: '社保方案编码', type: 'text', admin: { width: '50%' } },
+            { name: 'housingFund', label: '公积金方案编码', type: 'text', admin: { width: '50%' } },
+          ],
+        },
       ],
     },
     {
