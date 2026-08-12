@@ -67,6 +67,9 @@ jobs:
         working-directory: app
         env:
           PAYLOAD_DB_PUSH: "false"
+          # robots.txt、sitemap 和 JSON-LD 会在构建产物中读取站点公开地址。
+          NEXT_PUBLIC_SERVER_URL: ${{ vars.SITE_URL || 'https://jijiangeshui.com' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://jijiangeshui.com' }}
         run: npm run build
 
       - name: 打包 standalone release

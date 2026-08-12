@@ -9,8 +9,11 @@ type SmokeCheck = {
   path: string
   status: number
   contains?: string
+  notContains?: string[]
   titleContains?: string
 }
+
+const expectedSiteUrl = process.env.SMOKE_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL
 
 const checks: SmokeCheck[] = [
   { path: '/', status: 200, contains: '工资' },
@@ -25,6 +28,23 @@ const checks: SmokeCheck[] = [
   // 使用非法参数验证 API 路由已经部署，避免冒烟测试依赖第三方地理编码服务。
   { path: '/api/location/reverse?lat=invalid&lon=invalid', status: 400 },
 ]
+
+if (expectedSiteUrl && !expectedSiteUrl.includes('localhost')) {
+  checks.push(
+    {
+      path: '/robots.txt',
+      status: 200,
+      contains: `Sitemap: ${expectedSiteUrl}/sitemap.xml`,
+      notContains: ['http://localhost:4000'],
+    },
+    {
+      path: '/sitemap.xml',
+      status: 200,
+      contains: `<loc>${expectedSiteUrl}</loc>`,
+      notContains: ['http://localhost:4000'],
+    },
+  )
+}
 
 async function main() {
   const server = spawn(process.execPath, [nextBin, 'start', '-p', String(port)], {
@@ -47,6 +67,9 @@ async function main() {
       }
       if (check.contains && !body.includes(check.contains)) {
         throw new Error(`${check.path} 未找到页面关键文案“${check.contains}”。`)
+      }
+      for (const forbidden of check.notContains || []) {
+        if (body.includes(forbidden)) throw new Error(`${check.path} 不应包含“${forbidden}”。`)
       }
       if (check.titleContains) {
         const title = body.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ''

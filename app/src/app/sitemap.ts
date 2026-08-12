@@ -5,6 +5,8 @@ import { getIncomeTaxRuleDataset } from '@/lib/income-tax-rule-service'
 import { getTaxRateSeoSelections, getTaxRateUrl } from '@/lib/tax-rate-page'
 import { currentYear, siteUrl } from '@/lib/site'
 
+export const dynamic = 'force-dynamic'
+
 function escapeXml(value: string) {
   return value
     .replaceAll('&', '&amp;')
